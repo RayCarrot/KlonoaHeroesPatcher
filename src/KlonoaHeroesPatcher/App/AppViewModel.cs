@@ -274,7 +274,10 @@ namespace KlonoaHeroesPatcher
                     Footer.RelocatedStructs = new PatchedFooter.RelocatedStruct[Footer.RelocatedStructsCount];
 
                     for (var i = 0; i < PendingRelocatedData.Count; i++)
+                    {
                         Footer.RelocatedStructs[i] = PendingRelocatedData[i].Relocate(s);
+                        s.Align();
+                    }
 
                     s.SerializeObject<PatchedFooter>(Footer, name: nameof(Footer));
 
