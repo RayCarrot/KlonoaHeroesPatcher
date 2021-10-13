@@ -10,6 +10,7 @@
                    TitleCharacterCasing="Normal"
                    Title="{Binding Path=Title}"
                    Icon="../../Img/AppIcon.ico"
+                   Closing="MainWindow_OnClosing"
                    Background="{DynamicResource MahApps.Brushes.ThemeBackground}"
                    Foreground="{DynamicResource MahApps.Brushes.ThemeForeground}"
                    MinWidth="640" MinHeight="480"

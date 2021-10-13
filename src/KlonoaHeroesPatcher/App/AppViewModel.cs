@@ -79,7 +79,7 @@ namespace KlonoaHeroesPatcher
         public NavigationItemViewModel SelectedNavigationItem { get; set; }
 
         public List<RelocatedData> PendingRelocatedData { get; }
-        public bool UnsavedChanges => PendingRelocatedData.Any(x => x.IsNewData); // TODO: Warn user when closing window
+        public bool UnsavedChanges => PendingRelocatedData.Any(x => x.IsNewData);
 
         #endregion
 
