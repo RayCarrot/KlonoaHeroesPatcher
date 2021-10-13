@@ -322,7 +322,10 @@ namespace KlonoaHeroesPatcher
 
         public void AddRelocatedData(RelocatedData data)
         {
-            // TODO: If already added we replace it instead
+            RelocatedData existingData = PendingRelocatedData.FirstOrDefault(x => x.Obj.Offset == data.Obj.Offset);
+
+            if (existingData != null)
+                PendingRelocatedData.Remove(existingData);
 
             PendingRelocatedData.Add(data);
         }
