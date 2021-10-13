@@ -1,0 +1,57 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <LangVersion>9</LangVersion>
+    <Version>0.1.0.0</Version>
+    <Authors>RayCarrot</Authors>
+    <Product>Klonoa Heroes Patcher</Product>
+    <PackageProjectUrl>https://github.com/RayCarrot/KlonoaHeroesPatcher</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/RayCarrot/KlonoaHeroesPatcher</RepositoryUrl>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MahApps.Metro" Version="2.4.7" />
+    <PackageReference Include="MahApps.Metro.IconPacks.Material" Version="4.10.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+    <PackageReference Include="PropertyChanged.Fody" Version="3.4.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\Binary\BinarySerializer.PS1\src\BinarySerializer.PS1.csproj" />
+    <ProjectReference Include="..\..\..\Binary\BinarySerializer.GBA\src\BinarySerializer.GBA.csproj" />
+    <ProjectReference Include="..\..\..\Binary\BinarySerializer.Klonoa\src\BinarySerializer.Klonoa.csproj" />
+    <ProjectReference Include="..\..\..\Binary\BinarySerializer\src\BinarySerializer.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Editor\Cutscene\CutsceneFileEditor.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Editor\Binary\BinaryFileEditor.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Update="Editor\Cutscene\CutsceneFileEditor.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Editor\Binary\BinaryFileEditor.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="UI\Resources\Styles.Expander.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="UI\Resources\Styles.TextBlock.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,96 @@
+﻿<UserControl x:Class="KlonoaHeroesPatcher.CutsceneFileEditor"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:local="clr-namespace:KlonoaHeroesPatcher"
+             Background="{DynamicResource MahApps.Brushes.ThemeBackground}"
+             Foreground="{DynamicResource MahApps.Brushes.ThemeForeground}"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800" 
+             d:DataContext="{d:DesignInstance local:CutsceneFileEditorViewModel}">
+
+    <ScrollViewer Padding="5">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <!-- Text -->
+            <StackPanel Grid.Row="0">
+
+                <TextBlock Style="{StaticResource TextBlock.Header}"
+                           Text="Text"
+                           Margin="0 0 0 5" />
+
+                <Expander Header="Characters"
+                          Margin="0 0 0 5">
+                    <!-- TODO: Add dynamic info -->
+                </Expander>
+
+                <Expander Header="Commands"
+                          Margin="0 0 0 5">
+                    <StackPanel Grid.IsSharedSizeScope="True">
+
+                        <local:DuoGridItem Header="[END]" Text="End of the cutscene text. Should always be placed as the last command." />
+                        <local:DuoGridItem Header="[CLEAR]" Text="Clears the previously drawn text." />
+                        <local:DuoGridItem Header="[LINEBREAK]" Text="Draws the text on a new line." />
+                        <local:DuoGridItem Header="[SPEAKER:X]" Text="Draws the text for the speaker's name, specified with the argument." />
+                        <local:DuoGridItem Header="[CMD_05]" Text="Unknown" />
+                        <local:DuoGridItem Header="[CMD_06]" Text="Unknown" />
+                        <local:DuoGridItem Header="[CMD_07:X]" Text="Unknown" />
+                        <local:DuoGridItem Header="[CMD_08:X]" Text="Unknown" />
+                        <local:DuoGridItem Header="[PROMPT]" Text="Waits for the player to press a button before continuing." />
+                        <local:DuoGridItem Header="[PAUSE]" Text="Unknown" />
+                        <local:DuoGridItem Header="[CMD_0B]" Text="Unknown" />
+                        <local:DuoGridItem Header="[CMD_0C:X]" Text="Unknown" />
+                        <local:DuoGridItem Header="[CMD_0D:X]" Text="Unknown" />
+                        <local:DuoGridItem Header="[CMD_0E]" Text="Unknown" />
+                        <local:DuoGridItem Header="[CMD_0F]" Text="Unknown" />
+
+                    </StackPanel>
+                </Expander>
+
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <TextBox Grid.Column="0"
+                             Text="{Binding Path=Text}"
+                             TextWrapping="Wrap"
+                             Margin="0 0 10 0"/>
+
+                    <Border Grid.Column="1"
+                            HorizontalAlignment="Left" 
+                            Background="Gray">
+                        <Image Source="{Binding Path=TextPreviewImgSource}"
+                               Width="{Binding Path=TextPreviewWidth}"
+                               RenderOptions.BitmapScalingMode="NearestNeighbor" />
+                    </Border>
+
+                </Grid>
+
+            </StackPanel>
+
+            <Separator Grid.Row="1"
+                       Margin="0 10" />
+
+            <!-- Script -->
+            <StackPanel Grid.Row="2">
+
+                <TextBlock Style="{StaticResource TextBlock.Header}"
+                           Text="Script (read-only)"
+                           Margin="0 0 0 5" />
+
+                <TextBox Text="{Binding Path=ScriptText}"
+                         TextWrapping="Wrap"/>
+
+            </StackPanel>
+
+        </Grid>
+    </ScrollViewer>
+</UserControl>
