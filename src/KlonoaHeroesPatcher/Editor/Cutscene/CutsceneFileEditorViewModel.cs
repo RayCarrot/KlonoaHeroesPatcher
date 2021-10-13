@@ -66,12 +66,14 @@ namespace KlonoaHeroesPatcher
 
         public string GetFontChar(int index)
         {
-            return AppViewModel.Current.Config.FontTable.TryGetValue(index, out string v) ? v : $"[0x{index:X4}]";
+            var a = AppViewModel.Current.Config.FontTable.TryGetValue(index, out string[] v) ? v : null;
+
+            return a?.FirstOrDefault() ?? $"[0x{index:X4}]";
         }
 
         public void ApplyModifiedText()
         {
-            Dictionary<int, string> fontTable = AppViewModel.Current.Config.FontTable;
+            Dictionary<int, string[]> fontTable = AppViewModel.Current.Config.FontTable;
             var textCmds = new List<CutsceneTextCommand>();
 
             try
@@ -156,9 +158,9 @@ namespace KlonoaHeroesPatcher
                         int fontIndex = -1;
 
                         // Start by checking if it fully matches an item in the font table
-                        foreach (var f in fontTable)
+                        foreach (KeyValuePair<int, string[]> f in fontTable)
                         {
-                            if (f.Value.Equals(c.ToString(), StringComparison.InvariantCultureIgnoreCase))
+                            if (f.Value.Any(s => s.Equals(c.ToString(), StringComparison.InvariantCultureIgnoreCase)))
                             {
                                 fontIndex = f.Key;
                                 break;
@@ -168,16 +170,22 @@ namespace KlonoaHeroesPatcher
                         // If no match was found we assume the item might consist of multiple characters
                         if (fontIndex == -1)
                         {
-                            foreach (var f in fontTable.Where(x => x.Value.Length > 1))
+                            foreach (KeyValuePair<int, string[]> f in fontTable)
                             {
-                                var check = Text.Substring(i, f.Value.Length);
-
-                                if (check.Equals(f.Value, StringComparison.InvariantCultureIgnoreCase))
+                                foreach (string s in f.Value.Where(x => x.Length > 1))
                                 {
-                                    fontIndex = f.Key;
-                                    i += f.Value.Length - 1;
-                                    break;
+                                    var check = Text.Substring(i, f.Value.Length);
+
+                                    if (check.Equals(s, StringComparison.InvariantCultureIgnoreCase))
+                                    {
+                                        fontIndex = f.Key;
+                                        i += f.Value.Length - 1;
+                                        break;
+                                    }
                                 }
+
+                                if (fontIndex != -1)
+                                    break;
                             }
                         }
 
