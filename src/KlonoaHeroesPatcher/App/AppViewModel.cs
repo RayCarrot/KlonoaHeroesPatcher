@@ -106,6 +106,15 @@ namespace KlonoaHeroesPatcher
             FileEditorViewModel editor;
             PackIconMaterialKind icon;
             Color iconColor;
+            ObservableCollection<DuoGridItemViewModel> info = new ObservableCollection<DuoGridItemViewModel>();
+
+            info.Add(new DuoGridItemViewModel("File Type", obj?.GetType().Name));
+
+            if (obj is BaseFile f)
+            {
+                info.Add(new DuoGridItemViewModel("File Size", $"{f.Pre_FileSize} bytes"));
+                info.Add(new DuoGridItemViewModel("Compressed", $"{f.Pre_IsCompressed}"));
+            }
 
             if (obj is Graphics_File)
             {
@@ -135,7 +144,7 @@ namespace KlonoaHeroesPatcher
 
             bool relocated = Footer.RelocatedStructs.Any(x => x.NewPointer == obj?.Offset);
 
-            var navItem = new NavigationItemViewModel(title, icon, iconColor, obj, parentArchiveFile, editor, relocated);
+            var navItem = new NavigationItemViewModel(title, icon, iconColor, info, obj, parentArchiveFile, editor, relocated);
             collection.Add(navItem);
 
             if (obj is not ArchiveFile archive)

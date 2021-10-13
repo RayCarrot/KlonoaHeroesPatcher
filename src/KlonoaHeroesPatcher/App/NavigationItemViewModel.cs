@@ -8,11 +8,12 @@ namespace KlonoaHeroesPatcher
 {
     public class NavigationItemViewModel : BaseViewModel
     {
-        public NavigationItemViewModel(string title, PackIconMaterialKind icon, Color iconColor, BinarySerializable serializableObject, ArchiveFile parentArchiveFile, FileEditorViewModel editorViewModel, bool relocated)
+        public NavigationItemViewModel(string title, PackIconMaterialKind icon, Color iconColor, ObservableCollection<DuoGridItemViewModel> fileInfo, BinarySerializable serializableObject, ArchiveFile parentArchiveFile, FileEditorViewModel editorViewModel, bool relocated)
         {
             Title = title;
             Icon = icon;
             IconColor = new SolidColorBrush(iconColor);
+            FileInfo = fileInfo;
             SerializableObject = serializableObject;
             ParentArchiveFile = parentArchiveFile;
             EditorViewModel = editorViewModel;
@@ -33,6 +34,7 @@ namespace KlonoaHeroesPatcher
         public string Title { get; }
         public PackIconMaterialKind Icon { get; }
         public SolidColorBrush IconColor { get; }
+        public ObservableCollection<DuoGridItemViewModel> FileInfo { get; }
         public BinarySerializable SerializableObject { get; }
         public ArchiveFile ParentArchiveFile { get; }
         public Pointer Offset { get; }
