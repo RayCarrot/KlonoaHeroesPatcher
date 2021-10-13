@@ -53,7 +53,8 @@ namespace KlonoaHeroesPatcher
             RelocatedStructs = s.SerializeObjectArray<RelocatedStruct>(RelocatedStructs, RelocatedStructsCount, name: nameof(RelocatedStructs));
 
             // End with the footer offset and magic. This way the footer can be read without knowing where it begins.
-            s.Goto(Offset.File.StartPointer + s.CurrentLength - 12);
+            if (s.CurrentLength - s.CurrentPointer.FileOffset >= 12)
+                s.Goto(Offset.File.StartPointer + s.CurrentLength - 12);
 
             s.Serialize<long>(footerOffset, name: nameof(footerOffset));
             magic = s.SerializeString(Magic, 4, name: nameof(Magic));
