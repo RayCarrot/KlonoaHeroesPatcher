@@ -229,9 +229,6 @@ namespace KlonoaHeroesPatcher
                 {
                     var newLine = cmd.Command is CutsceneTextCommand.CommandType.Clear or CutsceneTextCommand.CommandType.Linebreak;
 
-                    if (newLine)
-                        txtStr.AppendLine();
-
                     txtStr.Append("[");
                     txtStr.Append(cmd.Command.ToString().ToUpper());
 
