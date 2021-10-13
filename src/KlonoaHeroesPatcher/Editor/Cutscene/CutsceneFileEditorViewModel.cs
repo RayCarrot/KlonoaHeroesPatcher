@@ -1,6 +1,7 @@
 ﻿using BinarySerializer.Klonoa.KH;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Windows;
@@ -20,6 +21,8 @@ namespace KlonoaHeroesPatcher
 
         public Cutscene_File CutsceneFile => (Cutscene_File)SerializableObject;
         public CutsceneTextOnly_File CutsceneTextOnly { get; set; }
+
+        public ObservableCollection<DuoGridItemViewModel> AllowedCharactersInfo { get; set; }
 
         private string _text;
         public string Text
@@ -47,6 +50,8 @@ namespace KlonoaHeroesPatcher
 
             if (firstLoad)
             {
+                AllowedCharactersInfo = new ObservableCollection<DuoGridItemViewModel>(AppViewModel.Current.Config.FontTable.Select(x => new DuoGridItemViewModel($"{x.Key:X4}", String.Join(", ", x.Value))));
+
                 using (AppViewModel.Current.Context)
                 {
                     var s = AppViewModel.Current.Context.Deserializer;

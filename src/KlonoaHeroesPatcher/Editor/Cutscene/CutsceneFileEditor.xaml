@@ -25,12 +25,20 @@
                            Text="Text"
                            Margin="0 0 0 5" />
 
-                <Expander Header="Characters"
+                <Expander Header="Available Characters"
                           Margin="0 0 0 5">
-                    <!-- TODO: Add dynamic info -->
+                    <ItemsControl Grid.IsSharedSizeScope="True"
+                                  ItemsSource="{Binding Path=AllowedCharactersInfo}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <local:DuoGridItem Header="{Binding Path=Header}"
+                                                   Text="{Binding Path=Text}" />
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
                 </Expander>
 
-                <Expander Header="Commands"
+                <Expander Header="Available Commands"
                           Margin="0 0 0 5">
                     <StackPanel Grid.IsSharedSizeScope="True">
 
