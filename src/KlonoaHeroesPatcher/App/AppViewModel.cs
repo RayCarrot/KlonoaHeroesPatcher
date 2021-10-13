@@ -196,6 +196,8 @@ namespace KlonoaHeroesPatcher
 
             if (status != null)
                 Title += $" - {status}";
+
+            Logger.Trace("Set app title to {0}", Title);
         }
 
         public void OpenFile()
@@ -211,11 +213,15 @@ namespace KlonoaHeroesPatcher
             if (result != true)
                 return;
 
+            Logger.Info("Opening file...");
+
             Load(dialog.FileName);
         }
 
         public void SaveFile()
         {
+            Logger.Info("Saving file...");
+
             Save(ROM.Offset.File.AbsolutePath);
         }
 
@@ -232,16 +238,22 @@ namespace KlonoaHeroesPatcher
             if (result != true)
                 return;
 
+            Logger.Info("Saving file as...");
+
             Save(dialog.FileName);
         }
 
         public void Load(string romPath)
         {
             Unload();
+         
+            Logger.Info("Loading ROM");
 
             // Verify the path
             if (!File.Exists(romPath))
             {
+                Logger.Warn("ROM file {0} not found", romPath);
+
                 MessageBox.Show($"The specified ROM file '{romPath}' does not exist", "Error opening file", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
@@ -252,6 +264,9 @@ namespace KlonoaHeroesPatcher
             {
                 string basePath = Path.GetDirectoryName(romPath);
                 string romName = Path.GetFileName(romPath);
+
+                Logger.Trace("Base path: {0}", basePath);
+                Logger.Trace("ROM name: {0}", romName);
 
                 // Create the context and dispose after finished reading
                 using (Context = new KlonoaContext(basePath, Config.SerializerLogPath))
@@ -267,6 +282,8 @@ namespace KlonoaHeroesPatcher
 
                     // Read the ROM
                     ROM = FileFactory.Read<KlonoaHeroesROM>(romName, Context);
+
+                    Logger.Info("Read ROM with {0} relocated structs", Footer.RelocatedStructsCount);
 
                     // TODO: Add prev relocated data from footer to pending relocate as we need to relocate it again when saving
 
@@ -298,6 +315,8 @@ namespace KlonoaHeroesPatcher
 
         public void Save(string romPath)
         {
+            Logger.Info("Saving ROM");
+
             using (Context)
             {
                 try
@@ -309,12 +328,18 @@ namespace KlonoaHeroesPatcher
                     file.DestinationPath = Context.NormalizePath(romPath, false);
                     file.RecreateOnWrite = false;
 
+                    Logger.Trace("ROM source: {0}", file.SourcePath);
+                    Logger.Trace("ROM destination: {0}", file.DestinationPath);
+
                     if (file.SourcePath != file.DestinationPath)
                         File.Copy(file.SourcePath, file.DestinationPath, true);
+
 
                     var relocatePointer = new Pointer(Config.ROMEndPointer, file);
                     var s = Context.Serializer;
                     s.Goto(relocatePointer);
+
+                    Logger.Info("Adding {0} relocated structs to 0x{1}", PendingRelocatedData.Count, s.CurrentPointer.StringAbsoluteOffset);
 
                     Footer.RelocatedStructsCount = PendingRelocatedData.Count;
                     Footer.RelocatedStructs = new PatchedFooter.RelocatedStruct[Footer.RelocatedStructsCount];
@@ -326,6 +351,8 @@ namespace KlonoaHeroesPatcher
                     }
 
                     s.SerializeObject<PatchedFooter>(Footer, name: nameof(Footer));
+
+                    Logger.Info("Saved ROM");
 
                     MessageBox.Show("The file was successfully saved", "Saved successfully");
 
@@ -341,6 +368,8 @@ namespace KlonoaHeroesPatcher
 
         public void Unload()
         {
+            Logger.Info("Unloading ROM...");
+
             Context?.Dispose();
             Context = null;
             ROM = null;
@@ -348,11 +377,15 @@ namespace KlonoaHeroesPatcher
             SelectedNavigationItem = null;
             PendingRelocatedData.Clear();
             SetTitle();
+
+            Logger.Info("Unloaded ROM");
         }
 
         public void GenerateConfig()
         {
             File.WriteAllText(ConfigFileName, JsonConvert.SerializeObject(AppConfig.Default, Formatting.Indented));
+
+            Logger.Trace("Generated config");
 
             MessageBox.Show($"Config generated as {ConfigFileName}");
         }
@@ -364,6 +397,8 @@ namespace KlonoaHeroesPatcher
             {
                 CreateNoWindow = true
             });
+
+            Logger.Trace("Opened URL {0}", url);
         }
 
         public void AddRelocatedData(RelocatedData data)
@@ -372,6 +407,11 @@ namespace KlonoaHeroesPatcher
 
             if (existingData != null)
                 PendingRelocatedData.Remove(existingData);
+
+            if (existingData != null)
+                Logger.Info("Replaced relocated data from 0x{0}", data.Obj.Offset.StringAbsoluteOffset);
+            else
+                Logger.Info("Added relocated data from 0x{0}", data.Obj.Offset.StringAbsoluteOffset);
 
             PendingRelocatedData.Add(data);
         }
