@@ -1,19 +1,20 @@
-﻿using System;
+﻿using BinarySerializer;
+using NLog;
+using System;
 using System.IO;
 using System.Text;
-using System.Windows;
-using BinarySerializer;
+using ILogger = BinarySerializer.ILogger;
 
 namespace KlonoaHeroesPatcher
 {
     public class KlonoaContext : Context
     {
-        public KlonoaContext(string basePath, string logPath, bool showWarnings) 
+        public KlonoaContext(string basePath, string logPath) 
             : base(
                 basePath: basePath, 
                 settings: null, 
                 serializerLog: logPath == null ? null : new KlonoaSerializerLog(logPath),
-                logger: showWarnings ? new DebugBinaryLogger() : null) { }
+                logger: new KlonoaBinaryLogger()) { }
 
         public class KlonoaSerializerLog : ISerializerLog
         {
@@ -49,13 +50,15 @@ namespace KlonoaHeroesPatcher
             }
         }
 
-        public class DebugBinaryLogger : ILogger
+        public class KlonoaBinaryLogger : ILogger
         {
-            public void Log(object log) { }
+            private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
-            public void LogWarning(object log) => MessageBox.Show(log.ToString(), "Warning");
+            public void Log(object log) => Logger.Info(log);
 
-            public void LogError(object log) => MessageBox.Show(log.ToString(), "Error");
+            public void LogWarning(object log) => Logger.Warn(log);
+
+            public void LogError(object log) => Logger.Error(log);
         }
     }
 }

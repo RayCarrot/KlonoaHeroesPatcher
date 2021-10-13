@@ -9,9 +9,10 @@ namespace KlonoaHeroesPatcher
         /// </summary>
         /// <param name="fontTable">The font table, indicating the string each font index represents</param>
         /// <param name="serializerLogPath">An optional serializer log path</param>
-        /// <param name="showWarnings">Indicates if serializer warning should be shown as message boxes</param>
+        /// <param name="useFileLogging">Indicates if file logging is enabled</param>
+        /// <param name="logLevel">Indicates the log level to use for the logging</param>
         /// <param name="romEndPointer">Indicates where to start appending data to the ROM</param>
-        public AppConfig(Dictionary<int, string[]> fontTable, string serializerLogPath, bool? showWarnings, uint? romEndPointer)
+        public AppConfig(Dictionary<int, string[]> fontTable, string serializerLogPath, bool? useFileLogging, string logLevel, uint? romEndPointer)
         {
             FontTable = fontTable ?? new Dictionary<int, string[]>()
             {
@@ -401,7 +402,8 @@ namespace KlonoaHeroesPatcher
                 //[0x17F] = "[17F]",
             };
             SerializerLogPath = serializerLogPath;
-            ShowWarnings = showWarnings ?? false;
+            UseFileLogging = useFileLogging ?? true;
+            LogLevel = logLevel;
             ROMEndPointer = romEndPointer ?? 0x08FD5440;
         }
 
@@ -416,9 +418,14 @@ namespace KlonoaHeroesPatcher
         public string SerializerLogPath { get; }
 
         /// <summary>
-        /// Indicates if serializer warning should be shown as message boxes
+        /// Indicates if file logging is enabled
         /// </summary>
-        public bool ShowWarnings { get; }
+        public bool UseFileLogging { get; }
+
+        /// <summary>
+        /// Indicates the log level to use for the logging
+        /// </summary>
+        public string LogLevel { get; }
 
         /// <summary>
         /// Indicates where to start appending data to the ROM
@@ -428,6 +435,6 @@ namespace KlonoaHeroesPatcher
         /// <summary>
         /// Gets a default configuration
         /// </summary>
-        public static AppConfig Default => new AppConfig(null, null, null, null);
+        public static AppConfig Default => new AppConfig(null, null, null, null, null);
     }
 }

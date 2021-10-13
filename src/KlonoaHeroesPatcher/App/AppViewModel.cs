@@ -1,10 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using BinarySerializer;
+﻿using BinarySerializer;
 using BinarySerializer.GBA;
 using BinarySerializer.Klonoa;
 using BinarySerializer.Klonoa.KH;
 using MahApps.Metro.IconPacks;
+using Microsoft.Win32;
+using Newtonsoft.Json;
+using NLog;
+using NLog.Config;
+using NLog.Targets;
+using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
@@ -12,10 +17,6 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
-using BinarySerializer.PS1;
-using ControlzEx.Standard;
-using Microsoft.Win32;
-using Newtonsoft.Json;
 
 namespace KlonoaHeroesPatcher
 {
@@ -36,6 +37,12 @@ namespace KlonoaHeroesPatcher
 
             SetTitle();
         }
+
+        #endregion
+
+        #region Logger
+
+        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
         #endregion
 
@@ -61,6 +68,7 @@ namespace KlonoaHeroesPatcher
         public Version CurrentAppVersion => new Version(0, 1, 0, 0);
 
         public const string ConfigFileName = "Config.json";
+        public const string LogFileName = "Log.txt";
         public AppConfig Config { get; set; }
 
         public Context Context { get; set; }
@@ -142,6 +150,44 @@ namespace KlonoaHeroesPatcher
         public void Init()
         {
             Config = LoadConfig();
+            InitializeLogging();
+
+            Logger.Info("App initialized");
+        }
+
+        public void InitializeLogging()
+        {
+            // Create a new logging configuration
+            var logConfig = new LoggingConfiguration();
+
+#if DEBUG
+            // On debug we default it to log trace
+            LogLevel logLevel = LogLevel.Trace;
+#else
+            // If not on debug we default to log info
+            LogLevel logLevel = LogLevel.Info;
+#endif
+
+            // If the config specifies a log level we use that
+            if (Config.LogLevel != null)
+                logLevel = LogLevel.FromString(Config.LogLevel);
+
+            const string logLayout = "${time:invariant=true}|${level:uppercase=true}|${logger}|${message}${onexception:${newline}${exception:format=tostring}}";
+
+            // Log to file
+            if (Config.UseFileLogging)
+            {
+                logConfig.AddRule(logLevel, LogLevel.Fatal, new FileTarget("file")
+                {
+                    KeepFileOpen = true,
+                    DeleteOldFileOnStartup = true,
+                    FileName = LogFileName,
+                    Layout = logLayout,
+                });
+            }
+
+            // Apply config
+            LogManager.Configuration = logConfig;
         }
 
         public void SetTitle(string status = null)
@@ -208,7 +254,7 @@ namespace KlonoaHeroesPatcher
                 string romName = Path.GetFileName(romPath);
 
                 // Create the context and dispose after finished reading
-                using (Context = new KlonoaContext(basePath, Config.SerializerLogPath, Config.ShowWarnings))
+                using (Context = new KlonoaContext(basePath, Config.SerializerLogPath))
                 {
                     // Add the game settings
                     Context.AddKlonoaSettings(new KlonoaSettings_KH());
