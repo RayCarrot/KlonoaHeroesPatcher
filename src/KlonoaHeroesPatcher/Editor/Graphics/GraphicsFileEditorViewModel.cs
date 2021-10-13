@@ -34,7 +34,7 @@ namespace KlonoaHeroesPatcher
         public double Height { get; set; }
         public bool HasPalette => GraphicsFile.Palette?.Any() == true;
 
-        protected override void Load()
+        protected override void Load(bool firstLoad)
         {
             PreviewImgSource = TileGraphicsHelpers.CreateImageSource(
                 tileSet: GraphicsFile.TileSet, 
@@ -165,7 +165,7 @@ namespace KlonoaHeroesPatcher
                 RelocateFile();
 
                 // Reload
-                Load();
+                Load(false);
             }
             catch (Exception ex)
             {
