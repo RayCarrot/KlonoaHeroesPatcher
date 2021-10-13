@@ -10,6 +10,7 @@
     <Product>Klonoa Heroes Patcher</Product>
     <PackageProjectUrl>https://github.com/RayCarrot/KlonoaHeroesPatcher</PackageProjectUrl>
     <RepositoryUrl>https://github.com/RayCarrot/KlonoaHeroesPatcher</RepositoryUrl>
+    <ApplicationIcon>Img/AppIcon.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
@@ -55,4 +56,12 @@
     </Page>
   </ItemGroup>
 
+  <!-- Resources -->
+  <ItemGroup>
+    <None Remove="Img\AppIcon.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Img\AppIcon.ico" />
+  </ItemGroup>
+  
 </Project>
