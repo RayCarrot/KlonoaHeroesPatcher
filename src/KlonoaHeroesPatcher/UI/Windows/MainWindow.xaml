@@ -77,6 +77,7 @@
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto" />
                                 <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
                                 <ColumnDefinition Width="*" />
                             </Grid.ColumnDefinitions>
 
@@ -85,15 +86,25 @@
                                                         Margin="0 0 5 0" />
 
                             <iconPacks:PackIconMaterial Grid.Column="1"
+                                                        Visibility="{Binding Path=Relocated, Converter={local:BooleanToVisibilityConverter}}"
+                                                        Kind="FileEditOutline"
+                                                        Height="12"
+                                                        VerticalAlignment="Center"
+                                                        ToolTip="Modified"
+                                                        Background="Transparent"
+                                                        Margin="0 0 5 0" />
+
+                            <iconPacks:PackIconMaterial Grid.Column="2"
                                                         Visibility="{Binding Path=UnsavedChanges, Converter={local:BooleanToVisibilityConverter}}"
                                                         Kind="FileUploadOutline"
                                                         Height="12"
                                                         VerticalAlignment="Center"
                                                         ToolTip="Unsaved changes"
                                                         Background="Transparent"
+                                                        Foreground="#D81B60"
                                                         Margin="0 0 5 0" />
 
-                            <TextBlock Grid.Column="2"
+                            <TextBlock Grid.Column="3"
                                        Text="{Binding Path=DisplayName, Mode=OneTime}"
                                        Margin="0 0 10 0" />
 

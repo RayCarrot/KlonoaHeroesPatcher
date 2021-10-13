@@ -83,9 +83,9 @@ namespace KlonoaHeroesPatcher
 
         #endregion
 
-        #region Private Static Methods
+        #region Private Methods
 
-        private static AppConfig LoadConfig()
+        private AppConfig LoadConfig()
         {
             if (!File.Exists(ConfigFileName))
                 return AppConfig.Default;
@@ -101,7 +101,7 @@ namespace KlonoaHeroesPatcher
             }
         }
 
-        private static void AddNavigationItem(ICollection<NavigationItemViewModel> collection, string title, BinarySerializable obj, ArchiveFile parentArchiveFile)
+        private void AddNavigationItem(ICollection<NavigationItemViewModel> collection, string title, BinarySerializable obj, ArchiveFile parentArchiveFile)
         {
             FileEditorViewModel editor;
             PackIconMaterialKind icon;
@@ -133,7 +133,9 @@ namespace KlonoaHeroesPatcher
                 iconColor = Color.FromRgb(0x8B, 0x00, 0x8B);
             }
 
-            var navItem = new NavigationItemViewModel(title, icon, iconColor, obj, parentArchiveFile, editor);
+            bool relocated = Footer.RelocatedStructs.Any(x => x.NewPointer == obj?.Offset);
+
+            var navItem = new NavigationItemViewModel(title, icon, iconColor, obj, parentArchiveFile, editor, relocated);
             collection.Add(navItem);
 
             if (obj is not ArchiveFile archive)

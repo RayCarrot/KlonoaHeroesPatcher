@@ -8,7 +8,7 @@ namespace KlonoaHeroesPatcher
 {
     public class NavigationItemViewModel : BaseViewModel
     {
-        public NavigationItemViewModel(string title, PackIconMaterialKind icon, Color iconColor, BinarySerializable serializableObject, ArchiveFile parentArchiveFile, FileEditorViewModel editorViewModel = null)
+        public NavigationItemViewModel(string title, PackIconMaterialKind icon, Color iconColor, BinarySerializable serializableObject, ArchiveFile parentArchiveFile, FileEditorViewModel editorViewModel, bool relocated)
         {
             Title = title;
             Icon = icon;
@@ -16,6 +16,7 @@ namespace KlonoaHeroesPatcher
             SerializableObject = serializableObject;
             ParentArchiveFile = parentArchiveFile;
             EditorViewModel = editorViewModel;
+            Relocated = relocated;
             NavigationItems = new ObservableCollection<NavigationItemViewModel>();
 
             if (SerializableObject == null)
@@ -36,6 +37,7 @@ namespace KlonoaHeroesPatcher
         public ArchiveFile ParentArchiveFile { get; }
         public Pointer Offset { get; }
         public FileEditorViewModel EditorViewModel { get; }
+        public bool Relocated { get; }
         public bool IsSelected
         {
             get => _isSelected;
