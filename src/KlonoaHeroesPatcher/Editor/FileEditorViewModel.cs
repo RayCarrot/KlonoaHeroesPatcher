@@ -8,19 +8,25 @@ namespace KlonoaHeroesPatcher
         public object EditorUI { get; private set; }
         public ArchiveFile ParentArchiveFile { get; private set; }
         public BinarySerializable SerializableObject { get; private set; }
+        public NavigationItemViewModel NavigationItem { get; private set; }
 
         protected abstract void Load();
         protected abstract object GetEditor();
 
-        protected void RelocateFile() => AppViewModel.Current.AddRelocatedData(new RelocatedData(SerializableObject, ParentArchiveFile, true));
+        protected void RelocateFile()
+        {
+            AppViewModel.Current.AddRelocatedData(new RelocatedData(SerializableObject, ParentArchiveFile, true));
+            NavigationItem.UnsavedChanges = true;
+        }
 
-        public void Init(BinarySerializable obj, ArchiveFile parentArchiveFile)
+        public void Init(NavigationItemViewModel navigationItem)
         {
             if (SerializableObject != null)
                 return;
 
-            SerializableObject = obj;
-            ParentArchiveFile = parentArchiveFile;
+            SerializableObject = navigationItem.SerializableObject;
+            ParentArchiveFile = navigationItem.ParentArchiveFile;
+            NavigationItem = navigationItem;
             EditorUI = GetEditor();
             Load();
         }

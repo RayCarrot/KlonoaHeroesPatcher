@@ -75,6 +75,7 @@
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
                                 <ColumnDefinition Width="*" />
                             </Grid.ColumnDefinitions>
 
@@ -82,9 +83,19 @@
                                                         Foreground="{Binding Path=IconColor, Mode=OneTime}"
                                                         Margin="0 0 5 0" />
 
-                            <TextBlock Grid.Column="1"
+                            <iconPacks:PackIconMaterial Grid.Column="1"
+                                                        Visibility="{Binding Path=UnsavedChanges, Converter={local:BooleanToVisibilityConverter}}"
+                                                        Kind="FileUploadOutline"
+                                                        Height="12"
+                                                        VerticalAlignment="Center"
+                                                        ToolTip="Unsaved changes"
+                                                        Background="Transparent"
+                                                        Margin="0 0 5 0" />
+
+                            <TextBlock Grid.Column="2"
                                        Text="{Binding Path=DisplayName, Mode=OneTime}"
                                        Margin="0 0 10 0" />
+
 
                         </Grid>
                     </HierarchicalDataTemplate>

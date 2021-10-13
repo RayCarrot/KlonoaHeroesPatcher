@@ -44,10 +44,11 @@ namespace KlonoaHeroesPatcher
                 _isSelected = value;
 
                 if (IsSelected)
-                    EditorViewModel?.Init(SerializableObject, ParentArchiveFile);
+                    EditorViewModel?.Init(this);
             }
         }
         public bool CanBeEdited => EditorViewModel != null;
+        public bool UnsavedChanges { get; set; }
 
         public string DisplayName => $"{Offset?.StringAbsoluteOffset ?? "NULL"} ({Title})";
         public ObservableCollection<NavigationItemViewModel> NavigationItems { get; }
