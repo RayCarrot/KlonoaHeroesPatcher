@@ -306,7 +306,7 @@ namespace KlonoaHeroesPatcher
 
         public void GenerateConfig()
         {
-            File.WriteAllText(ConfigFileName, JsonConvert.SerializeObject(Config, Formatting.Indented));
+            File.WriteAllText(ConfigFileName, JsonConvert.SerializeObject(AppConfig.Default, Formatting.Indented));
 
             MessageBox.Show($"Config generated as {ConfigFileName}");
         }
