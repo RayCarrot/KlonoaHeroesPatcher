@@ -87,12 +87,14 @@ namespace KlonoaHeroesPatcher
         {
             public Pointer OriginalPointer { get; set; }
             public Pointer NewPointer { get; set; }
+            public Pointer ParentArchivePointer { get; set; }
             public uint DataSize { get; set; }
 
             public override void SerializeImpl(SerializerObject s)
             {
                 OriginalPointer = s.SerializePointer(OriginalPointer, name: nameof(OriginalPointer));
                 NewPointer = s.SerializePointer(NewPointer, name: nameof(NewPointer));
+                ParentArchivePointer = s.SerializePointer(ParentArchivePointer, name: nameof(ParentArchivePointer));
                 DataSize = s.Serialize<uint>(DataSize, name: nameof(DataSize));
             }
         }

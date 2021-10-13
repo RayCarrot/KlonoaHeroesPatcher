@@ -7,10 +7,11 @@ namespace KlonoaHeroesPatcher
 {
     public class RelocatedData
     {
-        public RelocatedData(BinarySerializable obj, ArchiveFile parentArchiveFile, bool isNewData)
+        public RelocatedData(BinarySerializable obj, ArchiveFile parentArchiveFile, Pointer originPointer = null)
         {
             Obj = obj;
-            IsNewData = isNewData;
+            ParentArchiveFile = parentArchiveFile;
+            OriginPointer = originPointer;
             UpdateRefsAction = (s, originalPointer, newPointer) =>
             {
                 int count = 0;
@@ -33,18 +34,14 @@ namespace KlonoaHeroesPatcher
                 Logger.Info("Updated {0} file references for relocated data from 0x{1}", count, originalPointer.StringAbsoluteOffset);
             };
         }
-        public RelocatedData(BinarySerializable obj, UpdateRefs updateRefsAction, bool isNewData)
-        {
-            Obj = obj;
-            UpdateRefsAction = updateRefsAction;
-            IsNewData = isNewData;
-        }
 
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
         public BinarySerializable Obj { get; }
+        public ArchiveFile ParentArchiveFile { get; }
         public UpdateRefs UpdateRefsAction { get; }
-        public bool IsNewData { get; }
+        public Pointer OriginPointer { get; } // Only specified if it's not new data
+        public bool IsNewData => OriginPointer == null; // Indicates if this data is being relocated first time. Otherwise it has been relocated before.
 
         public PatchedFooter.RelocatedStruct Relocate(SerializerObject s)
         {
@@ -52,7 +49,7 @@ namespace KlonoaHeroesPatcher
             Pointer newPointer = s.CurrentPointer;
 
             // Get the original pointer
-            Pointer origPointer = Obj.Offset;
+            Pointer originalPointer = Obj.Offset;
 
             // Init the object
             Obj.Init(newPointer);
@@ -64,15 +61,16 @@ namespace KlonoaHeroesPatcher
 
             uint dataSize = (uint)(s.CurrentPointer.FileOffset - newPointer.FileOffset);
 
-            Logger.Info("Relocated data from 0x{0} to 0x{1} with the size of {2}", origPointer.StringAbsoluteOffset, newPointer.StringAbsoluteOffset, dataSize);
+            Logger.Info("Relocated data from 0x{0} to 0x{1} with the size of {2}", originalPointer.StringAbsoluteOffset, newPointer.StringAbsoluteOffset, dataSize);
 
             // Update all the references in the ROM to the data with the new relocated pointer
-            UpdateRefsAction(s, origPointer, newPointer);
+            UpdateRefsAction(s, originalPointer, newPointer);
 
             return new PatchedFooter.RelocatedStruct
             {
-                OriginalPointer = origPointer,
+                OriginalPointer = OriginPointer ?? originalPointer,
                 NewPointer = newPointer,
+                ParentArchivePointer = ParentArchiveFile.Offset,
                 DataSize = dataSize
             };
         }

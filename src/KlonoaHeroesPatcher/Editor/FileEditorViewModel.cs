@@ -15,7 +15,7 @@ namespace KlonoaHeroesPatcher
 
         protected void RelocateFile(BinarySerializable obj = null)
         {
-            AppViewModel.Current.AddRelocatedData(new RelocatedData(obj ?? SerializableObject, ParentArchiveFile, true));
+            AppViewModel.Current.AddRelocatedData(new RelocatedData(obj ?? SerializableObject, ParentArchiveFile));
             NavigationItem.UnsavedChanges = true;
         }
 

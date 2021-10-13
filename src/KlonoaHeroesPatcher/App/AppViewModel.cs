@@ -285,7 +285,14 @@ namespace KlonoaHeroesPatcher
 
                     Logger.Info("Read ROM with {0} relocated structs", Footer.RelocatedStructsCount);
 
-                    // TODO: Add prev relocated data from footer to pending relocate as we need to relocate it again when saving
+                    foreach (PatchedFooter.RelocatedStruct relocatedStruct in Footer.RelocatedStructs)
+                    {
+                        var s = Context.Deserializer;
+                        var rawData = s.DoAt(relocatedStruct.NewPointer, () => s.SerializeObject<Array<byte>>(default, x => x.Length = relocatedStruct.DataSize));
+                        var parentArchive = s.DoAt(relocatedStruct.ParentArchivePointer, () => s.SerializeObject<ArchiveFile>(default));
+
+                        AddRelocatedData(new RelocatedData(rawData, parentArchive, relocatedStruct.OriginalPointer));
+                    }
 
                     NavigationItems.Clear();
 
@@ -406,12 +413,17 @@ namespace KlonoaHeroesPatcher
             RelocatedData existingData = PendingRelocatedData.FirstOrDefault(x => x.Obj.Offset == data.Obj.Offset);
 
             if (existingData != null)
+            {
+                // Use the origin pointer from the existing data
+                data = new RelocatedData(data.Obj, data.ParentArchiveFile, existingData.OriginPointer);
+
                 PendingRelocatedData.Remove(existingData);
+            }
 
             if (existingData != null)
-                Logger.Info("Replaced relocated data from 0x{0}", data.Obj.Offset.StringAbsoluteOffset);
+                Logger.Info("Replaced relocated data from 0x{0} with origin 0x{1}", data.Obj.Offset.StringAbsoluteOffset, data.OriginPointer?.StringAbsoluteOffset);
             else
-                Logger.Info("Added relocated data from 0x{0}", data.Obj.Offset.StringAbsoluteOffset);
+                Logger.Info("Added relocated data from 0x{0} with origin 0x{1}", data.Obj.Offset.StringAbsoluteOffset, data.OriginPointer?.StringAbsoluteOffset);
 
             PendingRelocatedData.Add(data);
         }
