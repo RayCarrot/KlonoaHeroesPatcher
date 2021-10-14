@@ -116,9 +116,6 @@ namespace KlonoaHeroesPatcher
 
         public static (byte[] tileSet, GraphicsTile[] tileMap) CreateTileData(byte[] imgData, int bpp, int width, int height, bool createMap)
         {
-            if (createMap)
-                throw new NotImplementedException("Importing to graphics with a tile map is currently not supported");
-
             // Get the format
             float bppFactor = 1 / (8f / bpp);
 
@@ -129,7 +126,10 @@ namespace KlonoaHeroesPatcher
             // Get the length of each tile in bytes
             int tileLength = (int)(TileWidth * TileHeight * bppFactor);
 
-            var tileSet = new byte[imgData.Length];
+            var tileSet = new byte[imgData.Length]; // Max size, might be smaller if we reuse tiles
+            var tileMap = new GraphicsTile[createMap ? tilesWidth * tilesHeight : 0];
+
+            int tileSetIndex = 0;
 
             // Enumerate every tile
             for (int tileY = 0; tileY < tilesHeight; tileY++)
@@ -140,8 +140,19 @@ namespace KlonoaHeroesPatcher
                 {
                     var absTileX = tileX * TileWidth * bppFactor;
 
-                    int tileIndex = tileY * tilesWidth + tileX;
-                    int tileSetOffset = tileIndex * tileLength;
+                    // TODO: If we're creating a map we want to check if the tile matches one which has already been added to the tileset, in which case we use that. Perhaps start by writing to the set, then compare bytes and then go back and overwrite next turn?
+                    
+                    int tileSetOffset = tileSetIndex * tileLength;
+
+                    int tileMapIndex = tileY * tilesWidth + tileX;
+
+                    if (createMap)
+                        tileMap[tileMapIndex] = new GraphicsTile
+                        {
+                            TileSetIndex = tileSetIndex,
+                        };
+
+                    tileSetIndex++;
 
                     for (int y = 0; y < TileHeight; y++)
                     {
@@ -162,7 +173,12 @@ namespace KlonoaHeroesPatcher
                 }
             }
 
-            return (tileSet, new GraphicsTile[0]);
+            int tileSetLength = tileSetIndex * tileLength;
+
+            if (tileSetLength != tileSet.Length)
+                Array.Resize(ref tileSet, tileSetLength);
+
+            return (tileSet, tileMap);
         }
 
         public static PixelFormat GetPixelFormat(int bpp, bool isGrayScale = false)
