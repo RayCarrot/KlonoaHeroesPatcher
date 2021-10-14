@@ -131,8 +131,7 @@
             </TreeView>
 
             <Grid Grid.Column="1" DataContext="{Binding Path=SelectedNavigationItem}">
-                <Grid DataContext="{Binding Path=EditorViewModel, Mode=OneTime}"
-                      Margin="10">
+                <Grid DataContext="{Binding Path=EditorViewModel, Mode=OneTime}">
                     <ContentPresenter Content="{Binding Path=EditorUI}" />
                 </Grid>
             </Grid>
