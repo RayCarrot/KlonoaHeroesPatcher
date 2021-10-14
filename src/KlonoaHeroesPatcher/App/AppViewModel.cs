@@ -283,13 +283,19 @@ namespace KlonoaHeroesPatcher
                 using (Context = new KlonoaContext(basePath, Config.SerializerLogPath))
                 {
                     // Add the game settings
-                    Context.AddKlonoaSettings(new KlonoaSettings_KH());
+                    var settings = new KlonoaSettings_KH();
+                    Context.AddKlonoaSettings(settings);
 
                     // Add the ROM to the context
                     Context.AddFile(new MemoryMappedFile(Context, romName, GBAConstants.Address_ROM));
 
                     // Read the patched footer in the ROM first
                     Footer = ReadFooter(romName);
+
+                    // Add the relocated files to the settings to correctly determine the archived file sizes
+                    settings.RelocatedFiles = Footer.RelocatedStructs.
+                        GroupBy(x => x.ParentArchivePointer).
+                        ToDictionary(x => x.Key, x => new HashSet<KlonoaSettings.RelocatedFile>(x.Select(r => new KlonoaSettings.RelocatedFile(r.OriginalPointer, r.NewPointer, r.DataSize))));
 
                     // Read the ROM
                     ROM = FileFactory.Read<KlonoaHeroesROM>(romName, Context);
