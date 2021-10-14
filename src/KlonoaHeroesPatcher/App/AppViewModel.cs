@@ -142,7 +142,7 @@ namespace KlonoaHeroesPatcher
                 iconColor = Color.FromRgb(0x8B, 0x00, 0x8B);
             }
 
-            bool relocated = Footer.RelocatedStructs.Any(x => x.NewPointer == obj?.Offset);
+            bool relocated = obj != null && Footer.RelocatedStructs.Any(x => x.NewPointer == BinaryHelpers.GetROMPointer(obj.Offset));
 
             var navItem = new NavigationItemViewModel(title, icon, iconColor, info, obj, parentArchiveFile, editor, relocated);
             collection.Add(navItem);
@@ -308,7 +308,10 @@ namespace KlonoaHeroesPatcher
                         var rawData = s.DoAt(relocatedStruct.NewPointer, () => s.SerializeObject<Array<byte>>(default, x => x.Length = relocatedStruct.DataSize));
                         var parentArchive = s.DoAt(relocatedStruct.ParentArchivePointer, () => s.SerializeObject<ArchiveFile>(default));
 
-                        AddRelocatedData(new RelocatedData(rawData, parentArchive, relocatedStruct.OriginalPointer));
+                        AddRelocatedData(new RelocatedData(rawData, parentArchive)
+                        {
+                            OriginPointer = relocatedStruct.OriginalPointer
+                        });
                     }
 
                     NavigationItems.Clear();
@@ -354,6 +357,8 @@ namespace KlonoaHeroesPatcher
 
                     Logger.Trace("ROM source: {0}", file.SourcePath);
                     Logger.Trace("ROM destination: {0}", file.DestinationPath);
+
+                    // TODO: Trim to rom end pointer
 
                     if (file.SourcePath != file.DestinationPath)
                         File.Copy(file.SourcePath, file.DestinationPath, true);
@@ -432,7 +437,10 @@ namespace KlonoaHeroesPatcher
             if (existingData != null)
             {
                 // Use the origin pointer from the existing data
-                data = new RelocatedData(data.Obj, data.ParentArchiveFile, existingData.OriginPointer);
+                data = data with
+                {
+                    OriginPointer = existingData.OriginPointer
+                };
 
                 PendingRelocatedData.Remove(existingData);
             }

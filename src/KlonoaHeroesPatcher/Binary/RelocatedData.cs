@@ -1,17 +1,15 @@
-﻿using System;
-using BinarySerializer;
+﻿using BinarySerializer;
 using BinarySerializer.Klonoa;
 using NLog;
 
 namespace KlonoaHeroesPatcher
 {
-    public class RelocatedData
+    public record RelocatedData
     {
-        public RelocatedData(BinarySerializable obj, ArchiveFile parentArchiveFile, Pointer originPointer = null)
+        public RelocatedData(BinarySerializable obj, ArchiveFile parentArchiveFile)
         {
             Obj = obj;
             ParentArchiveFile = parentArchiveFile;
-            OriginPointer = originPointer;
             UpdateRefsAction = (s, originalPointer, newPointer) =>
             {
                 int count = 0;
@@ -40,8 +38,10 @@ namespace KlonoaHeroesPatcher
         public BinarySerializable Obj { get; }
         public ArchiveFile ParentArchiveFile { get; }
         public UpdateRefs UpdateRefsAction { get; }
-        public Pointer OriginPointer { get; } // Only specified if it's not new data
+        public Pointer OriginPointer { get; init; } // Only specified if it's not new data
         public bool IsNewData => OriginPointer == null; // Indicates if this data is being relocated first time. Otherwise it has been relocated before.
+        public IStreamEncoder Encoder { get; init; }
+        public bool IsCompressed => Encoder != null;
 
         public PatchedFooter.RelocatedStruct Relocate(SerializerObject s)
         {
@@ -49,15 +49,16 @@ namespace KlonoaHeroesPatcher
             Pointer newPointer = s.CurrentPointer;
 
             // Get the original pointer
-            Pointer originalPointer = Obj.Offset;
+            Pointer originalPointer = BinaryHelpers.GetROMPointer(Obj.Offset);
 
-            // Init the object
-            Obj.Init(newPointer);
+            s.DoEncodedIf(Encoder, IsCompressed, () =>
+            {
+                // Init the object
+                Obj.Init(s.CurrentPointer);
 
-            // TODO: Some data might be compressed! We need an encoder.
-
-            // Serialize the object
-            Obj.SerializeImpl(s);
+                // Serialize the object
+                Obj.SerializeImpl(s);
+            });
 
             uint dataSize = (uint)(s.CurrentPointer.FileOffset - newPointer.FileOffset);
 

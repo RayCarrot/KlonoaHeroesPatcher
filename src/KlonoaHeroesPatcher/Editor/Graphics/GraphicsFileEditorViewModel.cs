@@ -70,7 +70,7 @@ namespace KlonoaHeroesPatcher
 
         public void ExportImage()
         {
-            Pointer offset = GraphicsFile.Offset.File is VirtualFile virtualFile ? virtualFile.ParentPointer : GraphicsFile.Offset;
+            Pointer offset = BinaryHelpers.GetROMPointer(GraphicsFile.Offset);
 
             var dialog = new SaveFileDialog()
             {

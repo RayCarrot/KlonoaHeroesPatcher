@@ -23,10 +23,7 @@ namespace KlonoaHeroesPatcher
             if (SerializableObject == null)
                 return;
 
-            if (SerializableObject.Offset.File is VirtualFile virtualFile)
-                Offset = virtualFile.ParentPointer;
-            else
-                Offset = SerializableObject.Offset;
+            Offset = BinaryHelpers.GetROMPointer(SerializableObject.Offset);
         }
 
         private bool _isSelected;
