@@ -39,8 +39,7 @@ namespace KlonoaHeroesPatcher
                 palette: GraphicsFile.Palette, 
                 tileMap: GraphicsFile.TileMap, 
                 width: GraphicsFile.TileMapWidth, 
-                height: GraphicsFile.TileMapHeight,
-                trimPalette: true);
+                height: GraphicsFile.TileMapHeight);
 
             Width = PreviewImgSource.Width;
             Height = PreviewImgSource.Height;
@@ -73,7 +72,7 @@ namespace KlonoaHeroesPatcher
             {
                 Title = "Export image",
                 Filter = "Image Files (*.png, *.jpg)|*.png;*.jpg",
-                FileName = $"{offset.StringAbsoluteOffset}_{GraphicsFile.BPP}bit.png"
+                FileName = $"{offset.StringAbsoluteOffset}.png"
             };
 
             var result = dialog.ShowDialog();

@@ -315,8 +315,7 @@ namespace KlonoaHeroesPatcher
                 palette: font.Palette.Skip(16 * 3).ToArray(), // Use palette 3
                 tileMap: map,
                 width: width * TileGraphicsHelpers.TileWidth,
-                height: height * TileGraphicsHelpers.TileHeight,
-                trimPalette: false);
+                height: height * TileGraphicsHelpers.TileHeight);
 
             // Display at twice the size
             TextPreviewWidth = width * TileGraphicsHelpers.TileWidth * 2;

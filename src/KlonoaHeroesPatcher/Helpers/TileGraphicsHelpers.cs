@@ -17,11 +17,10 @@ namespace KlonoaHeroesPatcher
         public const double DpiX = 96;
         public const double DpiY = 96;
 
-        public static BitmapSource CreateImageSource(byte[] tileSet, int bpp, IList<BaseColor> palette, GraphicsTile[] tileMap, int width, int height, bool trimPalette)
+        public static BitmapSource CreateImageSource(byte[] tileSet, int bpp, IList<BaseColor> palette, GraphicsTile[] tileMap, int width, int height)
         {
             // Get the format
-            bool hasPalette = palette?.Any() == true;
-            PixelFormat format = GetPixelFormat(bpp, !hasPalette);
+            PixelFormat format = PixelFormats.Indexed8; // Always do 8-bit since 4-bit images can use multiple palettes
             float bppFactor = bpp / 8f;
 
             // Get the dimensions
@@ -29,15 +28,18 @@ namespace KlonoaHeroesPatcher
             int tilesHeight = height / TileHeight;
             int stride = GetStride(width, format);
 
+            if (palette?.Any() != true)
+                palette = ColorHelpers.CreateDummyPalette(256, true, wrap: ColorHelpers.GetPaletteLength(bpp));
+
             // Get the palette
-            BitmapPalette bmpPal = hasPalette ? new BitmapPalette(ColorHelpers.ConvertColors(palette, bpp, trimPalette)) : null;
+            BitmapPalette bmpPal = new BitmapPalette(ColorHelpers.ConvertColors(palette, bpp, false));
 
             // Set tile map to null if not available
             if (tileMap?.Any() != true)
                 tileMap = null;
 
-            // Create a buffer for the preview pixel data
-            var previewPixelData = new byte[(int)(width * height * bppFactor)];
+            // Create a buffer for the image data
+            var imgData = new byte[width * height];
 
             // Get the length of each tile in bytes
             int tileLength = (int)(TileWidth * TileHeight * bppFactor);
@@ -45,11 +47,11 @@ namespace KlonoaHeroesPatcher
             // Enumerate every tile
             for (int tileY = 0; tileY < tilesHeight; tileY++)
             {
-                var absTileY = tileY * TileHeight;
+                int absTileY = tileY * TileHeight;
 
                 for (int tileX = 0; tileX < tilesWidth; tileX++)
                 {
-                    var absTileX = tileX * TileWidth * bppFactor;
+                    int absTileX = tileX * TileWidth;
 
                     int mapIndex = tileY * tilesWidth + tileX;
 
@@ -62,27 +64,26 @@ namespace KlonoaHeroesPatcher
 
                     for (int y = 0; y < TileHeight; y++)
                     {
-                        for (int x = 0; x < TileWidth * bppFactor; x++)
+                        for (int x = 0; x < TileWidth; x++)
                         {
-                            var b = tileSet[(int)(tileSetOffset + y * TileWidth * bppFactor + x)];
+                            byte b = tileSet[(int)(tileSetOffset + (y * TileWidth + x) * bppFactor)];
 
-                            // Reverse the bits if 4bpp
                             if (bpp == 4)
-                            {
-                                var b1 = BitHelpers.SetBits(b, BitHelpers.ExtractBits(b, 4, 0), 4, 4);
-                                b = (byte)BitHelpers.SetBits(b1, BitHelpers.ExtractBits(b, 4, 4), 4, 0);
-                            }
+                                b = (byte)BitHelpers.ExtractBits(b, 4, x % 2 == 0 ? 0 : 4);
 
                             var sourceTileX = mapTile?.FlipX != true ? x : TileWidth - x - 1;
                             var sourceTileY = mapTile?.FlipY != true ? y : TileHeight - y - 1;
 
-                            previewPixelData[(int)((absTileY + sourceTileY) * width * bppFactor + (absTileX + sourceTileX))] = b;
+                            if (mapTile != null)
+                                b = (byte)(b + mapTile.PaletteIndex * 16);
+
+                            imgData[(absTileY + sourceTileY) * width + absTileX + sourceTileX] = b;
                         }
                     }
                 }
             }
 
-            return BitmapSource.Create(width, height, DpiX, DpiY, format, bmpPal, previewPixelData, stride);
+            return BitmapSource.Create(width, height, DpiX, DpiY, format, bmpPal, imgData, stride);
         }
 
         public static BitmapSource CreatePaletteImageSource(BitmapPalette bmpPal, int scale = 16, int offset = 0, int? optionalLength = null, int? optionalWrap = null, bool reverseY = true)
@@ -135,7 +136,7 @@ namespace KlonoaHeroesPatcher
 
             int tileSetIndex = 0;
 
-            var colorsCount = (int)Math.Pow(2, dstBpp);
+            var colorsCount = ColorHelpers.GetPaletteLength(dstBpp);
 
             // Trim and remove the transparent color from the palette
             if (dstPalette.Length > colorsCount)
@@ -217,17 +218,6 @@ namespace KlonoaHeroesPatcher
                 Array.Resize(ref tileSet, tileSetLength);
 
             return (tileSet, tileMap);
-        }
-
-        public static PixelFormat GetPixelFormat(int bpp, bool isGrayScale = false)
-        {
-            if (bpp != 4 && bpp != 8)
-                throw new Exception($"Unsupported bpp {bpp}");
-
-            if (!isGrayScale)
-                return bpp == 4 ? PixelFormats.Indexed4 : PixelFormats.Indexed8;
-            else
-                return bpp == 4 ? PixelFormats.Gray4 : PixelFormats.Gray8;
         }
 
         public static int GetStride(int width, PixelFormat format)

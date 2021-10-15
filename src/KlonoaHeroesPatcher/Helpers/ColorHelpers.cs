@@ -8,9 +8,29 @@ namespace KlonoaHeroesPatcher
 {
     public class ColorHelpers
     {
+        public static int GetPaletteLength(int bpp) => (int)Math.Pow(2, bpp);
+
+        public static BaseColor[] CreateDummyPalette(int length, bool firstTransparent = true, int? wrap = null)
+        {
+            BaseColor[] pal = new BaseColor[length];
+            
+            wrap ??= length;
+            
+            if (firstTransparent)
+                pal[0] = BaseColor.Clear;
+            
+            for (int i = firstTransparent ? 1 : 0; i < length; i++)
+            {
+                float val = (float)(i % wrap.Value) / (wrap.Value - 1);
+                pal[i] = new CustomColor(val, val, val);
+            }
+            
+            return pal;
+        }
+
         public static IList<Color> ConvertColors(IEnumerable<BaseColor> colors, int bpp, bool trimPalette)
         {
-            int wrap = (int)Math.Pow(2, bpp);
+            int wrap = GetPaletteLength(bpp);
 
             var c = colors.Select((x, i) => Color.FromArgb(
                 a: (byte)(i % wrap == 0 ? 0 : 255),
