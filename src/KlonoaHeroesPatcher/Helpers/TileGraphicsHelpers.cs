@@ -14,6 +14,9 @@ namespace KlonoaHeroesPatcher
         public const int TileWidth = GBAConstants.TileSize;
         public const int TileHeight = GBAConstants.TileSize;
 
+        public const double DpiX = 96;
+        public const double DpiY = 96;
+
         public static BitmapSource CreateImageSource(byte[] tileSet, int bpp, IList<BaseColor> palette, GraphicsTile[] tileMap, int width, int height, bool trimPalette)
         {
             // Get the format
@@ -49,7 +52,7 @@ namespace KlonoaHeroesPatcher
                     var absTileX = tileX * TileWidth * bppFactor;
 
                     int mapIndex = tileY * tilesWidth + tileX;
-                 
+
                     if (tileMap != null && tileMap[mapIndex] == null)
                         continue;
 
@@ -79,7 +82,7 @@ namespace KlonoaHeroesPatcher
                 }
             }
 
-            return BitmapSource.Create(width, height, 96, 96, format, bmpPal, previewPixelData, stride);
+            return BitmapSource.Create(width, height, DpiX, DpiY, format, bmpPal, previewPixelData, stride);
         }
 
         public static BitmapSource CreatePaletteImageSource(BitmapPalette bmpPal, int scale = 16, int offset = 0, int? optionalLength = null, int? optionalWrap = null, bool reverseY = true)
@@ -111,7 +114,7 @@ namespace KlonoaHeroesPatcher
                 }
             }
 
-            return BitmapSource.Create(width, height, 96, 96, format, bmpPal, bytes, GetStride(width, format));
+            return BitmapSource.Create(width, height, DpiX, DpiY, format, bmpPal, bytes, GetStride(width, format));
         }
 
         public static (byte[] tileSet, GraphicsTile[] tileMap) CreateTileData(byte[] imgData, int bpp, int width, int height, bool createMap)
@@ -141,7 +144,7 @@ namespace KlonoaHeroesPatcher
                     var absTileX = tileX * TileWidth * bppFactor;
 
                     // TODO: If we're creating a map we want to check if the tile matches one which has already been added to the tileset, in which case we use that. Perhaps start by writing to the set, then compare bytes and then go back and overwrite next turn?
-                    
+
                     int tileSetOffset = tileSetIndex * tileLength;
 
                     int tileMapIndex = tileY * tilesWidth + tileX;
