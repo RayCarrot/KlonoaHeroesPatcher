@@ -43,10 +43,6 @@
                             Command="{Binding Path=ImportImageCommand, Mode=OneTime}"
                             Margin="0 0 5 0" />
 
-                    <Button Content="Import (include palette)" 
-                            Command="{Binding Path=ImportImageWithPaletteCommand, Mode=OneTime}" />
-
-
                 </StackPanel>
 
             </StackPanel>

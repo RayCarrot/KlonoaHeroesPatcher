@@ -22,7 +22,7 @@ namespace KlonoaHeroesPatcher
             // Get the format
             bool hasPalette = palette?.Any() == true;
             PixelFormat format = GetPixelFormat(bpp, !hasPalette);
-            float bppFactor = 1 / (8f / bpp);
+            float bppFactor = bpp / 8f;
 
             // Get the dimensions
             int tilesWidth = width / TileWidth;
@@ -30,7 +30,7 @@ namespace KlonoaHeroesPatcher
             int stride = GetStride(width, format);
 
             // Get the palette
-            BitmapPalette bmpPal = hasPalette ? new BitmapPalette(ConvertColors(palette, bpp, trimPalette)) : null;
+            BitmapPalette bmpPal = hasPalette ? new BitmapPalette(ColorHelpers.ConvertColors(palette, bpp, trimPalette)) : null;
 
             // Set tile map to null if not available
             if (tileMap?.Any() != true)
@@ -117,22 +117,31 @@ namespace KlonoaHeroesPatcher
             return BitmapSource.Create(width, height, DpiX, DpiY, format, bmpPal, bytes, GetStride(width, format));
         }
 
-        public static (byte[] tileSet, GraphicsTile[] tileMap) CreateTileData(byte[] imgData, int bpp, int width, int height, bool createMap)
+        public static (byte[] tileSet, GraphicsTile[] tileMap) CreateTileData(byte[] srcImgData, PixelFormat srcFormat, int dstBpp, BaseColor[] dstPalette, int width, int height, bool createMap)
         {
             // Get the format
-            float bppFactor = 1 / (8f / bpp);
+            float tileSetBppFactor = dstBpp / 8f;
+            float imgDataBppFactor = srcFormat.BitsPerPixel / 8f;
 
             // Get the dimensions
             int tilesWidth = width / TileWidth;
             int tilesHeight = height / TileHeight;
 
             // Get the length of each tile in bytes
-            int tileLength = (int)(TileWidth * TileHeight * bppFactor);
+            int tileLength = (int)(TileWidth * TileHeight * tileSetBppFactor);
 
-            var tileSet = new byte[imgData.Length]; // Max size, might be smaller if we reuse tiles
+            var tileSet = new byte[tilesWidth * tilesHeight * tileLength]; // Max size, might be smaller if we reuse tiles in which case we shrink it later
             var tileMap = new GraphicsTile[createMap ? tilesWidth * tilesHeight : 0];
 
             int tileSetIndex = 0;
+
+            var colorsCount = (int)Math.Pow(2, dstBpp);
+
+            // Trim and remove the transparent color from the palette
+            if (dstPalette.Length > colorsCount)
+                dstPalette = dstPalette.Take(colorsCount).Skip(1).ToArray();
+            else
+                dstPalette = dstPalette.Skip(1).ToArray();
 
             // Enumerate every tile
             for (int tileY = 0; tileY < tilesHeight; tileY++)
@@ -141,7 +150,7 @@ namespace KlonoaHeroesPatcher
 
                 for (int tileX = 0; tileX < tilesWidth; tileX++)
                 {
-                    var absTileX = tileX * TileWidth * bppFactor;
+                    var absTileX = tileX * TileWidth;
 
                     // TODO: If we're creating a map we want to check if the tile matches one which has already been added to the tileset, in which case we use that. Perhaps start by writing to the set, then compare bytes and then go back and overwrite next turn?
 
@@ -159,18 +168,44 @@ namespace KlonoaHeroesPatcher
 
                     for (int y = 0; y < TileHeight; y++)
                     {
-                        for (int x = 0; x < TileWidth * bppFactor; x++)
+                        for (int x = 0; x < TileWidth; x++)
                         {
-                            var b = imgData[(int)((absTileY + y) * width * bppFactor + (absTileX + x))];
+                            var imgDataPixelOffset = (int)(((absTileY + y) * width + (absTileX + x)) * imgDataBppFactor);
+                            var tileSetPixelOffset = (int)(tileSetOffset + (y * TileWidth + x) * tileSetBppFactor);
 
-                            // Reverse the bits if 4bpp
-                            if (bpp == 4)
+                            byte r;
+                            byte g;
+                            byte b;
+                            byte a;
+
+                            // TODO: Support multiple formats, such as 4-bit, 8-bit and 24-bit
+                            if (srcFormat == PixelFormats.Bgra32)
                             {
-                                var b1 = BitHelpers.SetBits(b, BitHelpers.ExtractBits(b, 4, 0), 4, 4);
-                                b = (byte)BitHelpers.SetBits(b1, BitHelpers.ExtractBits(b, 4, 4), 4, 0);
+                                b = srcImgData[imgDataPixelOffset + 0];
+                                g = srcImgData[imgDataPixelOffset + 1];
+                                r = srcImgData[imgDataPixelOffset + 2];
+                                a = srcImgData[imgDataPixelOffset + 3];
+                            }
+                            else
+                            {
+                                throw new Exception($"Source format {srcFormat} is not supported. Has to be BGRA32.");
                             }
 
-                            tileSet[(int)(tileSetOffset + y * TileWidth * bppFactor + x)] = b;
+                            // Find the matching color from the palette to use. If fully transparen then use color 0.
+                            int paletteIndex = a == 0 ? 0 : ColorHelpers.FindNearestColor(dstPalette, new BGR888Color()
+                            {
+                                R = r,
+                                G = g,
+                                B = b,
+                            }) + 1;
+
+                            // Set the byte in the tile set
+                            if (dstBpp == 8)
+                                tileSet[tileSetPixelOffset] = (byte)paletteIndex;
+                            else if (dstBpp == 4)
+                                tileSet[tileSetPixelOffset] = (byte)BitHelpers.SetBits(tileSet[tileSetPixelOffset], paletteIndex, dstBpp, x % 2 == 0 ? 0 : 4);
+                            else
+                                throw new Exception($"Destination BPP {dstBpp} is not supported. Has to be 4 or 8.");
                         }
                     }
                 }
@@ -203,22 +238,6 @@ namespace KlonoaHeroesPatcher
                 stride += 4 - stride % 4;
 
             return stride;
-        }
-
-        public static IList<Color> ConvertColors(IEnumerable<BaseColor> colors, int bpp, bool trimPalette)
-        {
-            int wrap = (int)Math.Pow(2, bpp);
-
-            var c = colors.Select((x, i) => Color.FromArgb(
-                a: (byte)(i % wrap == 0 ? 0 : 255),
-                r: (byte)(x.Red * 255),
-                g: (byte)(x.Green * 255),
-                b: (byte)(x.Blue * 255))).ToArray();
-
-            if (trimPalette && c.Length >= wrap)
-                c = c.Take(wrap).ToArray();
-
-            return c;
         }
     }
 }

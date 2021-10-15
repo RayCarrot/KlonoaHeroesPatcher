@@ -1,4 +1,5 @@
-﻿using BinarySerializer.Klonoa.KH;
+﻿using BinarySerializer;
+using BinarySerializer.Klonoa.KH;
 using Microsoft.Win32;
 using System;
 using System.Collections.ObjectModel;
@@ -6,9 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Input;
-using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using BinarySerializer;
 
 namespace KlonoaHeroesPatcher
 {
@@ -17,15 +16,13 @@ namespace KlonoaHeroesPatcher
         public GraphicsFileEditorViewModel()
         {
             ExportImageCommand = new RelayCommand(ExportImage);
-            ImportImageCommand = new RelayCommand(() => ImportImage(false));
-            ImportImageWithPaletteCommand = new RelayCommand(() => ImportImage(true));
+            ImportImageCommand = new RelayCommand(ImportImage);
         }
 
         public Graphics_File GraphicsFile => (Graphics_File)SerializableObject;
 
         public ICommand ExportImageCommand { get; }
         public ICommand ImportImageCommand { get; }
-        public ICommand ImportImageWithPaletteCommand { get; }
 
         public ObservableCollection<DuoGridItemViewModel> InfoItems { get; set; }
         public BitmapSource PreviewImgSource { get; set; }
@@ -50,7 +47,7 @@ namespace KlonoaHeroesPatcher
 
             if (HasPalette)
                 PalettePreviewImgSource = TileGraphicsHelpers.CreatePaletteImageSource(
-                    bmpPal: new BitmapPalette(TileGraphicsHelpers.ConvertColors(GraphicsFile.Palette, GraphicsFile.BPP, false)), 
+                    bmpPal: new BitmapPalette(ColorHelpers.ConvertColors(GraphicsFile.Palette, GraphicsFile.BPP, false)), 
                     scale: 16, 
                     optionalWrap: 16);
 
@@ -105,7 +102,7 @@ namespace KlonoaHeroesPatcher
             }
         }
 
-        public void ImportImage(bool includePalette)
+        public void ImportImage()
         {
             var dialog = new OpenFileDialog()
             {
@@ -120,15 +117,8 @@ namespace KlonoaHeroesPatcher
 
             try
             {
+                // Read the image
                 var img = new BitmapImage(new Uri(dialog.FileName));
-
-                PixelFormat expectedFormat = TileGraphicsHelpers.GetPixelFormat(GraphicsFile.BPP);
-
-                if (img.Format != expectedFormat)
-                {
-                    MessageBox.Show($"The image file has to be saved as an {GraphicsFile.BPP}-bit file in order to be imported", "Error importing", MessageBoxButton.OK, MessageBoxImage.Error);
-                    return;
-                }
 
                 // Make sure the image can be tiled
                 if (img.PixelWidth % TileGraphicsHelpers.TileWidth != 0 || img.PixelHeight % TileGraphicsHelpers.TileHeight != 0)
@@ -137,10 +127,18 @@ namespace KlonoaHeroesPatcher
                     return;
                 }
 
+                // Get the raw image data
                 byte[] imgData = new byte[(int)(img.PixelWidth * img.PixelHeight * (img.Format.BitsPerPixel / 8f))];
                 img.CopyPixels(imgData, TileGraphicsHelpers.GetStride(img.PixelWidth, img.Format), 0);
 
-                (var tileSet, GraphicsTile[] tileMap) = TileGraphicsHelpers.CreateTileData(imgData, img.Format.BitsPerPixel, img.PixelWidth, img.PixelHeight, GraphicsFile.TileMapLength != 0);
+                // Create the tile set and map
+                (byte[] tileSet, GraphicsTile[] tileMap) = TileGraphicsHelpers.CreateTileData(
+                    srcImgData: imgData, 
+                    srcFormat: img.Format, 
+                    dstBpp: GraphicsFile.BPP, 
+                    dstPalette: GraphicsFile.Palette, 
+                    width: img.PixelWidth, height: img.PixelHeight, 
+                    createMap: GraphicsFile.TileMapLength != 0);
 
                 // Update the properties
                 GraphicsFile.TileMapWidth = (ushort)img.PixelWidth;
@@ -150,16 +148,6 @@ namespace KlonoaHeroesPatcher
                 GraphicsFile.TileMap = tileMap;
                 GraphicsFile.TileMapLength = (uint)(tileMap.Length * 2);
                 GraphicsFile.TileMapOffset = GraphicsFile.TileSetOffset + GraphicsFile.TileSetLength;
-
-                // Update the palette
-                if (img.Palette != null && includePalette)
-                {
-                    for (int i = 0; i < img.Palette.Colors.Count; i++)
-                    {
-                        var c = img.Palette.Colors[i];
-                        GraphicsFile.Palette[i] = new RGBA5551Color(c.R / 255f, c.G / 255f, c.B / 255f, c.A / 255f);
-                    }
-                }
 
                 // Relocate the data
                 RelocateFile();
