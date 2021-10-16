@@ -1,8 +1,12 @@
 ﻿using System.Collections.ObjectModel;
+using System.IO;
+using System.Windows;
+using System.Windows.Input;
 using System.Windows.Media;
 using BinarySerializer;
 using BinarySerializer.Klonoa;
 using MahApps.Metro.IconPacks;
+using Microsoft.Win32;
 
 namespace KlonoaHeroesPatcher
 {
@@ -20,13 +24,20 @@ namespace KlonoaHeroesPatcher
             Relocated = relocated;
             NavigationItems = new ObservableCollection<NavigationItemViewModel>();
 
+            ExportBinaryCommand = new RelayCommand(ExportBinary);
+            ImportBinaryCommand = new RelayCommand(ImportBinary);
+
             if (SerializableObject == null)
                 return;
 
-            Offset = BinaryHelpers.GetROMPointer(SerializableObject.Offset);
+            Offset = BinaryHelpers.GetROMPointer(SerializableObject.Offset, throwOnError: false);
         }
 
         private bool _isSelected;
+        private bool _hasInitialized;
+
+        public ICommand ExportBinaryCommand { get; }
+        public ICommand ImportBinaryCommand { get; }
 
         public string Title { get; }
         public PackIconMaterialKind Icon { get; }
@@ -34,6 +45,7 @@ namespace KlonoaHeroesPatcher
         public ObservableCollection<DuoGridItemViewModel> FileInfo { get; }
         public BinarySerializable SerializableObject { get; }
         public ArchiveFile ParentArchiveFile { get; }
+        public bool IsNull => SerializableObject == null;
         public Pointer Offset { get; }
         public FileEditorViewModel EditorViewModel { get; }
         public bool Relocated { get; }
@@ -44,14 +56,106 @@ namespace KlonoaHeroesPatcher
             {
                 _isSelected = value;
 
-                if (IsSelected)
+                if (!_hasInitialized && IsSelected)
+                {
                     EditorViewModel?.Init(this);
+                    _hasInitialized = true;
+                }
             }
         }
         public bool CanBeEdited => EditorViewModel != null;
         public bool UnsavedChanges { get; set; }
+        public bool CanExportBinary => SerializableObject is BaseFile f && f.Pre_FileSize != -1 && Offset != null;
+        public bool CanImportBinary => CanExportBinary && SerializableObject is not ArchiveFile;
 
-        public string DisplayName => $"{Offset?.StringAbsoluteOffset ?? "NULL"} ({Title})";
+        public string DisplayName => $"{Offset?.StringAbsoluteOffset ?? (IsNull ? "NULL" : "_")} ({Title})";
         public ObservableCollection<NavigationItemViewModel> NavigationItems { get; }
+
+        public void RelocateFile(BinarySerializable obj = null)
+        {
+            obj ??= SerializableObject;
+
+            AppViewModel.Current.AddRelocatedData(new RelocatedData(obj, ParentArchiveFile)
+            {
+                Encoder = (obj as BaseFile)?.Pre_FileEncoder,
+            });
+            UnsavedChanges = true;
+        }
+
+        public void ExportBinary()
+        {
+            var dialog = new SaveFileDialog()
+            {
+                Title = "Export binary",
+                Filter = "All files (*.*)|*.*",
+                FileName = $"{Offset.StringAbsoluteOffset}.bin"
+            };
+
+            var result = dialog.ShowDialog();
+
+            if (result != true)
+                return;
+
+            Context context = AppViewModel.Current.Context;
+            BaseFile file = (BaseFile)SerializableObject;
+
+            using (context)
+            {
+                BinaryDeserializer s = context.Deserializer;
+
+                s.Goto(Offset);
+                byte[] bytes = s.DoEncodedIf(file.Pre_FileEncoder, file.Pre_IsCompressed, () => s.SerializeArray<byte>(default, file.Pre_FileSize));
+
+                File.WriteAllBytes(dialog.FileName, bytes);
+
+                MessageBox.Show($"The file was successfully exported");
+            }
+        }
+
+        public void ImportBinary()
+        {
+            var dialog = new OpenFileDialog()
+            {
+                Title = "Import binary",
+                Filter = "All files (*.*)|*.*",
+            };
+
+            var result = dialog.ShowDialog();
+
+            if (result != true)
+                return;
+
+            Context context = AppViewModel.Current.Context;
+
+            // Open the file
+            using var file = File.OpenRead(dialog.FileName);
+
+            using var streamFile = new StreamFile(context, "BinaryImport", file, allowLocalPointers: true);
+
+            context.AddFile(streamFile);
+
+            var originalOffset = SerializableObject.Offset;
+
+            try
+            {
+                BinaryDeserializer s = context.Deserializer;
+
+                s.Goto(streamFile.StartPointer);
+
+                SerializableObject.Init(s.CurrentPointer);
+                SerializableObject.SerializeImpl(s);
+
+                // Re-initialize
+                EditorViewModel?.Init(this);
+
+                // Relocate the file
+                RelocateFile();
+            }
+            finally
+            {
+                SerializableObject.Init(originalOffset);
+                context.RemoveFile(streamFile);
+            }
+        }
     }
 }

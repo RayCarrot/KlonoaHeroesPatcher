@@ -154,7 +154,7 @@ namespace KlonoaHeroesPatcher
                 iconColor = Color.FromRgb(0x8B, 0x00, 0x8B);
             }
 
-            bool relocated = obj != null && Footer.RelocatedStructs.Any(x => x.NewPointer == BinaryHelpers.GetROMPointer(obj.Offset));
+            bool relocated = obj != null && Footer.RelocatedStructs.Any(x => x.NewPointer == BinaryHelpers.GetROMPointer(obj.Offset, throwOnError: false));
 
             var navItem = new NavigationItemViewModel(title, icon, iconColor, info, obj, parentArchiveFile, editor, relocated);
             collection.Add(navItem);
@@ -333,6 +333,8 @@ namespace KlonoaHeroesPatcher
                     AddNavigationItem(NavigationItems, "AnimationPack2", ROM.AnimationPack2, null);
                     AddNavigationItem(NavigationItems, "UIPack", ROM.UIPack, null);
                     AddNavigationItem(NavigationItems, "StoryPack", ROM.StoryPack, null);
+
+                    SelectedNavigationItem = NavigationItems.First();
                 }
             }
             catch (Exception ex)

@@ -131,12 +131,43 @@
             </TreeView>
 
             <Grid Grid.Column="1" DataContext="{Binding Path=SelectedNavigationItem}">
-                <Grid DataContext="{Binding Path=EditorViewModel, Mode=OneTime}">
-                    <ContentPresenter Content="{Binding}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Grid.Row="0">
+
+                        <TextBlock Text="{Binding Path=DisplayName, Mode=OneTime}"
+                                   FontSize="16"
+                                   HorizontalAlignment="Center"
+                                   Margin="0 0 0 5"/>
+
+                        <StackPanel Orientation="Horizontal"
+                                    HorizontalAlignment="Center"
+                                    Margin="0 0 0 5">
+
+                            <Button Content="Export Binary"
+                                    IsEnabled="{Binding Path=CanExportBinary, Mode=OneTime}"
+                                    Command="{Binding Path=ExportBinaryCommand, Mode=OneTime}"
+                                    Margin="0 0 5 0" />
+
+                            <Button Content="Import Binary"
+                                    IsEnabled="{Binding Path=CanImportBinary, Mode=OneTime}"
+                                    Command="{Binding Path=ImportBinaryCommand, Mode=OneTime}"
+                                    Margin="0 0 5 0" />
+
+                        </StackPanel>
+
+                    </StackPanel>
+
+                    <ContentPresenter Grid.Row="1" Content="{Binding Path=EditorViewModel, Mode=OneTime}">
                         <ContentPresenter.ContentTemplateSelector>
                             <local:EditorTemplateSelector />
                         </ContentPresenter.ContentTemplateSelector>
                     </ContentPresenter>
+
                 </Grid>
             </Grid>
         </Grid>
