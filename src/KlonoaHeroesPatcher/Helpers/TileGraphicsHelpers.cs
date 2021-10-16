@@ -118,7 +118,7 @@ namespace KlonoaHeroesPatcher
             return BitmapSource.Create(width, height, DpiX, DpiY, format, bmpPal, bytes, GetStride(width, format));
         }
 
-        public static (byte[] tileSet, GraphicsTile[] tileMap) CreateTileData(byte[] srcImgData, PixelFormat srcFormat, int dstBpp, BaseColor[] dstPalette, int width, int height, bool createMap, int basePalette)
+        public static (byte[] tileSet, GraphicsTile[] tileMap) CreateTileData(byte[] srcImgData, PixelFormat srcFormat, BitmapPalette srcPalette, int dstBpp, BaseColor[] dstPalette, int width, int height, bool createMap, int basePalette)
         {
             // Get the format
             float tileSetBppFactor = dstBpp / 8f;
@@ -184,7 +184,6 @@ namespace KlonoaHeroesPatcher
                             byte b;
                             byte a;
 
-                            // TODO: Support multiple formats, such as 4-bit, 8-bit and 24-bit
                             if (srcFormat == PixelFormats.Bgra32)
                             {
                                 b = srcImgData[imgDataPixelOffset + 0];
@@ -192,9 +191,32 @@ namespace KlonoaHeroesPatcher
                                 r = srcImgData[imgDataPixelOffset + 2];
                                 a = srcImgData[imgDataPixelOffset + 3];
                             }
+                            else if (srcFormat == PixelFormats.Bgr24 || srcFormat == PixelFormats.Bgr32)
+                            {
+                                b = srcImgData[imgDataPixelOffset + 0];
+                                g = srcImgData[imgDataPixelOffset + 1];
+                                r = srcImgData[imgDataPixelOffset + 2];
+                                a = 255;
+                            }
+                            else if (srcFormat == PixelFormats.Indexed8)
+                            {
+                                var index = srcImgData[imgDataPixelOffset];
+                                b = srcPalette.Colors[index].B;
+                                g = srcPalette.Colors[index].G;
+                                r = srcPalette.Colors[index].R;
+                                a = srcPalette.Colors[index].A;
+                            }
+                            else if (srcFormat == PixelFormats.Indexed4)
+                            {
+                                var index = BitHelpers.ExtractBits(srcImgData[imgDataPixelOffset], 4, x % 2 == 0 ? 4 : 0);
+                                b = srcPalette.Colors[index].B;
+                                g = srcPalette.Colors[index].G;
+                                r = srcPalette.Colors[index].R;
+                                a = srcPalette.Colors[index].A;
+                            }
                             else
                             {
-                                throw new Exception($"Source format {srcFormat} is not supported. Has to be BGRA32.");
+                                throw new Exception($"Source format {srcFormat} is not supported");
                             }
 
                             // Find the matching color from the palette to use. If fully transparent then use color 0.

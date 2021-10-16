@@ -190,6 +190,7 @@ namespace KlonoaHeroesPatcher
                 (byte[] tileSet, GraphicsTile[] tileMap) = TileGraphicsHelpers.CreateTileData(
                     srcImgData: imgData, 
                     srcFormat: img.Format, 
+                    srcPalette: img.Palette,
                     dstBpp: GraphicsFile.BPP, 
                     dstPalette: GraphicsFile.Palette, 
                     width: img.PixelWidth, height: img.PixelHeight, 
