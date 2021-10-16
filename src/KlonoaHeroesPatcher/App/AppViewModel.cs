@@ -335,8 +335,6 @@ namespace KlonoaHeroesPatcher
                     AddNavigationItem(NavigationItems, "AnimationPack2", ROM.AnimationPack2, null);
                     AddNavigationItem(NavigationItems, "UIPack", ROM.UIPack, null);
                     AddNavigationItem(NavigationItems, "StoryPack", ROM.StoryPack, null);
-
-                    SelectedNavigationItem = NavigationItems.First();
                 }
             }
             catch (Exception ex)

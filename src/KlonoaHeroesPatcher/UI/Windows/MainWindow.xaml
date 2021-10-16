@@ -130,7 +130,7 @@
 
             </TreeView>
 
-            <Grid Grid.Column="1" DataContext="{Binding Path=SelectedNavigationItem}">
+            <Grid Grid.Column="1" DataContext="{Binding Path=SelectedNavigationItem}" Visibility="{Binding Converter={local:InvertedObjectNullToVisibilityConverter}}">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
