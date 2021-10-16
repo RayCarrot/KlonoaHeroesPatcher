@@ -75,7 +75,7 @@ namespace KlonoaHeroesPatcher
                             var sourceTileY = mapTile?.FlipY != true ? y : TileHeight - y - 1;
 
                             var paletteIndex = mapTile?.PaletteIndex ?? 0;
-                            b = (byte)(b + (basePalette - paletteIndex) * 16);
+                            b = (byte)(b + (basePalette + paletteIndex) * 16);
 
                             imgData[(absTileY + sourceTileY) * width + absTileX + sourceTileX] = b;
                         }
