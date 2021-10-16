@@ -17,7 +17,7 @@ namespace KlonoaHeroesPatcher
         public const double DpiX = 96;
         public const double DpiY = 96;
 
-        public static BitmapSource CreateImageSource(byte[] tileSet, int bpp, IList<BaseColor> palette, GraphicsTile[] tileMap, int width, int height)
+        public static BitmapSource CreateImageSource(byte[] tileSet, int bpp, IList<BaseColor> palette, GraphicsTile[] tileMap, int width, int height, int basePalette)
         {
             // Get the format
             PixelFormat format = PixelFormats.Indexed8; // Always do 8-bit since 4-bit images can use multiple palettes
@@ -74,8 +74,8 @@ namespace KlonoaHeroesPatcher
                             var sourceTileX = mapTile?.FlipX != true ? x : TileWidth - x - 1;
                             var sourceTileY = mapTile?.FlipY != true ? y : TileHeight - y - 1;
 
-                            if (mapTile != null)
-                                b = (byte)(b + mapTile.PaletteIndex * 16);
+                            var paletteIndex = mapTile?.PaletteIndex ?? 0;
+                            b = (byte)(b + (basePalette - paletteIndex) * 16);
 
                             imgData[(absTileY + sourceTileY) * width + absTileX + sourceTileX] = b;
                         }
@@ -118,7 +118,7 @@ namespace KlonoaHeroesPatcher
             return BitmapSource.Create(width, height, DpiX, DpiY, format, bmpPal, bytes, GetStride(width, format));
         }
 
-        public static (byte[] tileSet, GraphicsTile[] tileMap) CreateTileData(byte[] srcImgData, PixelFormat srcFormat, int dstBpp, BaseColor[] dstPalette, int width, int height, bool createMap)
+        public static (byte[] tileSet, GraphicsTile[] tileMap) CreateTileData(byte[] srcImgData, PixelFormat srcFormat, int dstBpp, BaseColor[] dstPalette, int width, int height, bool createMap, int basePalette)
         {
             // Get the format
             float tileSetBppFactor = dstBpp / 8f;
@@ -138,7 +138,7 @@ namespace KlonoaHeroesPatcher
 
             var colorsCount = ColorHelpers.GetPaletteLength(dstBpp);
 
-            // Trim and remove the transparent color from the palette
+            // Trim and remove the transparent color from the palette. We don't want to check against that when matching colors.
             if (dstPalette.Length > colorsCount)
                 dstPalette = dstPalette.Take(colorsCount).Skip(1).ToArray();
             else
@@ -163,6 +163,7 @@ namespace KlonoaHeroesPatcher
                         tileMap[tileMapIndex] = new GraphicsTile
                         {
                             TileSetIndex = tileSetIndex,
+                            PaletteIndex = basePalette, // TODO: Support tiles having different palette indices
                         };
 
                     tileSetIndex++;
@@ -192,7 +193,7 @@ namespace KlonoaHeroesPatcher
                                 throw new Exception($"Source format {srcFormat} is not supported. Has to be BGRA32.");
                             }
 
-                            // Find the matching color from the palette to use. If fully transparen then use color 0.
+                            // Find the matching color from the palette to use. If fully transparent then use color 0.
                             int paletteIndex = a == 0 ? 0 : ColorHelpers.FindNearestColor(dstPalette, new BGR888Color()
                             {
                                 R = r,

@@ -312,10 +312,11 @@ namespace KlonoaHeroesPatcher
             TextPreviewImgSource = TileGraphicsHelpers.CreateImageSource(
                 tileSet: font.TileSet,
                 bpp: font.BPP,
-                palette: font.Palette.Skip(16 * 3).ToArray(), // Use palette 3
+                palette: font.Palette,
                 tileMap: map,
                 width: width * TileGraphicsHelpers.TileWidth,
-                height: height * TileGraphicsHelpers.TileHeight);
+                height: height * TileGraphicsHelpers.TileHeight,
+                basePalette: 3);
 
             // Display at twice the size
             TextPreviewWidth = width * TileGraphicsHelpers.TileWidth * 2;

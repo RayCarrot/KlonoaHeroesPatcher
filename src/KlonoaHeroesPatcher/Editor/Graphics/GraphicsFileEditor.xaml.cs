@@ -1,4 +1,5 @@
-﻿using System.Windows.Controls;
+﻿using System.Windows;
+using System.Windows.Controls;
 
 namespace KlonoaHeroesPatcher
 {
@@ -10,6 +11,11 @@ namespace KlonoaHeroesPatcher
         public GraphicsFileEditor()
         {
             InitializeComponent();
+        }
+
+        private void BasePaletteSlider_OnValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            (DataContext as GraphicsFileEditorViewModel)?.RefreshPreviewImage();
         }
     }
 }

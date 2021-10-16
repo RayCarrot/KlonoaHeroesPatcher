@@ -30,8 +30,33 @@
 
                 <Image Source="{Binding Path=PreviewImgSource}"
                        Width="{Binding Path=Width}"
+                       HorizontalAlignment="Left"
                        RenderOptions.BitmapScalingMode="NearestNeighbor"
                        Margin="0 0 0 5" />
+
+                <StackPanel Orientation="Horizontal"
+                            Visibility="{Binding Path=CanChangeBasePalette, Converter={local:BooleanToVisibilityConverter}}"
+                            ToolTip="The base palette determines which palette index to use as the base when displaying the preview and for exporting/importing. Changing this value will not modify the image in the game."
+                            Margin="0 0 0 5">
+
+                    <Slider IsSnapToTickEnabled="True" 
+                            HorizontalAlignment="Left"
+                            TickPlacement="BottomRight"
+                            Minimum="{Binding Path=MinBasePalette}"
+                            Maximum="{Binding Path=MaxBasePalette}" 
+                            Value="{Binding Path=BasePalette}"
+                            ValueChanged="BasePaletteSlider_OnValueChanged"
+                            Width="200" 
+                            Margin="0 0 5 0" />
+
+                    <TextBlock Text="Base palette:"
+                               VerticalAlignment="Center"
+                               Margin="0 0 5 0"/>
+
+                    <TextBlock Text="{Binding Path=BasePalette}"
+                               VerticalAlignment="Center"/>
+
+                </StackPanel>
 
                 <StackPanel Orientation="Horizontal">
 

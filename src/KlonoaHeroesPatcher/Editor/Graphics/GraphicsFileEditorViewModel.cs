@@ -31,18 +31,32 @@ namespace KlonoaHeroesPatcher
         public double Height { get; set; }
         public bool HasPalette => GraphicsFile.Palette?.Any() == true;
 
+        public bool CanChangeBasePalette { get; set; }
+        public int MinBasePalette { get; set; }
+        public int MaxBasePalette { get; set; }
+        public int BasePalette { get; set; }
+
         protected override void Load(bool firstLoad)
         {
-            PreviewImgSource = TileGraphicsHelpers.CreateImageSource(
-                tileSet: GraphicsFile.TileSet, 
-                bpp: GraphicsFile.BPP, 
-                palette: GraphicsFile.Palette, 
-                tileMap: GraphicsFile.TileMap, 
-                width: GraphicsFile.TileMapWidth, 
-                height: GraphicsFile.TileMapHeight);
+            CanChangeBasePalette = GraphicsFile.BPP == 4;
 
-            Width = PreviewImgSource.Width;
-            Height = PreviewImgSource.Height;
+            if (CanChangeBasePalette)
+            {
+                if (GraphicsFile.TileMap.Any())
+                {
+                    MaxBasePalette = 15 - GraphicsFile.TileMap.Max(x => x.PaletteIndex);
+                    MinBasePalette = -GraphicsFile.TileMap.Min(x => x.PaletteIndex);
+                    BasePalette = MinBasePalette;
+                }
+                else
+                {
+                    MaxBasePalette = 15;
+                    MinBasePalette = 0;
+                    BasePalette = 0;
+                }
+            }
+
+            RefreshPreviewImage();
 
             if (HasPalette)
                 PalettePreviewImgSource = TileGraphicsHelpers.CreatePaletteImageSource(
@@ -63,6 +77,21 @@ namespace KlonoaHeroesPatcher
         }
 
         protected override object GetEditor() => new GraphicsFileEditor();
+        
+        public void RefreshPreviewImage()
+        {
+            PreviewImgSource = TileGraphicsHelpers.CreateImageSource(
+                tileSet: GraphicsFile.TileSet,
+                bpp: GraphicsFile.BPP,
+                palette: GraphicsFile.Palette,
+                tileMap: GraphicsFile.TileMap,
+                width: GraphicsFile.TileMapWidth,
+                height: GraphicsFile.TileMapHeight,
+                basePalette: BasePalette);
+
+            Width = PreviewImgSource.Width;
+            Height = PreviewImgSource.Height;
+        }
 
         public void ExportImage()
         {
@@ -137,7 +166,8 @@ namespace KlonoaHeroesPatcher
                     dstBpp: GraphicsFile.BPP, 
                     dstPalette: GraphicsFile.Palette, 
                     width: img.PixelWidth, height: img.PixelHeight, 
-                    createMap: GraphicsFile.TileMapLength != 0);
+                    createMap: GraphicsFile.TileMapLength != 0,
+                    basePalette: BasePalette + MinBasePalette);
 
                 // Update the properties
                 GraphicsFile.TileMapWidth = (ushort)img.PixelWidth;
