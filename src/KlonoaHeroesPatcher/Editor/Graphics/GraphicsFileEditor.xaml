@@ -11,7 +11,7 @@
              d:DataContext="{d:DesignInstance local:GraphicsFileEditorViewModel}">
 
     <ScrollViewer Padding="5 0">
-        <Grid>
+        <Grid IsEnabled="{Binding Path=IsImageLoaded}">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
@@ -45,7 +45,6 @@
                             Minimum="{Binding Path=MinBasePalette}"
                             Maximum="{Binding Path=MaxBasePalette}" 
                             Value="{Binding Path=BasePalette}"
-                            ValueChanged="BasePaletteSlider_OnValueChanged"
                             Width="200" 
                             Margin="0 0 5 0" />
 

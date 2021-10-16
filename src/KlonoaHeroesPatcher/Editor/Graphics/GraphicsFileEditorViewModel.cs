@@ -30,11 +30,25 @@ namespace KlonoaHeroesPatcher
         public double Width { get; set; }
         public double Height { get; set; }
         public bool HasPalette => GraphicsFile.Palette?.Any() == true;
+        public bool IsImageLoaded { get; set; }
 
         public bool CanChangeBasePalette { get; set; }
         public int MinBasePalette { get; set; }
         public int MaxBasePalette { get; set; }
-        public int BasePalette { get; set; }
+
+        private int _basePalette;
+        public int BasePalette
+        {
+            get => _basePalette;
+            set
+            {
+                if (BasePalette == value)
+                    return;
+
+                _basePalette = value;
+                RefreshPreviewImage();
+            }
+        }
 
         protected override void Load(bool firstLoad)
         {
@@ -46,14 +60,16 @@ namespace KlonoaHeroesPatcher
                 {
                     MaxBasePalette = 15 - GraphicsFile.TileMap.Max(x => x.PaletteIndex);
                     MinBasePalette = -GraphicsFile.TileMap.Min(x => x.PaletteIndex);
-                    BasePalette = MinBasePalette;
+                    _basePalette = MinBasePalette;
                 }
                 else
                 {
                     MaxBasePalette = 15;
                     MinBasePalette = 0;
-                    BasePalette = 0;
+                    _basePalette = 0;
                 }
+
+                OnPropertyChanged(nameof(BasePalette));
             }
 
             RefreshPreviewImage();
@@ -80,17 +96,28 @@ namespace KlonoaHeroesPatcher
         
         public void RefreshPreviewImage()
         {
-            PreviewImgSource = TileGraphicsHelpers.CreateImageSource(
-                tileSet: GraphicsFile.TileSet,
-                bpp: GraphicsFile.BPP,
-                palette: GraphicsFile.Palette,
-                tileMap: GraphicsFile.TileMap,
-                width: GraphicsFile.TileMapWidth,
-                height: GraphicsFile.TileMapHeight,
-                basePalette: BasePalette);
+            try
+            {
+                PreviewImgSource = TileGraphicsHelpers.CreateImageSource(
+                    tileSet: GraphicsFile.TileSet,
+                    bpp: GraphicsFile.BPP,
+                    palette: GraphicsFile.Palette,
+                    tileMap: GraphicsFile.TileMap,
+                    width: GraphicsFile.TileMapWidth,
+                    height: GraphicsFile.TileMapHeight,
+                    basePalette: BasePalette);
 
-            Width = PreviewImgSource.Width;
-            Height = PreviewImgSource.Height;
+                Width = PreviewImgSource.Width;
+                Height = PreviewImgSource.Height;
+
+                IsImageLoaded = true;
+            }
+            catch (Exception ex)
+            {
+                PreviewImgSource = null;
+                IsImageLoaded = false;
+                MessageBox.Show($"Error loading image. Error: {ex.Message}", "Error loading image", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         public void ExportImage()
