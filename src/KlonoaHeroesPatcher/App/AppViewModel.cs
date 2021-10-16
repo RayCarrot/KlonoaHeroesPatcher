@@ -375,11 +375,12 @@ namespace KlonoaHeroesPatcher
                     Logger.Trace("ROM source: {0}", file.SourcePath);
                     Logger.Trace("ROM destination: {0}", file.DestinationPath);
 
-                    // TODO: Trim to rom end pointer
-
                     if (file.SourcePath != file.DestinationPath)
                         File.Copy(file.SourcePath, file.DestinationPath, true);
 
+                    // Trim the file
+                    using (var f = File.OpenWrite(file.DestinationPath))
+                        f.SetLength(Config.ROMEndPointer - file.StartPointer.AbsoluteOffset);
 
                     var relocatePointer = new Pointer(Config.ROMEndPointer, file);
                     var s = Context.Serializer;
