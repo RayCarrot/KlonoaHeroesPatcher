@@ -54,6 +54,8 @@ namespace KlonoaHeroesPatcher
         {
             CanChangeBasePalette = GraphicsFile.BPP == 4;
 
+            _basePalette = 0;
+
             if (CanChangeBasePalette)
             {
                 if (GraphicsFile.TileMap.Any())
