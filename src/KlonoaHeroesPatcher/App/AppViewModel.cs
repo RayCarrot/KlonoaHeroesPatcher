@@ -134,10 +134,10 @@ namespace KlonoaHeroesPatcher
                 icon = PackIconMaterialKind.FileDocumentOutline;
                 iconColor = Color.FromRgb(0x4C, 0xAF, 0x50);
             }
-            else if (obj is ArchiveFile)
+            else if (obj is ArchiveFile a)
             {
                 editor = null;
-                icon = PackIconMaterialKind.FolderOutline;
+                icon = a.Pre_IsCompressed ? PackIconMaterialKind.FolderZipOutline : PackIconMaterialKind.FolderOutline;
                 iconColor = Color.FromRgb(0xEF, 0x6C, 0x00);
             }
             else
