@@ -138,6 +138,10 @@ namespace KlonoaHeroesPatcher
 
             var colorsCount = ColorHelpers.GetPaletteLength(dstBpp);
 
+            // If there is no palette we use a gray-scale one
+            if (dstPalette?.Any() != true)
+                dstPalette = ColorHelpers.CreateDummyPalette(colorsCount);
+
             // Trim and remove the transparent color from the palette. We don't want to check against that when matching colors.
             if (dstPalette.Length > colorsCount)
                 dstPalette = dstPalette.Take(colorsCount).Skip(1).ToArray();
