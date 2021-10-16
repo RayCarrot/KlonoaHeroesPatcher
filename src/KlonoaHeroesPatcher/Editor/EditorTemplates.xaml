@@ -1,0 +1,306 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:local="clr-namespace:KlonoaHeroesPatcher">
+
+    <DataTemplate x:Key="EditorTemplate.Binary" DataType="{x:Type local:BinaryFileEditorViewModel}">
+
+        <ScrollViewer Padding="5 0">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <!-- Raw data -->
+                <StackPanel Grid.Row="0"
+                            HorizontalAlignment="Left">
+
+                    <TextBlock Style="{StaticResource TextBlock.Header}"
+                               Text="Raw Data (read-only)"
+                               Margin="0 0 0 5" />
+
+                    <TextBox Text="{Binding Path=HexString}"
+                             IsReadOnly="True" />
+
+                </StackPanel>
+
+            </Grid>
+        </ScrollViewer>
+
+    </DataTemplate>
+
+    <DataTemplate x:Key="EditorTemplate.Cutscene" DataType="{x:Type local:CutsceneFileEditorViewModel}">
+
+        <ScrollViewer Padding="5 0">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <!-- Text -->
+                <StackPanel Grid.Row="0">
+
+                    <TextBlock Style="{StaticResource TextBlock.Header}"
+                               Text="Text"
+                               Margin="0 0 0 5" />
+
+                    <Expander Header="Available Characters"
+                              Margin="0 0 0 5">
+                        <ItemsControl Grid.IsSharedSizeScope="True"
+                                      ItemsSource="{Binding Path=AllowedCharactersInfo}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <local:DuoGridItem Header="{Binding Path=Header}"
+                                                       Text="{Binding Path=Text}" />
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </Expander>
+
+                    <Expander Header="Available Commands"
+                              Margin="0 0 0 5">
+                        <ItemsControl Grid.IsSharedSizeScope="True"
+                                      ItemsSource="{Binding Path=AllowedCommandsInfo, Mode=OneTime}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <local:DuoGridItem Header="{Binding Path=Header}"
+                                                       Text="{Binding Path=Text}" />
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </Expander>
+
+                    <Grid Margin="0 0 0 5">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBox Grid.Column="0"
+                                 Text="{Binding Path=Text, UpdateSourceTrigger=PropertyChanged}"
+                                 TextWrapping="Wrap"
+                                 Margin="0 0 10 0" />
+
+                        <Border Grid.Column="1"
+                                HorizontalAlignment="Left"
+                                Background="Gray">
+                            <Image Source="{Binding Path=TextPreviewImgSource}"
+                                   Width="{Binding Path=TextPreviewWidth}"
+                                   RenderOptions.BitmapScalingMode="NearestNeighbor" />
+                        </Border>
+
+                    </Grid>
+
+                    <Button Content="Apply"
+                            IsEnabled="{Binding Path=PendingTextChanges}"
+                            Command="{Binding Path=ApplyTextChangesCommand, Mode=OneTime}" />
+
+                </StackPanel>
+
+                <Separator Grid.Row="1"
+                           Margin="0 10" />
+
+                <!-- Script -->
+                <StackPanel Grid.Row="2">
+
+                    <TextBlock Style="{StaticResource TextBlock.Header}"
+                               Text="Script (read-only)"
+                               Margin="0 0 0 5" />
+
+                    <TextBox Text="{Binding Path=ScriptText}"
+                             TextWrapping="Wrap"
+                             IsReadOnly="True" />
+
+                </StackPanel>
+
+            </Grid>
+        </ScrollViewer>
+
+    </DataTemplate>
+
+    <DataTemplate x:Key="EditorTemplate.Graphics" DataType="{x:Type local:GraphicsFileEditorViewModel}">
+
+        <ScrollViewer Padding="5 0">
+            <Grid IsEnabled="{Binding Path=IsImageLoaded}">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <!-- Image -->
+                <StackPanel Grid.Row="0"
+                            HorizontalAlignment="Left">
+
+                    <TextBlock Style="{StaticResource TextBlock.Header}"
+                               Text="Image"
+                               Margin="0 0 0 5" />
+
+                    <Image Source="{Binding Path=PreviewImgSource}"
+                           Width="{Binding Path=Width}"
+                           HorizontalAlignment="Left"
+                           RenderOptions.BitmapScalingMode="NearestNeighbor"
+                           Margin="0 0 0 5" />
+
+                    <StackPanel Orientation="Horizontal"
+                                Visibility="{Binding Path=CanChangeBasePalette, Converter={local:BooleanToVisibilityConverter}}"
+                                ToolTip="The base palette determines which palette index to use as the base when displaying the preview and for exporting/importing. Changing this value will not modify the image in the game."
+                                Margin="0 0 0 5">
+
+                        <Slider IsSnapToTickEnabled="True"
+                                HorizontalAlignment="Left"
+                                TickPlacement="BottomRight"
+                                Minimum="{Binding Path=MinBasePalette}"
+                                Maximum="{Binding Path=MaxBasePalette}"
+                                Value="{Binding Path=BasePalette}"
+                                Width="200"
+                                Margin="0 0 5 0" />
+
+                        <TextBlock Text="Base palette:"
+                                   VerticalAlignment="Center"
+                                   Margin="0 0 5 0" />
+
+                        <TextBlock Text="{Binding Path=BasePalette}"
+                                   VerticalAlignment="Center" />
+
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal">
+
+                        <Button Content="Export"
+                                Command="{Binding Path=ExportImageCommand, Mode=OneTime}"
+                                Margin="0 0 5 0" />
+
+                        <Button Content="Import"
+                                Command="{Binding Path=ImportImageCommand, Mode=OneTime}"
+                                Margin="0 0 5 0" />
+
+                    </StackPanel>
+
+                </StackPanel>
+
+                <Separator Grid.Row="1"
+                           Margin="0 10" />
+
+                <!-- Palette -->
+                <StackPanel Grid.Row="2"
+                            HorizontalAlignment="Left"
+                            Visibility="{Binding Path=HasPalette, Converter={local:BooleanToVisibilityConverter}}">
+
+                    <TextBlock Style="{StaticResource TextBlock.Header}"
+                               Text="Colors"
+                               Margin="0 0 0 5" />
+
+                    <Image Source="{Binding Path=PalettePreviewImgSource}"
+                           Width="256"
+                           RenderOptions.BitmapScalingMode="NearestNeighbor"
+                           Margin="0 0 0 5" />
+
+                </StackPanel>
+
+                <Separator Grid.Row="3"
+                           Visibility="{Binding Path=HasPalette, Converter={local:BooleanToVisibilityConverter}}"
+                           Margin="0 10" />
+
+                <!-- Info -->
+                <StackPanel Grid.Row="4"
+                            HorizontalAlignment="Left">
+
+                    <TextBlock Style="{StaticResource TextBlock.Header}"
+                               Text="Info"
+                               Margin="0 0 0 5" />
+
+                    <ItemsControl Grid.IsSharedSizeScope="True"
+                                  ItemsSource="{Binding Path=InfoItems}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <local:DuoGridItem Header="{Binding Path=Header}"
+                                                   Text="{Binding Path=Text}" />
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                </StackPanel>
+
+            </Grid>
+        </ScrollViewer>
+
+    </DataTemplate>
+
+    <DataTemplate x:Key="EditorTemplate.Text" DataType="{x:Type local:TextFileEditorViewModel}">
+
+        <ScrollViewer Padding="5 0">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <!-- Text -->
+                <StackPanel Grid.Row="0">
+
+                    <TextBlock Style="{StaticResource TextBlock.Header}"
+                               Text="Text"
+                               Margin="0 0 0 5" />
+
+                    <Expander Header="Available Characters"
+                              Margin="0 0 0 5">
+                        <ItemsControl Grid.IsSharedSizeScope="True"
+                                      ItemsSource="{Binding Path=AllowedCharactersInfo}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <local:DuoGridItem Header="{Binding Path=Header}"
+                                                       Text="{Binding Path=Text}" />
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </Expander>
+
+                    <Expander Header="Available Commands"
+                              Margin="0 0 0 5">
+                        <ItemsControl Grid.IsSharedSizeScope="True"
+                                      ItemsSource="{Binding Path=AllowedCommandsInfo, Mode=OneTime}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <local:DuoGridItem Header="{Binding Path=Header}"
+                                                       Text="{Binding Path=Text}" />
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </Expander>
+
+                    <Grid Margin="0 0 0 5">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBox Grid.Column="0"
+                                 Text="{Binding Path=Text, UpdateSourceTrigger=PropertyChanged}"
+                                 TextWrapping="Wrap"
+                                 Margin="0 0 10 0" />
+
+                        <Border Grid.Column="1"
+                                HorizontalAlignment="Left"
+                                Background="Gray">
+                            <Image Source="{Binding Path=TextPreviewImgSource}"
+                                   Width="{Binding Path=TextPreviewWidth}"
+                                   RenderOptions.BitmapScalingMode="NearestNeighbor" />
+                        </Border>
+
+                    </Grid>
+
+                    <Button Content="Apply"
+                            IsEnabled="{Binding Path=PendingTextChanges}"
+                            Command="{Binding Path=ApplyTextChangesCommand, Mode=OneTime}" />
+
+                </StackPanel>
+
+            </Grid>
+        </ScrollViewer>
+
+    </DataTemplate>
+
+</ResourceDictionary>

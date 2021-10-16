@@ -13,6 +13,5 @@ namespace KlonoaHeroesPatcher
         {
             HexString = RawFile.Data.ToHexString(align: 16);
         }
-        protected override object GetEditor() => new BinaryFileEditor();
     }
 }

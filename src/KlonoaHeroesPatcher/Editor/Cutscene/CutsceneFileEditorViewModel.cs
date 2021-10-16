@@ -30,8 +30,6 @@ namespace KlonoaHeroesPatcher
             RefreshScripts();
         }
 
-        protected override object GetEditor() => new CutsceneFileEditor();
-
         protected override TextCommand[] GetTextCommands() => CutsceneTextOnly.TextCommands;
 
         protected override void RelocateTextCommands(TextCommand[] cmds)

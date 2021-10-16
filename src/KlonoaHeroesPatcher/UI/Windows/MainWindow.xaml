@@ -132,7 +132,11 @@
 
             <Grid Grid.Column="1" DataContext="{Binding Path=SelectedNavigationItem}">
                 <Grid DataContext="{Binding Path=EditorViewModel, Mode=OneTime}">
-                    <ContentPresenter Content="{Binding Path=EditorUI}" />
+                    <ContentPresenter Content="{Binding}">
+                        <ContentPresenter.ContentTemplateSelector>
+                            <local:EditorTemplateSelector />
+                        </ContentPresenter.ContentTemplateSelector>
+                    </ContentPresenter>
                 </Grid>
             </Grid>
         </Grid>

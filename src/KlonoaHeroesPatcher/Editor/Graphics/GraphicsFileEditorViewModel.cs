@@ -92,8 +92,6 @@ namespace KlonoaHeroesPatcher
             };
         }
 
-        protected override object GetEditor() => new GraphicsFileEditor();
-        
         public void RefreshPreviewImage()
         {
             try

@@ -29,30 +29,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="Editor\Text\TextFileEditor.xaml.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="Editor\Cutscene\CutsceneFileEditor.xaml.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="Editor\Binary\BinaryFileEditor.xaml.cs">
-      <SubType>Code</SubType>
-    </Compile>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Page Update="Editor\Text\TextFileEditor.xaml">
-      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Update="Editor\Cutscene\CutsceneFileEditor.xaml">
-      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Update="Editor\Binary\BinaryFileEditor.xaml">
-      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
-      <SubType>Designer</SubType>
-    </Page>
     <Page Update="UI\Resources\Styles.Expander.xaml">
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
       <SubType>Designer</SubType>

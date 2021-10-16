@@ -6,8 +6,6 @@ namespace KlonoaHeroesPatcher
     {
         public TextCommands TextFile => (TextCommands)SerializableObject;
 
-        protected override object GetEditor() => new TextFileEditor();
-
         protected override TextCommand[] GetTextCommands() => TextFile.Commands;
 
         protected override void RelocateTextCommands(TextCommand[] cmds)

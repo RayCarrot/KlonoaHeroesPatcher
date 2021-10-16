@@ -5,13 +5,11 @@ namespace KlonoaHeroesPatcher
 {
     public abstract class FileEditorViewModel : BaseViewModel
     {
-        public object EditorUI { get; private set; }
         public ArchiveFile ParentArchiveFile { get; private set; }
         public BinarySerializable SerializableObject { get; private set; }
         public NavigationItemViewModel NavigationItem { get; private set; }
 
         protected abstract void Load(bool firstLoad);
-        protected abstract object GetEditor();
 
         protected void RelocateFile(BinarySerializable obj = null)
         {
@@ -32,7 +30,6 @@ namespace KlonoaHeroesPatcher
             SerializableObject = navigationItem.SerializableObject;
             ParentArchiveFile = navigationItem.ParentArchiveFile;
             NavigationItem = navigationItem;
-            EditorUI = GetEditor();
             Load(true);
         }
     }
