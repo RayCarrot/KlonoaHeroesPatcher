@@ -73,6 +73,12 @@ namespace KlonoaHeroesPatcher
 
         public void RelocateFile(BinarySerializable obj = null)
         {
+            if (IsNull || Offset == null)
+            {
+                MessageBox.Show("The file can't be relocated. Most likely it's inside of a compressed archive which currently doesn't support relocating.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
             obj ??= SerializableObject;
 
             AppViewModel.Current.AddRelocatedData(new RelocatedData(obj, ParentArchiveFile)
