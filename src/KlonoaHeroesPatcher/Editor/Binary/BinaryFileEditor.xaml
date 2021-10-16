@@ -11,7 +11,7 @@
              d:DesignHeight="450" d:DesignWidth="800" 
              d:DataContext="{d:DesignInstance local:BinaryFileEditorViewModel}">
 
-    <ScrollViewer Padding="5">
+    <ScrollViewer Padding="5 0">
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="*" />
