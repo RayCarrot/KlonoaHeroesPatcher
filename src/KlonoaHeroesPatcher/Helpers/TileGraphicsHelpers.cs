@@ -157,8 +157,6 @@ namespace KlonoaHeroesPatcher
                 {
                     var absTileX = tileX * TileWidth;
 
-                    // TODO: If we're creating a map we want to check if the tile matches one which has already been added to the tileset, in which case we use that. Perhaps start by writing to the set, then compare bytes and then go back and overwrite next turn?
-
                     int tileSetOffset = tileSetIndex * tileLength;
 
                     int tileMapIndex = tileY * tilesWidth + tileX;
@@ -169,8 +167,6 @@ namespace KlonoaHeroesPatcher
                             TileSetIndex = tileSetIndex,
                             PaletteIndex = basePalette, // TODO: Support tiles having different palette indices
                         };
-
-                    tileSetIndex++;
 
                     for (int y = 0; y < TileHeight; y++)
                     {
@@ -236,6 +232,25 @@ namespace KlonoaHeroesPatcher
                                 throw new Exception($"Destination BPP {dstBpp} is not supported. Has to be 4 or 8.");
                         }
                     }
+
+                    // If we're creating a map we want to check if this tile matches a previous one, and if so use that instead
+                    if (createMap)
+                    {
+                        for (int i = 0; i < tileSetIndex; i++)
+                        {
+                            // Compare bytes
+                            var match = tileSet.Skip(i * tileLength).Take(tileLength).SequenceEqual(tileSet.Skip(tileSetIndex * tileLength).Take(tileLength));
+
+                            if (match)
+                            {
+                                tileMap[tileMapIndex].TileSetIndex = i;
+                                tileSetIndex--;
+                                break;
+                            }
+                        }
+                    }
+
+                    tileSetIndex++;
                 }
             }
 
