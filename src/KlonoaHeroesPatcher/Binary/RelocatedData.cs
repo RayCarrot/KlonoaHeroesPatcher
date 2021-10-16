@@ -1,4 +1,5 @@
-﻿using BinarySerializer;
+﻿using System;
+using BinarySerializer;
 using BinarySerializer.Klonoa;
 using NLog;
 
@@ -10,7 +11,7 @@ namespace KlonoaHeroesPatcher
         {
             Obj = obj;
             ParentArchiveFile = parentArchiveFile;
-            UpdateRefsAction = (s, originalPointer, newPointer) =>
+            UpdateRefsAction = (s, originalPointer, newPointer, fileSize) =>
             {
                 int count = 0;
 
@@ -20,11 +21,44 @@ namespace KlonoaHeroesPatcher
                     if (parentArchiveFile.OffsetTable.FilePointers[fileIndex] != originalPointer)
                         continue;
 
-                    s.DoAt(parentArchiveFile.OffsetTable.Offset + 4 + (fileIndex * 4), () =>
+                    var anchor = parentArchiveFile.Offset;
+
+                    // Perhaps this could be replaced by serializing the offset table object?
+                    switch (parentArchiveFile.Pre_Type)
                     {
-                        // Update the offset to point to the new location
-                        s.Serialize<uint>((uint)(newPointer.AbsoluteOffset - parentArchiveFile.Offset.AbsoluteOffset));
-                    });
+                        case ArchiveFileType.Default:
+                            s.DoAt(parentArchiveFile.OffsetTable.Offset + 4 + (fileIndex * 4), () =>
+                            {
+                                // Update the offset to point to the new location
+                                s.Serialize<uint>((uint)(newPointer.AbsoluteOffset - anchor.AbsoluteOffset));
+                            });
+                            break;
+                        
+                        case ArchiveFileType.KH_PF:
+                            anchor = parentArchiveFile.OffsetTable.Offset + 4 + (parentArchiveFile.OffsetTable.FilesCount * 4) + (parentArchiveFile.OffsetTable.FilesCount * 4);
+                            s.DoAt(parentArchiveFile.OffsetTable.Offset + 4 + (parentArchiveFile.OffsetTable.FilesCount * 4) + (fileIndex * 4), () =>
+                            {
+                                // Update the offset to point to the new location
+                                s.Serialize<uint>((uint)(newPointer.AbsoluteOffset - anchor.AbsoluteOffset));
+                            });
+                            s.DoAt(parentArchiveFile.OffsetTable.Offset + 4 + (fileIndex * 4), () =>
+                            {
+                                // Update the file size
+                                s.Serialize<int>((int)fileSize);
+                            });
+                            break;
+                        
+                        case ArchiveFileType.KH_TP:
+                            s.DoAt(parentArchiveFile.OffsetTable.KH_TP_FileOffsetsPointer + (fileIndex * 4), () =>
+                            {
+                                // Update the offset to point to the new location
+                                s.Serialize<uint>((uint)(newPointer.AbsoluteOffset - anchor.AbsoluteOffset));
+                            });
+                            break;
+
+                        default:
+                            throw new Exception($"Unsupported archive type {parentArchiveFile.Pre_Type}");
+                    }
 
                     count++;
                 }
@@ -65,7 +99,7 @@ namespace KlonoaHeroesPatcher
             Logger.Info("Relocated data from 0x{0} to 0x{1} with the size of {2}", originalPointer.StringAbsoluteOffset, newPointer.StringAbsoluteOffset, dataSize);
 
             // Update all the references in the ROM to the data with the new relocated pointer
-            UpdateRefsAction(s, originalPointer, newPointer);
+            UpdateRefsAction(s, originalPointer, newPointer, dataSize);
 
             return new PatchedFooter.RelocatedStruct
             {
@@ -76,6 +110,6 @@ namespace KlonoaHeroesPatcher
             };
         }
 
-        public delegate void UpdateRefs(SerializerObject s, Pointer originalPointer, Pointer newPointer);
+        public delegate void UpdateRefs(SerializerObject s, Pointer originalPointer, Pointer newPointer, long fileSize);
     }
 }
