@@ -145,6 +145,8 @@ namespace KlonoaHeroesPatcher
                 editor = null;
                 icon = a.Pre_IsCompressed ? PackIconMaterialKind.FolderZipOutline : PackIconMaterialKind.FolderOutline;
                 iconColor = Color.FromRgb(0xEF, 0x6C, 0x00);
+
+                info.Add(new DuoGridItemViewModel("Archive Type", $"{a.Pre_Type}"));
             }
             else
             {
