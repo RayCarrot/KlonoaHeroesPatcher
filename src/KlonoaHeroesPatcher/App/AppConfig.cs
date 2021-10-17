@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace KlonoaHeroesPatcher
 {
@@ -8,11 +9,12 @@ namespace KlonoaHeroesPatcher
         /// Default constructor
         /// </summary>
         /// <param name="fontTable">The font table, indicating the string each font index represents</param>
+        /// <param name="textStringComparison">The string comparison to use for text</param>
         /// <param name="serializerLogPath">An optional serializer log path</param>
         /// <param name="useFileLogging">Indicates if file logging is enabled</param>
         /// <param name="logLevel">Indicates the log level to use for the logging</param>
         /// <param name="romEndPointer">Indicates where to start appending data to the ROM</param>
-        public AppConfig(Dictionary<int, string[]> fontTable, string serializerLogPath, bool? useFileLogging, string logLevel, uint? romEndPointer)
+        public AppConfig(Dictionary<int, string[]> fontTable, StringComparison? textStringComparison, string serializerLogPath, bool? useFileLogging, string logLevel, uint? romEndPointer)
         {
             FontTable = fontTable ?? new Dictionary<int, string[]>()
             {
@@ -401,6 +403,7 @@ namespace KlonoaHeroesPatcher
                 //[0x17E] = "[17E]",
                 //[0x17F] = "[17F]",
             };
+            TextStringComparison = textStringComparison ?? StringComparison.InvariantCultureIgnoreCase;
             SerializerLogPath = serializerLogPath;
             UseFileLogging = useFileLogging ?? true;
             LogLevel = logLevel;
@@ -411,6 +414,11 @@ namespace KlonoaHeroesPatcher
         /// The font table, indicating the string each font index represents
         /// </summary>
         public Dictionary<int, string[]> FontTable { get; }
+
+        /// <summary>
+        /// The string comparison to use for text
+        /// </summary>
+        public StringComparison TextStringComparison { get; }
 
         /// <summary>
         /// An optional serializer log path
@@ -435,6 +443,6 @@ namespace KlonoaHeroesPatcher
         /// <summary>
         /// Gets a default configuration
         /// </summary>
-        public static AppConfig Default => new AppConfig(null, null, null, null, null);
+        public static AppConfig Default => new AppConfig(null, null, null, null, null, null);
     }
 }

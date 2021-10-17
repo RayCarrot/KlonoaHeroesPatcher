@@ -169,7 +169,7 @@ namespace KlonoaHeroesPatcher
                         // Start by checking if it fully matches an item in the font table
                         foreach (KeyValuePair<int, string[]> f in fontTable)
                         {
-                            if (f.Value.Any(s => s.Equals(c.ToString(), StringComparison.InvariantCultureIgnoreCase)))
+                            if (f.Value.Any(s => s.Equals(c.ToString(), AppViewModel.Current.Config.TextStringComparison)))
                             {
                                 fontIndex = f.Key;
                                 break;
@@ -185,7 +185,7 @@ namespace KlonoaHeroesPatcher
                                 {
                                     var check = Text.Substring(i, f.Value.Length);
 
-                                    if (check.Equals(s, StringComparison.InvariantCultureIgnoreCase))
+                                    if (check.Equals(s, AppViewModel.Current.Config.TextStringComparison))
                                     {
                                         fontIndex = f.Key;
                                         i += f.Value.Length - 1;

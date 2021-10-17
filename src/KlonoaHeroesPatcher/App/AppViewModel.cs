@@ -17,6 +17,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
+using Newtonsoft.Json.Converters;
 
 namespace KlonoaHeroesPatcher
 {
@@ -92,7 +93,7 @@ namespace KlonoaHeroesPatcher
 
             try
             {
-                return JsonConvert.DeserializeObject<AppConfig>(File.ReadAllText(ConfigFileName));
+                return JsonConvert.DeserializeObject<AppConfig>(File.ReadAllText(ConfigFileName), new StringEnumConverter());
             }
             catch (Exception ex)
             {
@@ -430,7 +431,7 @@ namespace KlonoaHeroesPatcher
 
         public void GenerateConfig()
         {
-            File.WriteAllText(ConfigFileName, JsonConvert.SerializeObject(AppConfig.Default, Formatting.Indented));
+            File.WriteAllText(ConfigFileName, JsonConvert.SerializeObject(AppConfig.Default, Formatting.Indented, new StringEnumConverter()));
 
             Logger.Trace("Generated config");
 
