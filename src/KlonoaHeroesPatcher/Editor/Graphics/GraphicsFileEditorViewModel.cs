@@ -26,6 +26,26 @@ namespace KlonoaHeroesPatcher
 
         public ObservableCollection<DuoGridItemViewModel> InfoItems { get; set; }
         public BitmapSource PreviewImgSource { get; set; }
+        public ObservableCollection<GraphicsMapTileViewModel> MapTiles { get; set; }
+        public int MapTilesWidth { get; set; }
+
+        private GraphicsMapTileViewModel _selectedMapTile;
+        public GraphicsMapTileViewModel SelectedMapTile
+        {
+            get => _selectedMapTile;
+            set
+            {
+                if (value == SelectedMapTile)
+                    return;
+
+                _selectedMapTile = value;
+
+                foreach (GraphicsMapTileViewModel tile in MapTiles)
+                    tile.IsHighlighted = tile != value && tile.Tile.TileSetIndex == value?.Tile.TileSetIndex;
+            }
+        }
+        public int SelectedMapTileIndex { get; set; }
+
         public BitmapSource PalettePreviewImgSource { get; set; }
         public double Width { get; set; }
         public double Height { get; set; }
@@ -46,11 +66,34 @@ namespace KlonoaHeroesPatcher
                     return;
 
                 _basePalette = value;
-                RefreshPreviewImage();
+                RefreshImage();
             }
         }
 
         protected override void Load(bool firstLoad)
+        {
+            RefreshBasePalette();
+            RefreshImage();
+
+            if (HasPalette)
+                PalettePreviewImgSource = TileGraphicsHelpers.CreatePaletteImageSource(
+                    bmpPal: new BitmapPalette(ColorHelpers.ConvertColors(GraphicsFile.Palette, GraphicsFile.BPP, false)), 
+                    scale: 16, 
+                    optionalWrap: 16);
+
+            int tileSize = (int)(TileGraphicsHelpers.TileWidth * TileGraphicsHelpers.TileHeight / (8f / GraphicsFile.BPP));
+
+            InfoItems = new ObservableCollection<DuoGridItemViewModel>()
+            {
+                new DuoGridItemViewModel("Size", $"{Width}x{Height}"),
+                new DuoGridItemViewModel("Colors", $"{GraphicsFile.Palette?.Length ?? 0}"),
+                new DuoGridItemViewModel("BPP", $"{GraphicsFile.BPP}"),
+                new DuoGridItemViewModel("Tiles", $"{GraphicsFile.TileSet.Length / tileSize}"),
+                new DuoGridItemViewModel("Has map", $"{GraphicsFile.TileMap?.Any() == true}"),
+            };
+        }
+
+        public void RefreshBasePalette()
         {
             CanChangeBasePalette = GraphicsFile.BPP == 4;
 
@@ -73,28 +116,9 @@ namespace KlonoaHeroesPatcher
 
                 OnPropertyChanged(nameof(BasePalette));
             }
-
-            RefreshPreviewImage();
-
-            if (HasPalette)
-                PalettePreviewImgSource = TileGraphicsHelpers.CreatePaletteImageSource(
-                    bmpPal: new BitmapPalette(ColorHelpers.ConvertColors(GraphicsFile.Palette, GraphicsFile.BPP, false)), 
-                    scale: 16, 
-                    optionalWrap: 16);
-
-            int tileSize = (int)(TileGraphicsHelpers.TileWidth * TileGraphicsHelpers.TileHeight / (8f / GraphicsFile.BPP));
-
-            InfoItems = new ObservableCollection<DuoGridItemViewModel>()
-            {
-                new DuoGridItemViewModel("Size", $"{Width}x{Height}"),
-                new DuoGridItemViewModel("Colors", $"{GraphicsFile.Palette?.Length ?? 0}"),
-                new DuoGridItemViewModel("BPP", $"{GraphicsFile.BPP}"),
-                new DuoGridItemViewModel("Tiles", $"{GraphicsFile.TileSet.Length / tileSize}"),
-                new DuoGridItemViewModel("Has map", $"{GraphicsFile.TileMap?.Any() == true}"),
-            };
         }
 
-        public void RefreshPreviewImage()
+        public void RefreshImage()
         {
             try
             {
@@ -117,6 +141,44 @@ namespace KlonoaHeroesPatcher
                 PreviewImgSource = null;
                 IsImageLoaded = false;
                 MessageBox.Show($"Error loading image. Error: {ex.Message}", "Error loading image", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+
+            try
+            {
+                if (GraphicsFile.TileMap.Any() && PreviewImgSource != null)
+                {
+                    MapTiles = new ObservableCollection<GraphicsMapTileViewModel>();
+
+                    var tilesWidth = GraphicsFile.TileMapWidth / TileGraphicsHelpers.TileWidth;
+                    var tilesHeight = GraphicsFile.TileMapHeight / TileGraphicsHelpers.TileHeight;
+
+                    MapTilesWidth = tilesWidth;
+
+                    for (int y = 0; y < tilesHeight; y++)
+                    {
+                        for (int x = 0; x < tilesWidth; x++)
+                        {
+                            var bmp = new CroppedBitmap(PreviewImgSource, new Int32Rect(
+                                x: x * TileGraphicsHelpers.TileWidth, 
+                                y: y * TileGraphicsHelpers.TileHeight, 
+                                width: TileGraphicsHelpers.TileWidth, 
+                                height: TileGraphicsHelpers.TileHeight));
+
+                            var tilesCount = (int)(GraphicsFile.TileSetLength / (TileGraphicsHelpers.TileWidth * TileGraphicsHelpers.TileHeight * (GraphicsFile.BPP / 8f)));
+
+                            MapTiles.Add(new GraphicsMapTileViewModel(this, bmp, GraphicsFile.TileMap[y * tilesWidth + x], tilesCount));
+                        }
+                    }
+                }
+                else
+                {
+                    MapTiles = null;
+                }
+            }
+            catch (Exception ex)
+            {
+                MapTiles = null;
+                MessageBox.Show($"Error loading image map. Error: {ex.Message}", "Error loading image map", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 

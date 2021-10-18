@@ -11,7 +11,7 @@ namespace KlonoaHeroesPatcher
 
         protected abstract void Load(bool firstLoad);
 
-        protected void RelocateFile(BinarySerializable obj = null) => NavigationItem.RelocateFile(obj);
+        public void RelocateFile(BinarySerializable obj = null) => NavigationItem.RelocateFile(obj);
 
         public void Init(NavigationItemViewModel navigationItem)
         {

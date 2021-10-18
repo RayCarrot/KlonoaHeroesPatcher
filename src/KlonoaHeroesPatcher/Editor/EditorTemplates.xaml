@@ -1,6 +1,7 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:local="clr-namespace:KlonoaHeroesPatcher">
+                    xmlns:local="clr-namespace:KlonoaHeroesPatcher"
+                    xmlns:metro="http://metro.mahapps.com/winfx/xaml/controls">
 
     <DataTemplate x:Key="EditorTemplate.Binary" DataType="{x:Type local:BinaryFileEditorViewModel}">
 
@@ -128,6 +129,8 @@
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
 
@@ -205,8 +208,151 @@
                            Visibility="{Binding Path=HasPalette, Converter={local:BooleanToVisibilityConverter}}"
                            Margin="0 10" />
 
-                <!-- Info -->
                 <StackPanel Grid.Row="4"
+                            Visibility="{Binding Path=MapTiles, Converter={local:InvertedObjectNullToVisibilityConverter}}">
+
+                    <TextBlock Style="{StaticResource TextBlock.Header}"
+                               Text="Tile Map"
+                               Margin="0 0 0 5" />
+
+                    <ScrollViewer Margin="0 0 0 5"
+                                  VerticalScrollBarVisibility="Disabled"
+                                  HorizontalScrollBarVisibility="Auto">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+
+                            <ListBox Grid.Column="0"
+                                     ItemsSource="{Binding Path=MapTiles}"
+                                     SelectedItem="{Binding Path=SelectedMapTile}"
+                                     SelectedIndex="{Binding Path=SelectedMapTileIndex}">
+
+                                <ListBox.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <UniformGrid Columns="{Binding Path=MapTilesWidth}" />
+                                    </ItemsPanelTemplate>
+                                </ListBox.ItemsPanel>
+
+                                <ListBox.ItemContainerStyle>
+                                    <Style TargetType="{x:Type ListBoxItem}"
+                                           BasedOn="{StaticResource {x:Type ListBoxItem}}">
+                                        <Setter Property="Padding" Value="0" />
+                                    </Style>
+                                </ListBox.ItemContainerStyle>
+
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Padding="3">
+                                            <Border.Style>
+                                                <Style TargetType="{x:Type Border}">
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding Path=IsHighlighted}"
+                                                                     Value="True">
+                                                            <Setter Property="Background" Value="Orange" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Border.Style>
+
+                                            <Image Source="{Binding Path=PreviewImgSource, Mode=OneTime}"
+                                                   Width="16" Height="16"
+                                                   RenderOptions.BitmapScalingMode="NearestNeighbor" />
+                                        </Border>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+
+                            </ListBox>
+
+                            <StackPanel Grid.Column="1"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"
+                                        DataContext="{Binding Path=SelectedMapTile}"
+                                        Visibility="{Binding Converter={local:InvertedObjectNullToVisibilityConverter}}">
+
+                                <Image Source="{Binding Path=PreviewImgSource, Mode=OneTime}"
+                                       Width="128" Height="128"
+                                       RenderOptions.BitmapScalingMode="NearestNeighbor"
+                                       Margin="0 0 0 10" />
+
+                                <Grid Margin="0 0 0 5">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="5" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
+
+                                    <TextBlock Grid.Column="0" Grid.Row="0"
+                                               Margin="0 0 0 5"
+                                               VerticalAlignment="Center"
+                                               Style="{StaticResource TextBlock.Header}"
+                                               Text="Tile" />
+
+                                    <metro:NumericUpDown Grid.Column="2" Grid.Row="0"
+                                                         Margin="0 0 0 5"
+                                                         MinWidth="80"
+                                                         Value="{Binding Path=TileSetIndex}"
+                                                         Minimum="{Binding Path=MinTileSetIndex, Mode=OneTime}"
+                                                         Maximum="{Binding Path=MaxTileSetIndex, Mode=OneTime}" />
+
+                                    <TextBlock Grid.Column="0" Grid.Row="1"
+                                               Margin="0 0 0 5"
+                                               VerticalAlignment="Center"
+                                               Style="{StaticResource TextBlock.Header}"
+                                               Text="Palette" />
+
+                                    <metro:NumericUpDown Grid.Column="2" Grid.Row="1"
+                                                         Margin="0 0 0 5"
+                                                         MinWidth="80"
+                                                         Value="{Binding Path=PaletteIndex}"
+                                                         Minimum="{Binding Path=MinPaletteIndex, Mode=OneTime}"
+                                                         Maximum="{Binding Path=MaxPaletteIndex, Mode=OneTime}" />
+
+                                    <TextBlock Grid.Column="0" Grid.Row="2"
+                                               Margin="0 0 0 5"
+                                               VerticalAlignment="Center"
+                                               Style="{StaticResource TextBlock.Header}"
+                                               Text="Horizontal Flip" />
+
+                                    <CheckBox Grid.Column="2" Grid.Row="2"
+                                              Margin="0 0 0 5"
+                                              IsChecked="{Binding Path=FlipX}" />
+
+                                    <TextBlock Grid.Column="0" Grid.Row="3"
+                                               Margin="0 0 0 5"
+                                               VerticalAlignment="Center"
+                                               Style="{StaticResource TextBlock.Header}"
+                                               Text="Vertical Flip" />
+
+                                    <CheckBox Grid.Column="2" Grid.Row="3"
+                                              Margin="0 0 0 5"
+                                              IsChecked="{Binding Path=FlipY}" />
+
+                                </Grid>
+
+                                <Button Content="Apply"
+                                        Command="{Binding Path=ApplyCommand, Mode=OneTime}"/>
+
+                            </StackPanel>
+
+                        </Grid>
+
+                    </ScrollViewer>
+                </StackPanel>
+
+                <Separator Grid.Row="5"
+                           Visibility="{Binding Path=MapTiles, Converter={local:InvertedObjectNullToVisibilityConverter}}"
+                           Margin="0 10" />
+
+                <!-- Info -->
+                <StackPanel Grid.Row="6"
                             HorizontalAlignment="Left">
 
                     <TextBlock Style="{StaticResource TextBlock.Header}"
