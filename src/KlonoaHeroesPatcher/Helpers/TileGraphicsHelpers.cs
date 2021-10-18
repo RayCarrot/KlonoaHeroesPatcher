@@ -238,12 +238,51 @@ namespace KlonoaHeroesPatcher
                     {
                         for (int i = 0; i < tileSetIndex; i++)
                         {
-                            // Compare bytes
-                            var match = tileSet.Skip(i * tileLength).Take(tileLength).SequenceEqual(tileSet.Skip(tileSetIndex * tileLength).Take(tileLength));
+                            bool matchesNormal = true;
+                            bool matchesFlipX = true;
+                            bool matchesFlipY = true;
+                            bool matchesFlipXY = true;
 
-                            if (match)
+                            for (int y = 0; y < TileHeight; y++)
+                            {
+                                for (int x = 0; x < TileWidth; x++)
+                                {
+                                    byte p = getPixel(tileSetIndex, x, y);
+
+                                    if (matchesNormal)
+                                        matchesNormal = p == getPixel(i, x, y);
+
+                                    if (matchesFlipX)
+                                        matchesFlipX = p == getPixel(i, TileWidth - x - 1, y);
+
+                                    if (matchesFlipY)
+                                        matchesFlipY = p == getPixel(i, x, TileHeight - y - 1);
+
+                                    if (matchesFlipXY)
+                                        matchesFlipXY = p == getPixel(i, TileWidth - x - 1, TileHeight - y - 1);
+
+                                    byte getPixel(int baseTileIndex, int xOffset, int yOffset)
+                                    {
+                                        var pixel = tileSet[(int)(baseTileIndex * tileLength + (yOffset * TileWidth + xOffset) * tileSetBppFactor)];
+
+                                        if (dstBpp == 4)
+                                            pixel = (byte)BitHelpers.ExtractBits(pixel, 4, x % 2 == 0 ? 0 : 4);
+
+                                        return pixel;
+                                    }
+                                }
+                            }
+
+                            if (matchesNormal || matchesFlipX || matchesFlipY || matchesFlipXY)
                             {
                                 tileMap[tileMapIndex].TileSetIndex = i;
+
+                                if (!matchesNormal)
+                                {
+                                    tileMap[tileMapIndex].FlipX = matchesFlipX || matchesFlipXY;
+                                    tileMap[tileMapIndex].FlipY = matchesFlipY || matchesFlipXY;
+                                }
+
                                 tileSetIndex--;
                                 break;
                             }
