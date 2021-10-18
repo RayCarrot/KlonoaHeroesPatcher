@@ -63,8 +63,10 @@ namespace KlonoaHeroesPatcher
                 var s = new CutsceneCommandsGetArgsSerializerObject(cmd.Context);
                 cmd.SerializeImpl(s);
 
+                long relativeOffset = cmd.Offset.FileOffset - CutsceneFile.Offset.FileOffset;
+
                 scriptStr.AppendLine(
-                    $"{cmd.Offset.StringAbsoluteOffset}:" +
+                    $"{relativeOffset:X8}:" +
                     $"{new string('\t', indentLevel)}" +
                     $"{cmd.Type.ToString().ToUpper()}({String.Join(", ", s.Arguments.Skip(2).Select(x => $"{x.Name}: {x.Value}"))})");
             }
