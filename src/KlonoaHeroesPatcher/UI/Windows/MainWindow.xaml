@@ -37,9 +37,17 @@
                           Command="{Binding Path=SaveFileAsCommand, Mode=OneTime}" />
             </MenuItem>
 
+            <MenuItem Header="Edit">
+                <MenuItem Header="Go to font"
+                          ToolTip="Selects the font file"
+                          IsEnabled="{Binding Path=ROM, Converter={local:InvertedObjectNullToBooleanConverter}}"
+                          Icon="{iconPacks:Material FormatFont}"
+                          Command="{Binding Path=SelectFontFileCommand, Mode=OneTime}"/>
+            </MenuItem>
+
             <MenuItem Header="Tools">
                 <MenuItem Header="Generate config"
-                          ToolTip="Generated a config file which can be modified to change certain configurations for this app"
+                          ToolTip="Generates a config file which can be modified to change certain configurations for this app"
                           Icon="{iconPacks:Material FileSettingsOutline}"
                           Command="{Binding Path=GenerateConfigCommand, Mode=OneTime}"/>
             </MenuItem>
@@ -69,6 +77,7 @@
                 <TreeView.ItemContainerStyle>
                     <Style TargetType="{x:Type TreeViewItem}" BasedOn="{StaticResource {x:Type TreeViewItem}}">
                         <Setter Property="IsSelected" Value="{Binding Path=IsSelected}" />
+                        <Setter Property="IsExpanded" Value="{Binding Path=IsExpanded}" />
                     </Style>
                 </TreeView.ItemContainerStyle>
 

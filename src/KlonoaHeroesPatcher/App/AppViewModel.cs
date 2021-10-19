@@ -33,6 +33,7 @@ namespace KlonoaHeroesPatcher
             OpenFileCommand = new RelayCommand(OpenFile);
             SaveFileCommand = new RelayCommand(SaveFile);
             SaveFileAsCommand = new RelayCommand(SaveFileAs);
+            SelectFontFileCommand = new RelayCommand(SelectFontFile);
             GenerateConfigCommand = new RelayCommand(GenerateConfig);
             OpenURLCommand = new RelayCommand(x => OpenURL(x?.ToString()));
 
@@ -55,10 +56,18 @@ namespace KlonoaHeroesPatcher
 
         #region Commands
 
+        // File
         public ICommand OpenFileCommand { get; }
         public ICommand SaveFileCommand { get; }
         public ICommand SaveFileAsCommand { get; }
+        
+        // Edit
+        public ICommand SelectFontFileCommand { get; }
+        
+        // Tools
         public ICommand GenerateConfigCommand { get; }
+        
+        // Help
         public ICommand OpenURLCommand { get; }
 
         #endregion
@@ -427,6 +436,23 @@ namespace KlonoaHeroesPatcher
             SetTitle();
 
             Logger.Info("Unloaded ROM");
+        }
+
+        public void SelectFontFile()
+        {
+            var pack = NavigationItems.FirstOrDefault(x => x.SerializableObject == ROM.UIPack);
+
+            if (pack == null)
+                return;
+
+            pack.IsExpanded = true;
+
+            var file = pack.NavigationItems.FirstOrDefault(x => x.SerializableObject == ROM.UIPack.Font_0);
+
+            if (file == null)
+                return;
+
+            file.IsSelected = true;
         }
 
         public void GenerateConfig()

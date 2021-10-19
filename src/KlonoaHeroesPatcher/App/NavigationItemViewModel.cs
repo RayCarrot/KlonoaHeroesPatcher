@@ -63,6 +63,7 @@ namespace KlonoaHeroesPatcher
                 }
             }
         }
+        public bool IsExpanded { get; set; }
         public bool CanBeEdited => EditorViewModel != null;
         public bool UnsavedChanges { get; set; }
         public bool CanExportBinary => SerializableObject is BaseFile f && f.Pre_FileSize != -1 && Offset != null;
