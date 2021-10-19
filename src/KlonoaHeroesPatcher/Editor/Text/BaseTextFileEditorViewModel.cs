@@ -25,7 +25,7 @@ namespace KlonoaHeroesPatcher
                 new DuoGridItemViewModel("[CMD_05]", "Unknown"),
                 new DuoGridItemViewModel("[CMD_06]", "Unknown"),
                 new DuoGridItemViewModel("[CMD_07:X]", "Unknown"),
-                new DuoGridItemViewModel("[CMD_08:X]", "Unknown"),
+                new DuoGridItemViewModel("[BLANKSPACE:X]", "Adds blank with the length specified with the argument. If 0 then it defaults to 0x28."),
                 new DuoGridItemViewModel("[PROMPT]", "Waits for the player to press a button before continuing."),
                 new DuoGridItemViewModel("[PAUSE]", "Unknown"),
                 new DuoGridItemViewModel("[CMD_0B]", "Unknown"),
