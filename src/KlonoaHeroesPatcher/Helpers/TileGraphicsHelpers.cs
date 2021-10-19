@@ -62,31 +62,50 @@ namespace KlonoaHeroesPatcher
                     int tileIndex = mapTile?.TileSetIndex ?? mapIndex;
                     int tileSetOffset = tileIndex * tileLength;
 
-                    for (int y = 0; y < TileHeight; y++)
+                    int palOffset = 0;
+
+                    if (bpp == 4)
                     {
-                        for (int x = 0; x < TileWidth; x++)
-                        {
-                            byte b = tileSet[(int)(tileSetOffset + (y * TileWidth + x) * bppFactor)];
-
-                            if (bpp == 4)
-                                b = (byte)BitHelpers.ExtractBits(b, 4, x % 2 == 0 ? 0 : 4);
-
-                            var sourceTileX = mapTile?.FlipX != true ? x : TileWidth - x - 1;
-                            var sourceTileY = mapTile?.FlipY != true ? y : TileHeight - y - 1;
-
-                            if (bpp == 4)
-                            {
-                                var paletteIndex = mapTile?.PaletteIndex ?? 0;
-                                b = (byte)(b + (basePalette + paletteIndex) * 16);
-                            }
-
-                            imgData[(absTileY + sourceTileY) * width + absTileX + sourceTileX] = b;
-                        }
+                        var paletteIndex = mapTile?.PaletteIndex ?? 0;
+                        palOffset = (basePalette + paletteIndex) * 16;
                     }
+
+                    DrawTileTo8BPPImg(
+                        tileSet: tileSet, 
+                        tileSetOffset: tileSetOffset, 
+                        tileSetBpp: bpp, 
+                        paletteOffset: palOffset, 
+                        flipX: mapTile?.FlipX == true, 
+                        flipY: mapTile?.FlipY == true, 
+                        imgData: imgData, 
+                        xPos: absTileX, 
+                        yPos: absTileY, 
+                        imgWidth: width);
                 }
             }
 
             return BitmapSource.Create(width, height, DpiX, DpiY, format, bmpPal, imgData, stride);
+        }
+
+        public static void DrawTileTo8BPPImg(byte[] tileSet, int tileSetOffset, int tileSetBpp, int paletteOffset, bool flipX, bool flipY, byte[] imgData, int xPos, int yPos, int imgWidth)
+        {
+            float tileSetBppFactor = tileSetBpp / 8f;
+
+            for (int y = 0; y < TileHeight; y++)
+            {
+                for (int x = 0; x < TileWidth; x++)
+                {
+                    byte b = tileSet[(int)(tileSetOffset + (y * TileWidth + x) * tileSetBppFactor)];
+
+                    if (tileSetBpp == 4)
+                        b = (byte)BitHelpers.ExtractBits(b, 4, x % 2 == 0 ? 0 : 4);
+
+                    var sourceTileX = flipX ? TileWidth - x - 1 : x;
+                    var sourceTileY = flipY ? TileHeight - y - 1 : y;
+
+                    imgData[(yPos + sourceTileY) * imgWidth + xPos + sourceTileX] = (byte)(b + paletteOffset);
+                }
+            }
         }
 
         public static BitmapSource CreatePaletteImageSource(BitmapPalette bmpPal, int scale = 16, int offset = 0, int? optionalLength = null, int? optionalWrap = null, bool reverseY = true)
