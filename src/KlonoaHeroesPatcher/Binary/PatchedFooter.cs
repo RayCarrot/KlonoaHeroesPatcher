@@ -5,9 +5,13 @@ namespace KlonoaHeroesPatcher
     public class PatchedFooter : BinarySerializable
     {
         public const string Magic = "EDIT";
-        public const int CurrentEditorVersion = 1;
+        public const int CurrentEditorVersion = 2;
 
         public int EditorVersion { get; set; } = CurrentEditorVersion;
+
+        public int PatchDatasCount { get; set; }
+        public PatchData[] PatchDatas { get; set; } = new PatchData[0];
+
         public int RelocatedStructsCount { get; set; }
         public RelocatedStruct[] RelocatedStructs { get; set; } = new RelocatedStruct[0];
 
@@ -29,15 +33,22 @@ namespace KlonoaHeroesPatcher
             // Get the editor version
             EditorVersion = s.Serialize<int>(EditorVersion, name: nameof(EditorVersion));
 
-            // If not the current version we don't read the data. It's most likely from a later version.
-            if (EditorVersion != CurrentEditorVersion)
+            // If the version is higher than the current version we don't read the data
+            if (EditorVersion > CurrentEditorVersion)
             {
                 s.LogWarning($"Unknown editor version {EditorVersion}");
 
                 // Set to the current version again so it's correct when we write the data
-                EditorVersion = 1;
+                EditorVersion = CurrentEditorVersion;
 
                 return;
+            }
+
+            // Version 2 adds patch data
+            if (EditorVersion >= 2)
+            {
+                PatchDatasCount = s.Serialize<int>(PatchDatasCount, name: nameof(PatchDatasCount));
+                PatchDatas = s.SerializeObjectArray<PatchData>(PatchDatas, PatchDatasCount, name: nameof(PatchDatas));
             }
 
             // Keep a table of relocated data structs
@@ -81,6 +92,20 @@ namespace KlonoaHeroesPatcher
 
             Init(s.CurrentPointer);
             SerializeImpl(s);
+        }
+        
+        public class PatchData : BinarySerializable
+        {
+            public string ID { get; set; }
+            public Pointer DataPointer { get; set; }
+            public uint DataSize { get; set; }
+
+            public override void SerializeImpl(SerializerObject s)
+            {
+                ID = s.SerializeString(ID, 4, name: nameof(ID));
+                DataPointer = s.SerializePointer(DataPointer, name: nameof(DataPointer));
+                DataSize = s.Serialize<uint>(DataSize, name: nameof(DataSize));
+            }
         }
 
         public class RelocatedStruct : BinarySerializable

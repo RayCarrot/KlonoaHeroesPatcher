@@ -28,17 +28,6 @@
     <ProjectReference Include="..\..\..\Binary\BinarySerializer\src\BinarySerializer.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Page Update="UI\Resources\Styles.Expander.xaml">
-      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Update="UI\Resources\Styles.TextBlock.xaml">
-      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
-      <SubType>Designer</SubType>
-    </Page>
-  </ItemGroup>
-
   <!-- Resources -->
   <ItemGroup>
     <None Remove="Img\AppIcon.ico" />

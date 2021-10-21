@@ -28,8 +28,8 @@ namespace KlonoaHeroesPatcher
         public AppViewModel()
         {
             NavigationItems = new ObservableCollection<NavigationItemViewModel>();
+            PatchViewModels = new ObservableCollection<PatchViewModel>();
             PendingRelocatedData = new List<RelocatedData>();
-
             OpenFileCommand = new RelayCommand(OpenFile);
             SaveFileCommand = new RelayCommand(SaveFile);
             SaveFileAsCommand = new RelayCommand(SaveFileAs);
@@ -87,6 +87,8 @@ namespace KlonoaHeroesPatcher
 
         public ObservableCollection<NavigationItemViewModel> NavigationItems { get; }
         public NavigationItemViewModel SelectedNavigationItem { get; set; }
+
+        public ObservableCollection<PatchViewModel> PatchViewModels { get; }
 
         public List<RelocatedData> PendingRelocatedData { get; }
         public bool UnsavedChanges => PendingRelocatedData.Any(x => x.IsNewData);
@@ -311,7 +313,8 @@ namespace KlonoaHeroesPatcher
                     Context.AddKlonoaSettings(settings);
 
                     // Add the ROM to the context
-                    Context.AddFile(new MemoryMappedFile(Context, romName, GBAConstants.Address_ROM));
+                    var romFile = new MemoryMappedFile(Context, romName, GBAConstants.Address_ROM);
+                    Context.AddFile(romFile);
 
                     // Read the patched footer in the ROM first
                     Footer = ReadFooter(romName);
@@ -326,9 +329,10 @@ namespace KlonoaHeroesPatcher
 
                     Logger.Info("Read ROM with {0} relocated structs", Footer.RelocatedStructsCount);
 
+                    var s = Context.Deserializer;
+
                     foreach (PatchedFooter.RelocatedStruct relocatedStruct in Footer.RelocatedStructs)
                     {
-                        var s = Context.Deserializer;
                         var rawData = s.DoAt(relocatedStruct.NewPointer, () => s.SerializeObject<Array<byte>>(default, x => x.Length = relocatedStruct.DataSize));
                         var parentArchive = s.DoAt(relocatedStruct.ParentArchivePointer, () => s.SerializeObject<ArchiveFile>(default));
 
@@ -345,6 +349,25 @@ namespace KlonoaHeroesPatcher
                     AddNavigationItem(NavigationItems, "AnimationPack2", ROM.AnimationPack2, null);
                     AddNavigationItem(NavigationItems, "UIPack", ROM.UIPack, null);
                     AddNavigationItem(NavigationItems, "StoryPack", ROM.StoryPack, null);
+
+                    // Create the patches
+                    var patches = new Patch[]
+                    {
+                        // TODO: Add patches
+                    };
+
+                    // Create patch view models
+                    foreach (Patch patch in patches)
+                    {
+                        // Check if the patch is enabled
+                        bool enabled = Footer.PatchDatas.Any(x => x.ID == patch.ID);
+
+                        // Load the patch if enabled
+                        if (enabled)
+                            patch.Load(s, romFile);
+
+                        PatchViewModels.Add(new PatchViewModel(patch, enabled));
+                    }
                 }
             }
             catch (Exception ex)
@@ -385,6 +408,7 @@ namespace KlonoaHeroesPatcher
                     Logger.Trace("ROM source: {0}", file.SourcePath);
                     Logger.Trace("ROM destination: {0}", file.DestinationPath);
 
+                    // If we're saving to another file we copy the original one to retain all the same unmodified ROM data
                     if (file.SourcePath != file.DestinationPath)
                         File.Copy(file.SourcePath, file.DestinationPath, true);
 
@@ -392,12 +416,44 @@ namespace KlonoaHeroesPatcher
                     using (var f = File.OpenWrite(file.DestinationPath))
                         f.SetLength(Config.ROMEndPointer - file.StartPointer.AbsoluteOffset);
 
+                    // Go to the end of the ROM where we'll start appending data
                     var relocatePointer = new Pointer(Config.ROMEndPointer, file);
                     var s = Context.Serializer;
                     s.Goto(relocatePointer);
+                    s.Align();
+
+                    Footer.PatchDatasCount = PatchViewModels.Count(x => x.IsEnabled);
+                    Footer.PatchDatas = new PatchedFooter.PatchData[Footer.PatchDatasCount];
+
+                    var patchIndex = 0;
+
+                    // Apply or revert patches
+                    foreach (PatchViewModel patchVM in PatchViewModels)
+                    {
+                        if (patchVM.IsEnabled)
+                        {
+                            var dataPointer = s.CurrentPointer;
+                            patchVM.Patch.Apply(s, file);
+
+                            Footer.PatchDatas[patchIndex] = new PatchedFooter.PatchData
+                            {
+                                ID = patchVM.Patch.ID,
+                                DataPointer = dataPointer,
+                                DataSize = (uint)(s.CurrentFileOffset - dataPointer.FileOffset),
+                            };
+                            patchIndex++;
+                        }
+                        else if (patchVM.WasEnabled)
+                        {
+                            patchVM.Patch.Revert(s, file);
+                        }
+
+                        s.Align();
+                    }
 
                     Logger.Info("Adding {0} relocated structs to 0x{1}", PendingRelocatedData.Count, s.CurrentPointer.StringAbsoluteOffset);
 
+                    // Relocate the structs
                     Footer.RelocatedStructsCount = PendingRelocatedData.Count;
                     Footer.RelocatedStructs = new PatchedFooter.RelocatedStruct[Footer.RelocatedStructsCount];
 
@@ -432,6 +488,7 @@ namespace KlonoaHeroesPatcher
             ROM = null;
             NavigationItems.Clear();
             SelectedNavigationItem = null;
+            PatchViewModels.Clear();
             PendingRelocatedData.Clear();
             SetTitle();
 

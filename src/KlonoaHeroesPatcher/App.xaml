@@ -16,6 +16,8 @@
                 <!-- Local -->
                 <ResourceDictionary Source="UI/Resources/Styles.TextBlock.xaml" />
                 <ResourceDictionary Source="UI/Resources/Styles.Expander.xaml" />
+                <ResourceDictionary Source="UI/Resources/Styles.ItemsControl.xaml" />
+                <ResourceDictionary Source="UI/Resources/Styles.TabControl.xaml" />
                 <ResourceDictionary Source="UI/Resources/Styles.DuoGridItem.xaml" />
                 <ResourceDictionary Source="Editor/EditorTemplates.xaml" />
 
