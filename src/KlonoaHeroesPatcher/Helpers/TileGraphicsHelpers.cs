@@ -103,6 +103,10 @@ namespace KlonoaHeroesPatcher
                     var sourceTileX = flipX ? TileWidth - x - 1 : x;
                     var sourceTileY = flipY ? TileHeight - y - 1 : y;
 
+                    // Ignore transparent pixels
+                    if (b == 0)
+                        continue;
+
                     imgData[(yPos + sourceTileY) * imgWidth + xPos + sourceTileX] = (byte)(b + paletteOffset);
                 }
             }
