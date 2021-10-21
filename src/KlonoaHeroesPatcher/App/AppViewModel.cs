@@ -344,7 +344,7 @@ namespace KlonoaHeroesPatcher
 
                     NavigationItems.Clear();
 
-                    AddNavigationItem(NavigationItems, "UnknownPack", ROM.UnknownPack, null);
+                    AddNavigationItem(NavigationItems, "MenuPack", ROM.MenuPack, null);
                     AddNavigationItem(NavigationItems, "AnimationPack1", ROM.AnimationPack1, null);
                     AddNavigationItem(NavigationItems, "AnimationPack2", ROM.AnimationPack2, null);
                     AddNavigationItem(NavigationItems, "UIPack", ROM.UIPack, null);
