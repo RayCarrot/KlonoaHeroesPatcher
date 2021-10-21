@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -48,42 +49,34 @@ namespace KlonoaHeroesPatcher
                     Patch.Widths[i] = 8;
             }
 
+            var img = TileGraphicsHelpers.CreateImageSource(
+                tileSet: Font.TileSet,
+                bpp: Font.BPP,
+                palette: Font.Palette,
+                tileMap: Font.TileMap,
+                width: Font.TileMapWidth,
+                height: Font.TileMapHeight,
+                basePalette: 3);
+
             int fontWidth = Font.TileMapWidth / TileGraphicsHelpers.TileWidth;
+            
             Items = new ObservableCollection<ItemViewModel>(Enumerable.Range(0, count).Select(i =>
             {
                 int fontX = i % fontWidth;
                 int fontY = i / fontWidth;
-                fontY *= 2;
 
-                BitmapSource img = TileGraphicsHelpers.CreateImageSource(
-                    tileSet: Font.TileSet,
-                    bpp: Font.BPP,
-                    palette: Font.Palette,
-                    tileMap: new GraphicsTile[]
-                    {
-                        new GraphicsTile()
-                        {
-                            TileSetIndex = fontY * fontWidth + fontX,
-                        },
-                        new GraphicsTile()
-                        {
-                            TileSetIndex = (fontY + 1) * fontWidth + fontX,
-                        },
-                    },
-                    width: TileGraphicsHelpers.TileWidth,
-                    height: TileGraphicsHelpers.TileHeight * 2,
-                    basePalette: 3);
+                var rect = new Int32Rect(fontX * TileGraphicsHelpers.TileWidth, fontY * TileGraphicsHelpers.TileHeight * 2, TileGraphicsHelpers.TileWidth, TileGraphicsHelpers.TileHeight * 2);
 
-                return new ItemViewModel(Patch, img, i);
+                return new ItemViewModel(Patch, img, rect, i);
             }));
         }
 
         public class ItemViewModel : BaseViewModel
         {
-            public ItemViewModel(VariableWidthFontPatch patch, ImageSource imageSource, int index)
+            public ItemViewModel(VariableWidthFontPatch patch, BitmapSource imageSource, Int32Rect imageRect, int index)
             {
                 Patch = patch;
-                ImageSource = imageSource;
+                ImageSource = new CroppedBitmap(imageSource, imageRect);
                 Index = index;
             }
 
