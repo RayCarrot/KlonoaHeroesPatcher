@@ -13,6 +13,7 @@ namespace KlonoaHeroesPatcher
                 CutsceneFileEditorViewModel _ => (DataTemplate)Application.Current.FindResource("EditorTemplate.Cutscene"),
                 GraphicsFileEditorViewModel _ => (DataTemplate)Application.Current.FindResource("EditorTemplate.Graphics"),
                 TextFileEditorViewModel _ => (DataTemplate)Application.Current.FindResource("EditorTemplate.Text"),
+                AnimationFileEditorViewModel _ => (DataTemplate)Application.Current.FindResource("EditorTemplate.Animation"),
                 _ => null
             };
         }

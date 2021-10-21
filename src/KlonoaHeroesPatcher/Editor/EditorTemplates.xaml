@@ -1,7 +1,8 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:local="clr-namespace:KlonoaHeroesPatcher"
-                    xmlns:metro="http://metro.mahapps.com/winfx/xaml/controls">
+                    xmlns:metro="http://metro.mahapps.com/winfx/xaml/controls"
+                    xmlns:gif="https://github.com/XamlAnimatedGif/XamlAnimatedGif">
 
     <DataTemplate x:Key="EditorTemplate.Binary" DataType="{x:Type local:BinaryFileEditorViewModel}">
 
@@ -442,6 +443,53 @@
                     <Button Content="Apply"
                             IsEnabled="{Binding Path=PendingTextChanges}"
                             Command="{Binding Path=ApplyTextChangesCommand, Mode=OneTime}" />
+
+                </StackPanel>
+
+            </Grid>
+        </ScrollViewer>
+
+    </DataTemplate>
+
+    <DataTemplate x:Key="EditorTemplate.Animation" DataType="{x:Type local:AnimationFileEditorViewModel}">
+
+        <ScrollViewer Padding="5 0">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <!-- Animations -->
+                <StackPanel Grid.Row="0"
+                            HorizontalAlignment="Left">
+
+                    <TextBlock Style="{StaticResource TextBlock.Header}"
+                               Text="Animations"
+                               Margin="0 0 0 5" />
+
+                    <Border Margin="0 0 0 5" MinWidth="240" MinHeight="160">
+                        <Image DataContext="{Binding Path=SelectedAnimation}"
+                               gif:AnimationBehavior.SourceStream="{Binding Path=GIFStream}"
+                               Width="{Binding Path=Width}"
+                               HorizontalAlignment="Left"
+                               RenderOptions.BitmapScalingMode="NearestNeighbor" />
+                    </Border>
+
+                    <ComboBox ItemsSource="{Binding Path=Animations}"
+                              SelectedItem="{Binding Path=SelectedAnimation}"
+                              Margin="0 0 0 5">
+                        <ComboBox.ItemContainerStyle>
+                            <Style TargetType="{x:Type ComboBoxItem}" BasedOn="{StaticResource {x:Type ComboBoxItem}}">
+                                <Setter Property="IsSelected" Value="{Binding Path=IsSelected}" />
+                            </Style>
+                        </ComboBox.ItemContainerStyle>
+
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Path=DisplayName, Mode=OneTime}" />
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
 
                 </StackPanel>
 

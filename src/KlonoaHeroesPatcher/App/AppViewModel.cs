@@ -148,7 +148,7 @@ namespace KlonoaHeroesPatcher
             }
             else if (obj is Animation_File)
             {
-                editor = null;
+                editor = new AnimationFileEditorViewModel();
                 icon = PackIconMaterialKind.FileVideoOutline;
                 iconColor = Color.FromRgb(0x21, 0x96, 0xF3);
             }

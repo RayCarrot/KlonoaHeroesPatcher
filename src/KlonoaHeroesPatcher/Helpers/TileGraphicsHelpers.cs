@@ -112,6 +112,37 @@ namespace KlonoaHeroesPatcher
             }
         }
 
+        public static void DrawTileToRGBAImg(byte[] tileSet, int tileSetOffset, int tileSetBpp, bool flipX, bool flipY, byte[] imgData, int xPos, int yPos, int imgWidth, IList<BaseColor> palette, int basePalette)
+        {
+            float tileSetBppFactor = tileSetBpp / 8f;
+
+            for (int y = 0; y < TileHeight; y++)
+            {
+                for (int x = 0; x < TileWidth; x++)
+                {
+                    byte b = tileSet[(int)(tileSetOffset + (y * TileWidth + x) * tileSetBppFactor)];
+
+                    if (tileSetBpp == 4)
+                        b = (byte)BitHelpers.ExtractBits(b, 4, x % 2 == 0 ? 0 : 4);
+
+                    var sourceTileX = flipX ? TileWidth - x - 1 : x;
+                    var sourceTileY = flipY ? TileHeight - y - 1 : y;
+
+                    // Ignore transparent pixels
+                    if (b == 0)
+                        continue;
+
+                    var c = palette[b + (basePalette * 16)];
+
+                    var imgDataOffset = ((yPos + sourceTileY) * imgWidth + xPos + sourceTileX) * 4;
+                    imgData[imgDataOffset + 0] = (byte)(c.Red * 255f);
+                    imgData[imgDataOffset + 1] = (byte)(c.Green * 255f);
+                    imgData[imgDataOffset + 2] = (byte)(c.Blue * 255f);
+                    imgData[imgDataOffset + 3] = 255;
+                }
+            }
+        }
+
         public static BitmapSource CreatePaletteImageSource(BitmapPalette bmpPal, int scale = 16, int offset = 0, int? optionalLength = null, int? optionalWrap = null, bool reverseY = true)
         {
             PixelFormat format = PixelFormats.Indexed8;
