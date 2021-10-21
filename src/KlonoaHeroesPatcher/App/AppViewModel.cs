@@ -359,12 +359,18 @@ namespace KlonoaHeroesPatcher
                     // Create patch view models
                     foreach (Patch patch in patches)
                     {
-                        // Check if the patch is enabled
-                        bool enabled = Footer.PatchDatas.Any(x => x.ID == patch.ID);
+                        // Attempt to find the patch under applied patch data
+                        var patchData = Footer.PatchDatas.FirstOrDefault(x => x.ID == patch.ID);
+                        var enabled = patchData != null;
 
                         // Load the patch if enabled
                         if (enabled)
+                        {
+                            // Go to the data
+                            s.Goto(patchData.DataPointer);
+
                             patch.Load(s, romFile);
+                        }
 
                         PatchViewModels.Add(new PatchViewModel(patch, enabled));
                     }
