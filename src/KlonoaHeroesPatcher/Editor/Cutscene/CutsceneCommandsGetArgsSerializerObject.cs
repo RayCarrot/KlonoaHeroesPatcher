@@ -79,6 +79,15 @@ namespace KlonoaHeroesPatcher
             });
         }
 
+        public override void SerializeBitValues64<T>(Action<SerializeBits64> serializeFunc)
+        {
+            serializeFunc((value, length, name) =>
+            {
+                Arguments.Add(new CommandArgument(name, value, typeof(T)));
+                return value;
+            });
+        }
+
         public record CommandArgument(string Name, object Value, Type type);
     }
 }

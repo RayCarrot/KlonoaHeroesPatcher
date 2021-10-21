@@ -15,6 +15,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BinarySerializer.PS1", "..\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BinarySerializer.Klonoa", "..\..\Binary\BinarySerializer.Klonoa\src\BinarySerializer.Klonoa.csproj", "{762A2900-568D-478B-8C74-B1B101CC2FDA}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BinarySerializer.PS2", "..\..\Binary\BinarySerializer.PS2\src\BinarySerializer.PS2.csproj", "{84E7FE6B-47C4-401C-BDF1-CA88C99346C1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -41,6 +43,10 @@ Global
 		{762A2900-568D-478B-8C74-B1B101CC2FDA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{762A2900-568D-478B-8C74-B1B101CC2FDA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{762A2900-568D-478B-8C74-B1B101CC2FDA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{84E7FE6B-47C4-401C-BDF1-CA88C99346C1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{84E7FE6B-47C4-401C-BDF1-CA88C99346C1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{84E7FE6B-47C4-401C-BDF1-CA88C99346C1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{84E7FE6B-47C4-401C-BDF1-CA88C99346C1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -50,6 +56,7 @@ Global
 		{DB8D7276-8C5C-4776-99F9-A4A7AFF4E5CF} = {0297E748-C7B5-4DC4-80E0-7ED64E9B0A33}
 		{52E28D5B-DD82-4C6D-BB1B-C9223EA17B69} = {0297E748-C7B5-4DC4-80E0-7ED64E9B0A33}
 		{762A2900-568D-478B-8C74-B1B101CC2FDA} = {0297E748-C7B5-4DC4-80E0-7ED64E9B0A33}
+		{84E7FE6B-47C4-401C-BDF1-CA88C99346C1} = {0297E748-C7B5-4DC4-80E0-7ED64E9B0A33}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {9E513852-7183-4110-BB0F-63A21CE3FE98}
