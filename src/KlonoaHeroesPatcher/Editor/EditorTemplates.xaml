@@ -225,6 +225,7 @@
                             </Grid.ColumnDefinitions>
 
                             <ListBox Grid.Column="0"
+                                     VerticalAlignment="Center"
                                      ItemsSource="{Binding Path=MapTiles}"
                                      SelectedItem="{Binding Path=SelectedMapTile}"
                                      SelectedIndex="{Binding Path=SelectedMapTileIndex}">
