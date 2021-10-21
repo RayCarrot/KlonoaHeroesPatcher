@@ -193,7 +193,7 @@
 
             <TabItem Header="Patches" local:TabItemAssist.IconKind="BriefcaseOutline" local:TabItemAssist.IconForeground="#4CAF50">
 
-                <ScrollViewer>
+                <ScrollViewer Padding="5">
                     <ItemsControl ItemsSource="{Binding Path=PatchViewModels, Mode=OneTime}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
