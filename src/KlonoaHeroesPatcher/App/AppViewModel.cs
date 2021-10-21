@@ -353,7 +353,7 @@ namespace KlonoaHeroesPatcher
                     // Create the patches
                     var patches = new Patch[]
                     {
-                        // TODO: Add patches
+                        new VariableWidthFontPatch(),
                     };
 
                     // Create patch view models
