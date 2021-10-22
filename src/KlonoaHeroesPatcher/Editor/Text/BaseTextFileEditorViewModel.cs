@@ -261,6 +261,12 @@ namespace KlonoaHeroesPatcher
                         FontIndex = (short)TextCommand.CommandType.End
                     });
 
+                if (TextCommands.Pre_MaxLength != null && textCmds.Count > TextCommands.Pre_MaxLength)
+                {
+                    var diff = textCmds.Count - (int)TextCommands.Pre_MaxLength;
+                    textCmds.RemoveRange(textCmds.Count - diff - 1, diff);
+                }
+
                 TextCommands.Commands = textCmds.ToArray();
 
                 EditorViewModel.RelocateTextCommands();
