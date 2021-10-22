@@ -192,6 +192,9 @@ namespace KlonoaHeroesPatcher
                                     FontIndex = (short)cmdType,
                                     CommandArgument = arg,
                                 });
+
+                                if (cmdType == TextCommand.CommandType.End)
+                                    break;
                             }
 
                             i += cmdLength + 1;
@@ -251,6 +254,12 @@ namespace KlonoaHeroesPatcher
                     MessageBox.Show($"An error occurred. The current changes will not be saved until all issues have been resolved. Error: {ex.Message}", "Error updating text commands", MessageBoxButton.OK, MessageBoxImage.Error);
                     return;
                 }
+
+                if (textCmds.LastOrDefault()?.Command != TextCommand.CommandType.End)
+                    textCmds.Add(new TextCommand()
+                    {
+                        FontIndex = (short)TextCommand.CommandType.End
+                    });
 
                 TextCommands.Commands = textCmds.ToArray();
 
