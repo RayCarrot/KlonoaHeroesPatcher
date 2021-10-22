@@ -15,12 +15,12 @@ namespace KlonoaHeroesPatcher
         public long Pre_ScriptsLength { get; set; }
 
         public byte[] Scripts { get; set; }
-        public TextCommand[] TextCommands { get; set; }
+        public TextCommands TextCommands { get; set; }
 
         public override void SerializeImpl(SerializerObject s)
         {
             Scripts = s.SerializeArray<byte>(Scripts, Pre_ScriptsLength, name: nameof(Scripts));
-            TextCommands = s.SerializeObjectArrayUntil(TextCommands, x => x.Command == TextCommand.CommandType.End, name: nameof(TextCommands));
+            TextCommands = s.SerializeObject<TextCommands>(TextCommands, name: nameof(TextCommands));
         }
     }
 }

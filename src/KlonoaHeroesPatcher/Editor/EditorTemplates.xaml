@@ -73,30 +73,39 @@
                         </ItemsControl>
                     </Expander>
 
-                    <Grid Margin="0 0 0 5">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
+                    <ItemsControl ItemsSource="{Binding Path=TextItems}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel>
+                                    <Grid Margin="0 0 0 5">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
 
-                        <TextBox Grid.Column="0"
-                                 Text="{Binding Path=Text, UpdateSourceTrigger=PropertyChanged}"
-                                 TextWrapping="Wrap"
-                                 Margin="0 0 10 0" />
+                                        <TextBox Grid.Column="0"
+                                                 Text="{Binding Path=Text, UpdateSourceTrigger=PropertyChanged}"
+                                                 TextWrapping="Wrap"
+                                                 Margin="0 0 10 0" />
 
-                        <Border Grid.Column="1"
-                                HorizontalAlignment="Left"
-                                Background="Gray">
-                            <Image Source="{Binding Path=TextPreviewImgSource}"
-                                   Width="{Binding Path=TextPreviewWidth}"
-                                   RenderOptions.BitmapScalingMode="NearestNeighbor" />
-                        </Border>
+                                        <Border Grid.Column="1"
+                                                HorizontalAlignment="Left"
+                                                Background="Gray">
+                                            <Image Source="{Binding Path=TextPreviewImgSource}"
+                                                   Width="{Binding Path=TextPreviewWidth}"
+                                                   RenderOptions.BitmapScalingMode="NearestNeighbor" />
+                                        </Border>
 
-                    </Grid>
+                                    </Grid>
 
-                    <Button Content="Apply"
-                            IsEnabled="{Binding Path=PendingTextChanges}"
-                            Command="{Binding Path=ApplyTextChangesCommand, Mode=OneTime}" />
+                                    <Button Content="Apply"
+                                            Margin="0 0 0 10"
+                                            IsEnabled="{Binding Path=PendingTextChanges}"
+                                            Command="{Binding Path=ApplyTextChangesCommand, Mode=OneTime}" />
+                                </StackPanel>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
 
                 </StackPanel>
 
@@ -294,7 +303,7 @@
                                     <TextBlock Grid.Column="0" Grid.Row="0"
                                                Margin="0 0 0 5"
                                                VerticalAlignment="Center"
-                                               Style="{StaticResource TextBlock.Header}"
+                                               FontWeight="Bold"
                                                Text="Tile" />
 
                                     <metro:NumericUpDown Grid.Column="2" Grid.Row="0"
@@ -419,30 +428,39 @@
                         </ItemsControl>
                     </Expander>
 
-                    <Grid Margin="0 0 0 5">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
+                    <ItemsControl ItemsSource="{Binding Path=TextItems}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel>
+                                    <Grid Margin="0 0 0 5">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
 
-                        <TextBox Grid.Column="0"
-                                 Text="{Binding Path=Text, UpdateSourceTrigger=PropertyChanged}"
-                                 TextWrapping="Wrap"
-                                 Margin="0 0 10 0" />
+                                        <TextBox Grid.Column="0"
+                                                 Text="{Binding Path=Text, UpdateSourceTrigger=PropertyChanged}"
+                                                 TextWrapping="Wrap"
+                                                 Margin="0 0 10 0" />
 
-                        <Border Grid.Column="1"
-                                HorizontalAlignment="Left"
-                                Background="Gray">
-                            <Image Source="{Binding Path=TextPreviewImgSource}"
-                                   Width="{Binding Path=TextPreviewWidth}"
-                                   RenderOptions.BitmapScalingMode="NearestNeighbor" />
-                        </Border>
+                                        <Border Grid.Column="1"
+                                                HorizontalAlignment="Left"
+                                                Background="Gray">
+                                            <Image Source="{Binding Path=TextPreviewImgSource}"
+                                                   Width="{Binding Path=TextPreviewWidth}"
+                                                   RenderOptions.BitmapScalingMode="NearestNeighbor" />
+                                        </Border>
 
-                    </Grid>
+                                    </Grid>
 
-                    <Button Content="Apply"
-                            IsEnabled="{Binding Path=PendingTextChanges}"
-                            Command="{Binding Path=ApplyTextChangesCommand, Mode=OneTime}" />
+                                    <Button Content="Apply"
+                                            Margin="0 0 0 10"
+                                            IsEnabled="{Binding Path=PendingTextChanges}"
+                                            Command="{Binding Path=ApplyTextChangesCommand, Mode=OneTime}" />
+                                </StackPanel>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
 
                 </StackPanel>
 
@@ -484,6 +502,133 @@
                             </Style>
                         </ComboBox.ItemContainerStyle>
 
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Path=DisplayName, Mode=OneTime}" />
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+
+                </StackPanel>
+
+            </Grid>
+        </ScrollViewer>
+
+    </DataTemplate>
+
+    <DataTemplate x:Key="EditorTemplate.ItemsCollection" DataType="{x:Type local:ItemsCollectionFileEditorViewModel}">
+
+        <ScrollViewer Padding="5 0">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <!-- Items -->
+                <StackPanel Grid.Row="0">
+
+                    <TextBlock Style="{StaticResource TextBlock.Header}"
+                               Text="Items"
+                               Margin="0 0 0 5" />
+
+                    <Expander Header="Available Characters"
+                              Margin="0 0 0 5">
+                        <ItemsControl Grid.IsSharedSizeScope="True"
+                                      ItemsSource="{Binding Path=AllowedCharactersInfo}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <local:DuoGridItem Header="{Binding Path=Header}"
+                                                       Text="{Binding Path=Text}" />
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </Expander>
+
+                    <Expander Header="Available Commands"
+                              Margin="0 0 0 5">
+                        <ItemsControl Grid.IsSharedSizeScope="True"
+                                      ItemsSource="{Binding Path=AllowedCommandsInfo, Mode=OneTime}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <local:DuoGridItem Header="{Binding Path=Header}"
+                                                       Text="{Binding Path=Text}" />
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </Expander>
+
+                    <ItemsControl ItemsSource="{Binding Path=TextItems}"
+                                  Margin="0 0 0 5">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel>
+                                    <Grid Margin="0 0 0 5">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+
+                                        <TextBox Grid.Column="0"
+                                                 Text="{Binding Path=Text, UpdateSourceTrigger=PropertyChanged}"
+                                                 TextWrapping="Wrap"
+                                                 Margin="0 0 10 0" />
+
+                                        <Border Grid.Column="1"
+                                                HorizontalAlignment="Left"
+                                                Background="Gray">
+                                            <Image Source="{Binding Path=TextPreviewImgSource}"
+                                                   Width="{Binding Path=TextPreviewWidth}"
+                                                   RenderOptions.BitmapScalingMode="NearestNeighbor" />
+                                        </Border>
+
+                                    </Grid>
+
+                                    <Button Content="Apply"
+                                            Margin="0 0 0 10"
+                                            IsEnabled="{Binding Path=PendingTextChanges}"
+                                            Command="{Binding Path=ApplyTextChangesCommand, Mode=OneTime}" />
+                                </StackPanel>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                    <StackPanel Margin="0 0 0 5"
+                                HorizontalAlignment="Left">
+
+                        <ItemsControl Grid.IsSharedSizeScope="True"
+                                      ItemsSource="{Binding Path=ValueIntFields}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid Margin="0 0 0 5">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" SharedSizeGroup="FieldName" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+
+                                        <TextBlock Grid.Column="0"
+                                                   VerticalAlignment="Center"
+                                                   Margin="0 0 5 0"
+                                                   FontWeight="Bold"
+                                                   Text="{Binding Path=DisplayName, Mode=OneTime}" />
+
+                                        <metro:NumericUpDown Grid.Column="1"
+                                                             Value="{Binding Path=Value}"
+                                                             HorizontalAlignment="Left"
+                                                             MinWidth="100" />
+
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+
+                        <Button Content="Apply"
+                                Command="{Binding Path=ApplyValueFieldsCommand, Mode=OneTime}"
+                                Margin="0 0 0 5"/>
+
+                    </StackPanel>
+
+                    <ComboBox ItemsSource="{Binding Path=Items}"
+                              SelectedItem="{Binding Path=SelectedItem}">
                         <ComboBox.ItemTemplate>
                             <DataTemplate>
                                 <TextBlock Text="{Binding Path=DisplayName, Mode=OneTime}" />

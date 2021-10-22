@@ -146,6 +146,12 @@ namespace KlonoaHeroesPatcher
                 icon = PackIconMaterialKind.FileDocumentOutline;
                 iconColor = Color.FromRgb(0x4C, 0xAF, 0x50);
             }
+            else if (obj is ItemsCollection_File)
+            {
+                editor = new ItemsCollectionFileEditorViewModel();
+                icon = PackIconMaterialKind.ShapeOutline;
+                iconColor = Color.FromRgb(0xE9, 0x1E, 0x63);
+            }
             else if (obj is Animation_File)
             {
                 editor = new AnimationFileEditorViewModel();
@@ -347,7 +353,7 @@ namespace KlonoaHeroesPatcher
                     AddNavigationItem(NavigationItems, nameof(ROM.MenuPack), ROM.MenuPack, null);
                     AddNavigationItem(NavigationItems, nameof(ROM.ObjectAnimationsPack), ROM.ObjectAnimationsPack, null);
                     AddNavigationItem(NavigationItems, nameof(ROM.GameplayPack), ROM.GameplayPack, null);
-                    AddNavigationItem(NavigationItems, nameof(ROM.ItemPack), ROM.ItemPack, null);
+                    AddNavigationItem(NavigationItems, nameof(ROM.ItemsPack), ROM.ItemsPack, null);
                     AddNavigationItem(NavigationItems, nameof(ROM.UIPack), ROM.UIPack, null);
                     AddNavigationItem(NavigationItems, nameof(ROM.StoryPack), ROM.StoryPack, null);
 

@@ -1,5 +1,6 @@
 ﻿using BinarySerializer.Klonoa.KH;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
@@ -30,12 +31,13 @@ namespace KlonoaHeroesPatcher
             RefreshScripts();
         }
 
-        protected override TextCommand[] GetTextCommands() => CutsceneTextOnly.TextCommands;
-
-        protected override void RelocateTextCommands(TextCommand[] cmds)
+        protected override IEnumerable<TextCommands> GetTextCommands() => new TextCommands[]
         {
-            CutsceneTextOnly.TextCommands = cmds;
+            CutsceneTextOnly.TextCommands
+        };
 
+        protected override void RelocateTextCommands()
+        {
             // Relocate the data
             RelocateFile(CutsceneTextOnly);
         }
