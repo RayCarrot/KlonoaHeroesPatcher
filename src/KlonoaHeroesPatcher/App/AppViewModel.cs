@@ -344,11 +344,12 @@ namespace KlonoaHeroesPatcher
 
                     NavigationItems.Clear();
 
-                    AddNavigationItem(NavigationItems, "MenuPack", ROM.MenuPack, null);
-                    AddNavigationItem(NavigationItems, "AnimationPack1", ROM.AnimationPack1, null);
-                    AddNavigationItem(NavigationItems, "AnimationPack2", ROM.AnimationPack2, null);
-                    AddNavigationItem(NavigationItems, "UIPack", ROM.UIPack, null);
-                    AddNavigationItem(NavigationItems, "StoryPack", ROM.StoryPack, null);
+                    AddNavigationItem(NavigationItems, nameof(ROM.MenuPack), ROM.MenuPack, null);
+                    AddNavigationItem(NavigationItems, nameof(ROM.ObjectAnimationsPack), ROM.ObjectAnimationsPack, null);
+                    AddNavigationItem(NavigationItems, nameof(ROM.GameplayPack), ROM.GameplayPack, null);
+                    AddNavigationItem(NavigationItems, nameof(ROM.ItemPack), ROM.ItemPack, null);
+                    AddNavigationItem(NavigationItems, nameof(ROM.UIPack), ROM.UIPack, null);
+                    AddNavigationItem(NavigationItems, nameof(ROM.StoryPack), ROM.StoryPack, null);
 
                     // Create the patches
                     var patches = new Patch[]
