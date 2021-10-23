@@ -113,7 +113,7 @@ namespace KlonoaHeroesPatcher
             }
         }
 
-        private void AddNavigationItem(ICollection<NavigationItemViewModel> collection, string title, BinarySerializable obj, ArchiveFile parentArchiveFile)
+        private void AddNavigationItem(ICollection<NavigationItemViewModel> collection, string title, BinarySerializable obj, ArchiveFile parentArchiveFile, string overrideFileName = null)
         {
             FileEditorViewModel editor;
             PackIconMaterialKind icon;
@@ -176,14 +176,26 @@ namespace KlonoaHeroesPatcher
 
             bool relocated = obj != null && Footer.RelocatedStructs.Any(x => x.NewPointer == BinaryHelpers.GetROMPointer(obj.Offset, throwOnError: false));
 
-            var navItem = new NavigationItemViewModel(title, icon, iconColor, info, obj, parentArchiveFile, editor, relocated);
+            var navItem = new NavigationItemViewModel(title, icon, iconColor, info, obj, parentArchiveFile, editor, relocated, overrideFileName);
             collection.Add(navItem);
 
             if (obj is not ArchiveFile archive)
                 return;
 
-            foreach ((BinarySerializable file, string fileName) in archive.ParsedFiles)
-                AddNavigationItem(navItem.NavigationItems, fileName, file, archive);
+            for (var fileIndex = 0; fileIndex < archive.ParsedFiles.Length; fileIndex++)
+            {
+                (BinarySerializable file, string fileName) = archive.ParsedFiles[fileIndex];
+                
+                string fileOverrideFileName = null;
+
+                if (archive.Pre_Type == ArchiveFileType.KH_KW)
+                {
+                    var entry = archive.OffsetTable.KH_KW_Entries[fileIndex];
+                    fileOverrideFileName = $"Map {entry.MapID1}-{entry.MapID2}-{entry.MapID3}";
+                }
+
+                AddNavigationItem(navItem.NavigationItems, fileName, file, archive, fileOverrideFileName);
+            }
         }
 
         #endregion
@@ -356,6 +368,7 @@ namespace KlonoaHeroesPatcher
                     AddNavigationItem(NavigationItems, nameof(ROM.ItemsPack), ROM.ItemsPack, null);
                     AddNavigationItem(NavigationItems, nameof(ROM.UIPack), ROM.UIPack, null);
                     AddNavigationItem(NavigationItems, nameof(ROM.StoryPack), ROM.StoryPack, null);
+                    AddNavigationItem(NavigationItems, nameof(ROM.MapsPack), ROM.MapsPack, null);
 
                     // Create the patches
                     var patches = new Patch[]

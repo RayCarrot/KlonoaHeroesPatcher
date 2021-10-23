@@ -12,7 +12,7 @@ namespace KlonoaHeroesPatcher
 {
     public class NavigationItemViewModel : BaseViewModel
     {
-        public NavigationItemViewModel(string title, PackIconMaterialKind icon, Color iconColor, ObservableCollection<DuoGridItemViewModel> fileInfo, BinarySerializable serializableObject, ArchiveFile parentArchiveFile, FileEditorViewModel editorViewModel, bool relocated)
+        public NavigationItemViewModel(string title, PackIconMaterialKind icon, Color iconColor, ObservableCollection<DuoGridItemViewModel> fileInfo, BinarySerializable serializableObject, ArchiveFile parentArchiveFile, FileEditorViewModel editorViewModel, bool relocated, string overrideFileName = null)
         {
             Title = title;
             Icon = icon;
@@ -22,6 +22,7 @@ namespace KlonoaHeroesPatcher
             ParentArchiveFile = parentArchiveFile;
             EditorViewModel = editorViewModel;
             Relocated = relocated;
+            OverrideFileName = overrideFileName;
             NavigationItems = new ObservableCollection<NavigationItemViewModel>();
 
             ExportBinaryCommand = new RelayCommand(ExportBinary);
@@ -49,6 +50,8 @@ namespace KlonoaHeroesPatcher
         public Pointer Offset { get; }
         public FileEditorViewModel EditorViewModel { get; }
         public bool Relocated { get; }
+        public string OverrideFileName { get; }
+
         public bool IsSelected
         {
             get => _isSelected;
@@ -69,7 +72,7 @@ namespace KlonoaHeroesPatcher
         public bool CanExportBinary => SerializableObject is BaseFile f && f.Pre_FileSize != -1 && Offset != null;
         public bool CanImportBinary => CanExportBinary && SerializableObject is not ArchiveFile;
 
-        public string DisplayName => $"{Offset?.StringAbsoluteOffset ?? (IsNull ? "NULL" : "_")} ({Title})";
+        public string DisplayName => $"{Offset?.StringAbsoluteOffset ?? (IsNull ? "NULL" : "_")} ({OverrideFileName ?? Title})";
         public ObservableCollection<NavigationItemViewModel> NavigationItems { get; }
 
         public void RelocateFile(BinarySerializable obj = null)

@@ -56,6 +56,14 @@ namespace KlonoaHeroesPatcher
                             });
                             break;
 
+                        case ArchiveFileType.KH_KW:
+                            s.DoAt(parentArchiveFile.OffsetTable.KH_KW_FileOffsetsPointer + (fileIndex * 16) + 4, () =>
+                            {
+                                // Update the offset to point to the new location
+                                s.Serialize<uint>((uint)(newPointer.AbsoluteOffset - anchor.AbsoluteOffset));
+                            });
+                            break;
+
                         default:
                             throw new Exception($"Unsupported archive type {parentArchiveFile.Pre_Type}");
                     }
