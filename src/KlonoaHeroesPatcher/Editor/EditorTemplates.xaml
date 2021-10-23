@@ -493,6 +493,20 @@
                                RenderOptions.BitmapScalingMode="NearestNeighbor" />
                     </Border>
 
+                    <StackPanel Orientation="Horizontal"
+                                Margin="0 0 0 5"
+                                DataContext="{Binding Path=SelectedAnimation}">
+
+                        <Button Content="Export"
+                                Command="{Binding Path=ExportCommand, Mode=OneTime}"
+                                Margin="0 0 5 0" />
+
+                        <Button Content="Export frames"
+                                Command="{Binding Path=ExportFramesCommand, Mode=OneTime}"
+                                Margin="0 0 5 0" />
+
+                    </StackPanel>
+
                     <ComboBox ItemsSource="{Binding Path=Animations}"
                               SelectedItem="{Binding Path=SelectedAnimation}"
                               Margin="0 0 0 5">

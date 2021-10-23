@@ -1,8 +1,14 @@
-﻿using System.IO;
-using System.Linq;
+﻿using BinarySerializer;
 using BinarySerializer.GBA;
 using BinarySerializer.Klonoa.KH;
 using ImageMagick;
+using Microsoft.Win32;
+using System;
+using System.IO;
+using System.Linq;
+using System.Windows;
+using System.Windows.Input;
+using Microsoft.WindowsAPICodePack.Dialogs;
 
 namespace KlonoaHeroesPatcher
 {
@@ -14,7 +20,13 @@ namespace KlonoaHeroesPatcher
             AnimGroup = group;
             AnimIndex = anim;
             Animation = animationFile.AnimationGroups[group].Animations[anim];
+
+            ExportCommand = new RelayCommand(Export);
+            ExportFramesCommand = new RelayCommand(ExportFrames);
         }
+
+        public ICommand ExportCommand { get; }
+        public ICommand ExportFramesCommand { get; }
 
         public Animation_File AnimationFile { get; }
         public int AnimGroup { get; }
@@ -39,9 +51,9 @@ namespace KlonoaHeroesPatcher
         public Stream GIFStream { get; set; }
         public double Width { get; set; }
 
-        public void RefreshGIF()
+        public MagickImageCollection GetImageCollection()
         {
-            using var collection = new MagickImageCollection();
+            var collection = new MagickImageCollection();
 
             int minX = Animation.Frames.SelectMany(x => x.Sprites).Min(x => x.XPos);
             int minY = Animation.Frames.SelectMany(x => x.Sprites).Min(x => x.YPos);
@@ -62,22 +74,22 @@ namespace KlonoaHeroesPatcher
                     int tileLength = (int)(TileGraphicsHelpers.TileWidth * TileGraphicsHelpers.TileHeight * bppFactor);
                     GBAConstants.Size shape = GBAConstants.GetSpriteShape(sprite.ObjAttr.SpriteShape, sprite.ObjAttr.SpriteSize);
                     int offset = (int)sprite.TileSetOffset;
-                    
+
                     for (int y = 0; y < shape.Height; y += TileGraphicsHelpers.TileHeight)
                     {
                         for (int x = 0; x < shape.Width; x += TileGraphicsHelpers.TileWidth)
                         {
                             TileGraphicsHelpers.DrawTileToRGBAImg(
-                                tileSet: AnimationFile.TileSet, 
-                                tileSetOffset: offset, 
-                                tileSetBpp: bpp, 
-                                flipX: sprite.ObjAttr.HorizontalFlip, 
-                                flipY: sprite.ObjAttr.VerticalFlip, 
-                                imgData: imgData, 
-                                xPos: sprite.XPos + (sprite.ObjAttr.HorizontalFlip ? shape.Width - x - TileGraphicsHelpers.TileWidth : x) - minX, 
-                                yPos: sprite.YPos + (sprite.ObjAttr.VerticalFlip ? shape.Height - y - TileGraphicsHelpers.TileHeight : y) - minY, 
-                                imgWidth: width, 
-                                palette: AnimationFile.Palette, 
+                                tileSet: AnimationFile.TileSet,
+                                tileSetOffset: offset,
+                                tileSetBpp: bpp,
+                                flipX: sprite.ObjAttr.HorizontalFlip,
+                                flipY: sprite.ObjAttr.VerticalFlip,
+                                imgData: imgData,
+                                xPos: sprite.XPos + (sprite.ObjAttr.HorizontalFlip ? shape.Width - x - TileGraphicsHelpers.TileWidth : x) - minX,
+                                yPos: sprite.YPos + (sprite.ObjAttr.VerticalFlip ? shape.Height - y - TileGraphicsHelpers.TileHeight : y) - minY,
+                                imgWidth: width,
+                                palette: AnimationFile.Palette,
                                 basePalette: sprite.PaletteIndex);
 
                             offset += tileLength;
@@ -101,11 +113,79 @@ namespace KlonoaHeroesPatcher
             }
 
             Width = width;
+            return collection;
+        }
 
+        public void RefreshGIF()
+        {
+            GIFStream?.Dispose();
+            using var collection = GetImageCollection();
             var gifStream = new MemoryStream();
             collection.Write(gifStream, MagickFormat.Gif);
             gifStream.Position = 0;
             GIFStream = gifStream;
+        }
+
+        public void Export()
+        {
+            Pointer offset = BinaryHelpers.GetROMPointer(AnimationFile.Offset);
+
+            var dialog = new SaveFileDialog()
+            {
+                Title = "Export animation",
+                Filter = "GIF Files (*.gif)|*.gif",
+                FileName = $"{offset.StringAbsoluteOffset}.gif"
+            };
+
+            var result = dialog.ShowDialog();
+
+            if (result != true)
+                return;
+
+            try
+            {
+                using var collection = GetImageCollection();
+                collection.Write(dialog.FileName, MagickFormat.Gif);
+
+                MessageBox.Show($"The animation was successfully exported");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"An error occurred when exporting. Error: {ex.Message}", "Error exporting", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        public void ExportFrames()
+        {
+            using var dialog = new CommonOpenFileDialog
+            {
+                Title = "Export animation frames",
+                AllowNonFileSystemItems = false,
+                IsFolderPicker = true,
+                EnsureFileExists = true,
+                EnsurePathExists = true
+            };
+
+            var result = dialog.ShowDialog();
+
+            if (result != CommonFileDialogResult.Ok)
+                return;
+
+            try
+            {
+                using var collection = GetImageCollection();
+                for (int i = 0; i < collection.Count; i++)
+                {
+                    var img = collection[i];
+                    img.Write(Path.Combine(dialog.FileName, $"{i}.png"), MagickFormat.Png);
+                }
+
+                MessageBox.Show($"The animation frames were successfully exported");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"An error occurred when exporting. Error: {ex.Message}", "Error exporting", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
     }
 }

@@ -17,6 +17,7 @@
     <PackageReference Include="Magick.NET-Q8-x64" Version="8.3.3" />
     <PackageReference Include="MahApps.Metro" Version="2.4.7" />
     <PackageReference Include="MahApps.Metro.IconPacks.Material" Version="4.10.0" />
+    <PackageReference Include="Microsoft-WindowsAPICodePack-Shell" Version="1.1.4" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="NLog" Version="4.7.11" />
     <PackageReference Include="PropertyChanged.Fody" Version="3.4.0" />
