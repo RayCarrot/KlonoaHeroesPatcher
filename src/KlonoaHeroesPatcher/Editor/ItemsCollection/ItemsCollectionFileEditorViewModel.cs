@@ -92,15 +92,12 @@ namespace KlonoaHeroesPatcher
                 Item_Category.I => new ObservableCollection<ItemValueIntFieldViewModel>()
                 {
                     new ItemValueIntFieldViewModel("Price", (int) SelectedItem.Item.Price, x => SelectedItem.Item.Price = (uint) x),
-                    new ItemValueIntFieldViewModel("Effect Type", SelectedItem.Item.I_EffectType, x => SelectedItem.Item.I_EffectType = (ushort) x),
+                    new ItemValueIntFieldViewModel("Icon", SelectedItem.Item.I_IconIndex, x => SelectedItem.Item.I_IconIndex = (ushort) x),
                     new ItemValueIntFieldViewModel("Unknown", SelectedItem.Item.I_Unknown, x => SelectedItem.Item.I_Unknown = (ushort) x),
                 },
                 Item_Category.E => new ObservableCollection<ItemValueIntFieldViewModel>()
                 {
-                    new ItemValueIntFieldViewModel("Unknown 1", SelectedItem.Item.E_Unknown1, x => SelectedItem.Item.E_Unknown1 = (ushort) x),
-                    new ItemValueIntFieldViewModel("Unknown 2", SelectedItem.Item.E_Unknown2, x => SelectedItem.Item.E_Unknown2 = (ushort) x),
-                    new ItemValueIntFieldViewModel("Unknown 3", SelectedItem.Item.E_Unknown3, x => SelectedItem.Item.E_Unknown3 = (ushort) x),
-                    new ItemValueIntFieldViewModel("Unknown 4", SelectedItem.Item.E_Unknown4, x => SelectedItem.Item.E_Unknown4 = (ushort) x),
+                    new ItemValueIntFieldViewModel("Icon", SelectedItem.Item.E_IconIndex, x => SelectedItem.Item.E_IconIndex = (ushort) x),
                 },
                 _ => throw new ArgumentOutOfRangeException()
             };
