@@ -330,6 +330,9 @@ namespace KlonoaHeroesPatcher
                     var settings = new KlonoaSettings_KH();
                     Context.AddKlonoaSettings(settings);
 
+                    // Add the pointers
+                    Context.AddPreDefinedPointers(DefinedPointers.GBA_JP);
+
                     // Add the ROM to the context
                     var romFile = new MemoryMappedFile(Context, romName, GBAConstants.Address_ROM);
                     Context.AddFile(romFile);
@@ -353,7 +356,7 @@ namespace KlonoaHeroesPatcher
                     var s = Context.Deserializer;
 
                     // Read the maps pack as raw data
-                    var rawMapsPack = s.DoAt(new Pointer(0x08b30fd0, ROM.Offset.File), () => s.SerializeObject<ArchiveFile<RawData_File>>(default, x =>
+                    var rawMapsPack = s.DoAt(Context.GetPreDefinedPointer(DefinedPointer.MapsPack, ROM.Offset.File), () => s.SerializeObject<ArchiveFile<RawData_File>>(default, x =>
                     {
                         x.Pre_Type = ArchiveFileType.KH_KW;
                         x.Pre_ArchivedFilesEncoder = new BytePairEncoder();
