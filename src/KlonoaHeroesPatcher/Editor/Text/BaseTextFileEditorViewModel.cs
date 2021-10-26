@@ -57,7 +57,7 @@ namespace KlonoaHeroesPatcher
         }
 
         protected abstract IEnumerable<TextCommands> GetTextCommands();
-        protected abstract void RelocateTextCommands();
+        protected virtual void RelocateTextCommands() => RelocateFile();
 
         public class TextItemViewModel : BaseViewModel
         {

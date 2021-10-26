@@ -146,6 +146,12 @@ namespace KlonoaHeroesPatcher
                 icon = PackIconMaterialKind.FileDocumentOutline;
                 iconColor = Color.FromRgb(0x4C, 0xAF, 0x50);
             }
+            else if (obj is TextCollection_File)
+            {
+                editor = new TextCollectionFileEditorViewModel();
+                icon = PackIconMaterialKind.FileDocumentMultipleOutline;
+                iconColor = Color.FromRgb(0x4C, 0xAF, 0x50);
+            }
             else if (obj is ItemsCollection_File)
             {
                 editor = new ItemsCollectionFileEditorViewModel();

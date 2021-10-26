@@ -11,11 +11,5 @@ namespace KlonoaHeroesPatcher
         {
             TextFile
         };
-
-        protected override void RelocateTextCommands()
-        {
-            // Relocate the data
-            RelocateFile();
-        }
     }
 }
