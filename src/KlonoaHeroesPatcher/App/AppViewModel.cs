@@ -137,7 +137,7 @@ namespace KlonoaHeroesPatcher
             else if (obj is Cutscene_File)
             {
                 editor = new CutsceneFileEditorViewModel();
-                icon = PackIconMaterialKind.FileDocumentMultipleOutline;
+                icon = PackIconMaterialKind.FileVideoOutline;
                 iconColor = Color.FromRgb(0x8B, 0xC3, 0x4A);
             }
             else if (obj is TextCommands)
