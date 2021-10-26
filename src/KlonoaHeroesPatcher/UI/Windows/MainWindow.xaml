@@ -50,17 +50,22 @@
                           ToolTip="Generates a config file which can be modified to change certain configurations for this app"
                           Icon="{iconPacks:Material FileSettingsOutline}"
                           Command="{Binding Path=GenerateConfigCommand, Mode=OneTime}"/>
+                <Separator />
+                <MenuItem Header="View maps (Ray1Map)"
+                          Icon="{iconPacks:Material MapMarkerOutline}"
+                          Command="{Binding Path=OpenURLCommand, Mode=OneTime}"
+                          CommandParameter="{x:Static local:URLs.Ray1Map_KlonoaHeroes}"/>
             </MenuItem>
 
             <MenuItem Header="Help">
                 <MenuItem Header="GitHub (BinarySerializer.Klonoa)"
                           Icon="{iconPacks:Material Github}"
                           Command="{Binding Path=OpenURLCommand, Mode=OneTime}"
-                          CommandParameter="https://github.com/RayCarrot/BinarySerializer.Klonoa"/>
+                          CommandParameter="{x:Static local:URLs.GitHub_BinarySerializer_Klonoa}"/>
                 <MenuItem Header="GitHub (Klonoa Heroes Patcher)"
                           Icon="{iconPacks:Material Github}"
                           Command="{Binding Path=OpenURLCommand, Mode=OneTime}"
-                          CommandParameter="https://github.com/RayCarrot/KlonoaHeroesPatcher" />
+                          CommandParameter="{x:Static local:URLs.GitHub_KlonoaHeroesPatcher}" />
             </MenuItem>
         </Menu>
 
