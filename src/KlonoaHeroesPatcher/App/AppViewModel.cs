@@ -342,12 +342,24 @@ namespace KlonoaHeroesPatcher
                         GroupBy(x => x.ParentArchivePointer).
                         ToDictionary(x => x.Key, x => new HashSet<KlonoaSettings.RelocatedFile>(x.Select(r => new KlonoaSettings.RelocatedFile(r.OriginalPointer, r.NewPointer, r.DataSize))));
 
-                    // Read the ROM
-                    ROM = FileFactory.Read<KlonoaHeroesROM>(romName, Context);
+                    KlonoaHeroesROM.SerializeDataFlags serializeFlags = KlonoaHeroesROM.SerializeDataFlags.Packs;
+                    
+                    // Don't parse the map pack normally since it's too slow (due to the map tile objects)
+                    serializeFlags &= ~KlonoaHeroesROM.SerializeDataFlags.MapsPack;
 
-                    Logger.Info("Read ROM with {0} relocated structs", Footer.RelocatedStructsCount);
+                    // Read the ROM
+                    ROM = FileFactory.Read<KlonoaHeroesROM>(romName, Context, (_, r) => r.Pre_SerializeFlags = serializeFlags);
 
                     var s = Context.Deserializer;
+
+                    // Read the maps pack as raw data
+                    var rawMapsPack = s.DoAt(new Pointer(0x08b30fd0, ROM.Offset.File), () => s.SerializeObject<ArchiveFile<RawData_File>>(default, x =>
+                    {
+                        x.Pre_Type = ArchiveFileType.KH_KW;
+                        x.Pre_ArchivedFilesEncoder = new BytePairEncoder();
+                    }, name: "RawMapsPack"));
+
+                    Logger.Info("Read ROM with {0} relocated structs", Footer.RelocatedStructsCount);
 
                     foreach (PatchedFooter.RelocatedStruct relocatedStruct in Footer.RelocatedStructs)
                     {
@@ -368,7 +380,7 @@ namespace KlonoaHeroesPatcher
                     AddNavigationItem(NavigationItems, nameof(ROM.ItemsPack), ROM.ItemsPack, null);
                     AddNavigationItem(NavigationItems, nameof(ROM.UIPack), ROM.UIPack, null);
                     AddNavigationItem(NavigationItems, nameof(ROM.StoryPack), ROM.StoryPack, null);
-                    AddNavigationItem(NavigationItems, nameof(ROM.MapsPack), ROM.MapsPack, null);
+                    AddNavigationItem(NavigationItems, nameof(ROM.MapsPack), rawMapsPack, null);
 
                     // Create the patches
                     var patches = new Patch[]
