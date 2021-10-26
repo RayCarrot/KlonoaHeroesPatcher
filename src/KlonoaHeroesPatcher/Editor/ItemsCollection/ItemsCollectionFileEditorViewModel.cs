@@ -36,8 +36,8 @@ namespace KlonoaHeroesPatcher
         protected override IEnumerable<TextCommands> GetTextCommands() => new TextCommands[]
         {
             SelectedItem.Item.Name,
-            SelectedItem.Item.Description1,
-            SelectedItem.Item.Description2,
+            SelectedItem.Item.Description,
+            SelectedItem.Item.ShopDescription,
         };
 
         protected override void Load(bool firstLoad)
@@ -80,14 +80,14 @@ namespace KlonoaHeroesPatcher
                 Item_Category.A => new ObservableCollection<ItemValueIntFieldViewModel>()
                 {
                     new ItemValueIntFieldViewModel("Price", (int) SelectedItem.Item.Price, x => SelectedItem.Item.Price = (uint) x),
-                    new ItemValueIntFieldViewModel("Effect Type", SelectedItem.Item.A_EffectType, x => SelectedItem.Item.A_EffectType = (ushort) x),
+                    new ItemValueIntFieldViewModel("Icon", SelectedItem.Item.A_IconIndex, x => SelectedItem.Item.A_IconIndex = (ushort) x),
                     new ItemValueIntFieldViewModel("AT", SelectedItem.Item.A_AT, x => SelectedItem.Item.A_AT = (short) x),
                     new ItemValueIntFieldViewModel("SP", SelectedItem.Item.A_SP, x => SelectedItem.Item.A_SP = (short) x),
                     new ItemValueIntFieldViewModel("DF", SelectedItem.Item.A_DF, x => SelectedItem.Item.A_DF = (short) x),
                     new ItemValueIntFieldViewModel("AG", SelectedItem.Item.A_AG, x => SelectedItem.Item.A_AG = (short) x),
                     new ItemValueIntFieldViewModel("HP", SelectedItem.Item.A_HP, x => SelectedItem.Item.A_HP = (short) x),
-                    new ItemValueIntFieldViewModel("Unknown", SelectedItem.Item.A_Unknown, x => SelectedItem.Item.A_Unknown = (ushort) x),
-                    new ItemValueIntFieldViewModel("Effect Param", SelectedItem.Item.A_EffectParam, x => SelectedItem.Item.A_EffectParam = (ushort) x),
+                    new ItemValueIntFieldViewModel("Unknown", SelectedItem.Item.A_Unknown1, x => SelectedItem.Item.A_Unknown1 = (ushort) x),
+                    new ItemValueIntFieldViewModel("Unknown", SelectedItem.Item.A_Unknown2, x => SelectedItem.Item.A_Unknown2 = (ushort) x),
                 },
                 Item_Category.I => new ObservableCollection<ItemValueIntFieldViewModel>()
                 {
