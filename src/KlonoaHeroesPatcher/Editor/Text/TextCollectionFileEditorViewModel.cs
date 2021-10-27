@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using BinarySerializer.Klonoa.KH;
 
 namespace KlonoaHeroesPatcher
@@ -7,6 +8,6 @@ namespace KlonoaHeroesPatcher
     {
         public TextCollection_File TextFile => (TextCollection_File)SerializableObject;
 
-        protected override IEnumerable<TextCommands> GetTextCommands() => TextFile.Text;
+        protected override IEnumerable<TextItemViewModel> GetTextCommandViewModels() => TextFile.Text.Select((x, i) => new TextItemViewModel(this, x, $"{i}"));
     }
 }

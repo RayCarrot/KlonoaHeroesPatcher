@@ -3,43 +3,54 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using BinarySerializer;
 
 namespace KlonoaHeroesPatcher
 {
     public class CutsceneFileEditorViewModel : BaseTextFileEditorViewModel
     {
         public Cutscene_File CutsceneFile => (Cutscene_File)SerializableObject;
-        public CutsceneTextOnly_File CutsceneTextOnly { get; set; }
         
         public string ScriptText { get; set; }
 
         protected override void Load(bool firstLoad)
         {
-            if (firstLoad)
-            {
-                using (AppViewModel.Current.Context)
-                {
-                    var s = AppViewModel.Current.Context.Deserializer;
-                    s.Goto(CutsceneFile.Offset);
-                    var scriptsLength = CutsceneFile.Commands.First(x => x.Type == CutsceneCommand.CommandType.SetText).TextCommands.Commands.First().Offset.FileOffset - CutsceneFile.Offset.FileOffset;
-                    CutsceneTextOnly = s.SerializeObject<CutsceneTextOnly_File>(default, x => x.Pre_ScriptsLength = scriptsLength, name: nameof(CutsceneTextOnly));
-                }
-            }
-
             base.Load(firstLoad);
 
             RefreshScripts();
         }
 
-        protected override IEnumerable<TextCommands> GetTextCommands() => new TextCommands[]
+        protected override IEnumerable<TextItemViewModel> GetTextCommandViewModels()
         {
-            CutsceneTextOnly.TextCommands
-        };
+            foreach (CutsceneCommand cmd in CutsceneFile.Commands)
+            {
+                if (cmd.TextCommands != null)
+                    yield return new TextItemViewModel(this, cmd.TextCommands, getRelativeOffset(cmd.TextCommands.Offset));
+
+                if (cmd.TextCommandsArray != null)
+                {
+                    for (var i = 0; i < cmd.TextCommandsArray.Files.Length; i++)
+                    {
+                        TextCommands txtCmd = cmd.TextCommandsArray.Files[i];
+
+                        if (txtCmd == null)
+                            continue;
+
+                        yield return new TextItemViewModel(this, txtCmd, $"{getRelativeOffset(txtCmd.Offset)}[{i}]");
+                    }
+                }
+            }
+
+            string getRelativeOffset(Pointer offset) => $"0x{offset.FileOffset - CutsceneFile.Offset.FileOffset:X4}";
+        }
 
         protected override void RelocateTextCommands()
         {
+            // TODO: Update command offsets
+            throw new NotImplementedException();
+
             // Relocate the data
-            RelocateFile(CutsceneTextOnly);
+            RelocateFile();
         }
 
         public void RefreshScripts()
@@ -52,10 +63,6 @@ namespace KlonoaHeroesPatcher
                 cmd.SerializeImpl(s);
 
                 appendScriptLine(1, cmd);
-
-                if (cmd.SubCommands != null)
-                    foreach (CutsceneCommand subCmd in cmd.SubCommands)
-                        appendScriptLine(2, subCmd);
             }
 
             ScriptText = scriptStr.ToString();

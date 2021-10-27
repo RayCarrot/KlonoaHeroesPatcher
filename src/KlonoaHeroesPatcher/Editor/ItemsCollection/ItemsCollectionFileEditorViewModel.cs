@@ -33,11 +33,11 @@ namespace KlonoaHeroesPatcher
             }
         }
 
-        protected override IEnumerable<TextCommands> GetTextCommands() => new TextCommands[]
+        protected override IEnumerable<TextItemViewModel> GetTextCommandViewModels() => new TextItemViewModel[]
         {
-            SelectedItem.Item.Name,
-            SelectedItem.Item.Description,
-            SelectedItem.Item.ShopDescription,
+            new TextItemViewModel(this, SelectedItem.Item.Name, "Name"),
+            new TextItemViewModel(this, SelectedItem.Item.Description, "Description"),
+            new TextItemViewModel(this, SelectedItem.Item.ShopDescription, "Shop Description"),
         };
 
         protected override void Load(bool firstLoad)

@@ -7,9 +7,9 @@ namespace KlonoaHeroesPatcher
     {
         public TextCommands TextFile => (TextCommands)SerializableObject;
 
-        protected override IEnumerable<TextCommands> GetTextCommands() => new TextCommands[]
+        protected override IEnumerable<TextItemViewModel> GetTextCommandViewModels() => new TextItemViewModel[]
         {
-            TextFile
+            new TextItemViewModel(this, TextFile, null)
         };
     }
 }

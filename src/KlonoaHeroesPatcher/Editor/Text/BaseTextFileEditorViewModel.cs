@@ -40,10 +40,12 @@ namespace KlonoaHeroesPatcher
         public ObservableCollection<DuoGridItemViewModel> AllowedCommandsInfo { get; }
 
         public ObservableCollection<TextItemViewModel> TextItems { get; set; }
+        public TextItemViewModel SelectedTextItem { get; set; }
+        public bool HasMultipleTextItems { get; set; }
 
         protected override void Load(bool firstLoad)
         {
-            TextItems = new ObservableCollection<TextItemViewModel>(GetTextCommands().Select(x => new TextItemViewModel(this, x)));
+            TextItems = new ObservableCollection<TextItemViewModel>(GetTextCommandViewModels());
 
             foreach (TextItemViewModel textItem in TextItems)
             {
@@ -52,21 +54,25 @@ namespace KlonoaHeroesPatcher
                 textItem.RefreshTextPreview();
             }
 
+            SelectedTextItem = TextItems.First();
+            HasMultipleTextItems = TextItems.Count > 1;
+
             if (firstLoad)
                 AllowedCharactersInfo = new ObservableCollection<DuoGridItemViewModel>(AppViewModel.Current.Config.FontTable.Select(x => new DuoGridItemViewModel($"{x.Key:X4}", String.Join(", ", x.Value))));
         }
 
-        protected abstract IEnumerable<TextCommands> GetTextCommands();
+        protected abstract IEnumerable<TextItemViewModel> GetTextCommandViewModels();
         protected virtual void RelocateTextCommands() => RelocateFile();
 
         public class TextItemViewModel : BaseViewModel
         {
             #region Constructor
 
-            public TextItemViewModel(BaseTextFileEditorViewModel editorViewModel, TextCommands textCommands)
+            public TextItemViewModel(BaseTextFileEditorViewModel editorViewModel, TextCommands textCommands, string displayName)
             {
                 EditorViewModel = editorViewModel;
-                TextCommands = textCommands;
+                TextCommands = textCommands ?? throw new ArgumentNullException(nameof(textCommands));
+                DisplayName = displayName;
 
                 ApplyTextChangesCommand = new RelayCommand(ApplyModifiedText);
             }
@@ -83,9 +89,9 @@ namespace KlonoaHeroesPatcher
 
             public BaseTextFileEditorViewModel EditorViewModel { get; }
             public TextCommands TextCommands { get; }
+            public string DisplayName { get; }
 
             private string _text;
-
             public string Text
             {
                 get => _text;
