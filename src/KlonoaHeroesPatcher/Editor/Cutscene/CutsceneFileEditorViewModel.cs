@@ -103,7 +103,7 @@ namespace KlonoaHeroesPatcher
                         if (file == null)
                             continue;
 
-                        cmd.TextCommandsArray.OffsetTable.FilePointers[i] = offset.SetAnchor(anchor);
+                        cmd.TextCommandsArray.OffsetTable.FilePointers[i] = new Pointer(offset.AbsoluteOffset, offset.File, anchor, offset.Size, Pointer.OffsetType.Absolute);
 
                         file.RecalculateSize();
                         offset += file.Size;
