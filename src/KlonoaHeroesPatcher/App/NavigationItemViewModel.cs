@@ -81,7 +81,7 @@ namespace KlonoaHeroesPatcher
         public string DisplayName => $"{Offset?.StringAbsoluteOffset ?? (IsNull ? "NULL" : "_")} ({OverrideFileName ?? Title})";
         public ObservableCollection<NavigationItemViewModel> NavigationItems { get; }
 
-        public void RelocateFile(BinarySerializable obj = null)
+        public void RelocateFile()
         {
             if (IsNull || Offset == null)
             {
@@ -89,11 +89,9 @@ namespace KlonoaHeroesPatcher
                 return;
             }
 
-            obj ??= SerializableObject;
-
-            AppViewModel.Current.AddRelocatedData(new RelocatedData(obj, ParentArchiveFile)
+            AppViewModel.Current.AddRelocatedData(new RelocatedData(SerializableObject, ParentArchiveFile)
             {
-                Encoder = (obj as BaseFile)?.Pre_FileEncoder,
+                Encoder = (SerializableObject as BaseFile)?.Pre_FileEncoder,
             });
             UnsavedChanges = true;
         }

@@ -77,9 +77,11 @@ namespace KlonoaHeroesPatcher
 
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
-        public BinarySerializable Obj { get; }
-        public ArchiveFile ParentArchiveFile { get; }
-        public UpdateRefs UpdateRefsAction { get; }
+        protected BinarySerializable Obj { get; }
+        protected ArchiveFile ParentArchiveFile { get; }
+        protected UpdateRefs UpdateRefsAction { get; }
+
+        public Pointer Offset => Obj.Offset;
         public Pointer OriginPointer { get; init; } // Only specified if it's not new data
         public bool IsNewData => OriginPointer == null; // Indicates if this data is being relocated first time. Otherwise it has been relocated before.
         public IStreamEncoder Encoder { get; init; }

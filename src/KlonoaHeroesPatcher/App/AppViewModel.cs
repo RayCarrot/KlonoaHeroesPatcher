@@ -143,7 +143,7 @@ namespace KlonoaHeroesPatcher
                 icon = PackIconMaterialKind.FileVideoOutline;
                 iconColor = Color.FromRgb(0x8B, 0xC3, 0x4A);
             }
-            else if (obj is TextCommands)
+            else if (obj is TextCommands_File)
             {
                 editor = new TextFileEditorViewModel();
                 icon = PackIconMaterialKind.FileDocumentOutline;
@@ -609,7 +609,7 @@ namespace KlonoaHeroesPatcher
 
         public void AddRelocatedData(RelocatedData data)
         {
-            RelocatedData existingData = PendingRelocatedData.FirstOrDefault(x => x.Obj.Offset == data.Obj.Offset);
+            RelocatedData existingData = PendingRelocatedData.FirstOrDefault(x => x.Offset == data.Offset);
 
             if (existingData != null)
             {
@@ -623,9 +623,9 @@ namespace KlonoaHeroesPatcher
             }
 
             if (existingData != null)
-                Logger.Info("Replaced relocated data from 0x{0} with origin 0x{1}", data.Obj.Offset.StringAbsoluteOffset, data.OriginPointer?.StringAbsoluteOffset);
+                Logger.Info("Replaced relocated data from 0x{0} with origin 0x{1}", data.Offset.StringAbsoluteOffset, data.OriginPointer?.StringAbsoluteOffset);
             else
-                Logger.Info("Added relocated data from 0x{0} with origin 0x{1}", data.Obj.Offset.StringAbsoluteOffset, data.OriginPointer?.StringAbsoluteOffset);
+                Logger.Info("Added relocated data from 0x{0} with origin 0x{1}", data.Offset.StringAbsoluteOffset, data.OriginPointer?.StringAbsoluteOffset);
 
             PendingRelocatedData.Add(data);
         }

@@ -5,11 +5,11 @@ namespace KlonoaHeroesPatcher
 {
     public class TextFileEditorViewModel : BaseTextFileEditorViewModel
     {
-        public TextCommands TextFile => (TextCommands)SerializableObject;
+        public TextCommands_File TextFile => (TextCommands_File)SerializableObject;
 
         protected override IEnumerable<TextItemViewModel> GetTextCommandViewModels() => new TextItemViewModel[]
         {
-            new TextItemViewModel(this, TextFile, null)
+            new TextItemViewModel(this, TextFile.TextCommands, null)
         };
     }
 }
