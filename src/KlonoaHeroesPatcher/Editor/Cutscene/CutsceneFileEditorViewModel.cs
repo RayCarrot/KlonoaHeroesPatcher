@@ -22,32 +22,100 @@ namespace KlonoaHeroesPatcher
 
         protected override IEnumerable<TextItemViewModel> GetTextCommandViewModels()
         {
-            foreach (CutsceneCommand cmd in CutsceneFile.Commands)
-            {
-                if (cmd.TextCommands != null)
-                    yield return new TextItemViewModel(this, cmd.TextCommands, getRelativeOffset(cmd.TextCommands.Offset));
+            IEnumerable<TextItemViewModel> textCommands = CutsceneFile.Commands.
+                Select(x => x.TextCommands).
+                Where(x => x != null).
+                Distinct().
+                Select(x => new TextItemViewModel(this, x, getRelativeOffset(x.Offset)));
 
-                if (cmd.TextCommandsArray != null)
-                {
-                    for (var i = 0; i < cmd.TextCommandsArray.Files.Length; i++)
-                    {
-                        TextCommands txtCmd = cmd.TextCommandsArray.Files[i];
+            IEnumerable<TextItemViewModel> textArrayCommands = CutsceneFile.Commands.
+                Select(x => x.TextCommandsArray).
+                Where(x => x != null).
+                Distinct().
+                SelectMany(x => x.Files.
+                    Select((f, i) => new { File = f, Index = i}).
+                    Where(f => f.File != null).
+                    Select(f => new TextItemViewModel(this, f.File, $"{getRelativeOffset(f.File.Offset)}[{f.Index}]")));
 
-                        if (txtCmd == null)
-                            continue;
-
-                        yield return new TextItemViewModel(this, txtCmd, $"{getRelativeOffset(txtCmd.Offset)}[{i}]");
-                    }
-                }
-            }
+            return textCommands.Concat(textArrayCommands);
 
             string getRelativeOffset(Pointer offset) => $"0x{offset.FileOffset - CutsceneFile.Offset.FileOffset:X4}";
         }
 
         protected override void RelocateTextCommands()
         {
-            // TODO: Update command offsets
-            throw new NotImplementedException();
+            Pointer offset = CutsceneFile.Commands.Last().Offset + CutsceneFile.Commands.Last().Size;
+            Dictionary<object, long> newTextOffsets = new Dictionary<object, long>();
+
+            align();
+
+            // Re-locate text
+            foreach (CutsceneCommand cmd in CutsceneFile.Commands.Where(x => x.Type == CutsceneCommand.CommandType.SetText).Reverse())
+            {
+                if (newTextOffsets.ContainsKey(cmd.TextCommands))
+                {
+                    cmd.TextOffsetOffset = (short)((newTextOffsets[cmd.TextCommands] - cmd.Offset.FileOffset) / 4);
+                    cmd.TextOffset = 1;
+                }
+                else
+                {
+                    cmd.TextOffsetOffset = (short)((offset.FileOffset - cmd.Offset.FileOffset) / 4);
+                    cmd.TextOffset = 1;
+
+                    newTextOffsets[cmd.TextCommands] = offset.FileOffset;
+                    
+                    cmd.TextCommands.RecalculateSize();
+                    offset += 4 + cmd.TextCommands.Size;
+                    align();
+                }
+            }
+
+            // Re-locate text arrays
+            foreach (CutsceneCommand cmd in CutsceneFile.Commands.Where(x => x.Type == CutsceneCommand.CommandType.SetTextMulti).Reverse())
+            {
+                if (newTextOffsets.ContainsKey(cmd.TextCommandsArray))
+                {
+                    cmd.TextOffsetOffset = (short)((newTextOffsets[cmd.TextCommandsArray] - cmd.Offset.FileOffset) / 4);
+                    cmd.TextOffset = 1;
+                }
+                else
+                {
+                    cmd.TextOffsetOffset = (short)((offset.FileOffset - cmd.Offset.FileOffset) / 4);
+                    cmd.TextOffset = 1;
+
+                    newTextOffsets[cmd.TextCommandsArray] = offset.FileOffset;
+
+                    offset += 4; // Text offset
+                    var anchor = offset;
+                    offset += cmd.TextCommandsArray.OffsetTable.Size;
+
+                    for (int i = 0; i < cmd.TextCommandsArray.Files.Length; i++)
+                    {
+                        TextCommands file = cmd.TextCommandsArray.Files[i];
+
+                        if (file == null)
+                            continue;
+
+                        cmd.TextCommandsArray.OffsetTable.FilePointers[i] = offset.SetAnchor(anchor);
+
+                        file.RecalculateSize();
+                        offset += file.Size;
+                        align();
+                    }
+
+                    cmd.TextCommandsArray.CalculateFileEndPointers();
+
+                    align();
+                }
+            }
+
+            void align()
+            {
+                if (offset.FileOffset % 4 != 0)
+                    offset += 4 - offset.FileOffset % 4;
+            }
+
+            CutsceneFile.Pre_FileSize = offset.FileOffset - CutsceneFile.Offset.FileOffset;
 
             // Relocate the data
             RelocateFile();
@@ -106,7 +174,7 @@ namespace KlonoaHeroesPatcher
                         break;
 
                     case CutsceneCommand.CommandType.FileReference:
-                        writeLine($"FILE REF {cmd.FileIndex_0}-{cmd.FileIndex_1}-{cmd.FileIndex_2}");
+                        writeLine($"FILE REF {cmd.FileIndex_0}-{cmd.FileIndex_1}-{cmd.FileIndex_2} {cmd.FileIndexRelated_3}");
                         break;
                     
                     case CutsceneCommand.CommandType.Blank_0:
