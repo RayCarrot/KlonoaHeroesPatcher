@@ -14,8 +14,10 @@ namespace KlonoaHeroesPatcher
 {
     public abstract class BaseTextFileEditorViewModel : FileEditorViewModel
     {
-        protected BaseTextFileEditorViewModel()
+        static BaseTextFileEditorViewModel()
         {
+            AllowedCharactersInfo = new ObservableCollection<DuoGridItemViewModel>(AppViewModel.Current.Config.FontTable.Select(x => new DuoGridItemViewModel($"{x.Key:X4}", String.Join(", ", x.Value))));
+
             AllowedCommandsInfo = new ObservableCollection<DuoGridItemViewModel>()
             {
                 new DuoGridItemViewModel("[END]", "End of the cutscene text. Should always be placed as the last command."),
@@ -36,8 +38,8 @@ namespace KlonoaHeroesPatcher
             };
         }
 
-        public ObservableCollection<DuoGridItemViewModel> AllowedCharactersInfo { get; set; }
-        public ObservableCollection<DuoGridItemViewModel> AllowedCommandsInfo { get; }
+        public static ObservableCollection<DuoGridItemViewModel> AllowedCharactersInfo { get; }
+        public static ObservableCollection<DuoGridItemViewModel> AllowedCommandsInfo { get; }
 
         public ObservableCollection<TextItemViewModel> TextItems { get; set; }
         public TextItemViewModel SelectedTextItem { get; set; }
@@ -57,8 +59,6 @@ namespace KlonoaHeroesPatcher
 
                 SelectedTextItem = TextItems.First();
                 HasMultipleTextItems = TextItems.Count > 1;
-
-                AllowedCharactersInfo = new ObservableCollection<DuoGridItemViewModel>(AppViewModel.Current.Config.FontTable.Select(x => new DuoGridItemViewModel($"{x.Key:X4}", String.Join(", ", x.Value))));
             }
 
             foreach (TextItemViewModel textItem in TextItems)
