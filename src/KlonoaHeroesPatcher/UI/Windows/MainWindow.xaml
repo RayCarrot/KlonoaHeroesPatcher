@@ -15,6 +15,7 @@
                    Foreground="{DynamicResource MahApps.Brushes.ThemeForeground}"
                    MinWidth="640" MinHeight="480"
                    Width="1024" Height="760" 
+                   IsEnabled="{Binding Path=IsLoading, Converter={local:InvertedBooleanConverter}}"
                    d:DataContext="{d:DesignInstance local:AppViewModel}">
     <Grid>
         <Grid.RowDefinitions>
@@ -233,6 +234,11 @@
             </TabItem>
 
         </metro:MetroAnimatedTabControl>
+
+        <metro:ProgressRing Grid.Row="1" 
+                            HorizontalAlignment="Center" 
+                            VerticalAlignment="Center"
+                            Visibility="{Binding Path=IsLoading, Converter={local:BooleanToVisibilityConverter}}"/>
 
     </Grid>
 </metro:MetroWindow>

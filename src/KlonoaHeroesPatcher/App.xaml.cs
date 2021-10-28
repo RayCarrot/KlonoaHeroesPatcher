@@ -21,12 +21,12 @@ namespace KlonoaHeroesPatcher
 
         public AppViewModel AppViewModel { get; }
 
-        private void App_Startup(object sender, StartupEventArgs e)
+        private async void App_Startup(object sender, StartupEventArgs e)
         {
             AppViewModel.Init();
 
             if (e.Args.Any())
-                AppViewModel.Load(e.Args[0]);
+                await AppViewModel.LoadAsync(e.Args[0]);
         }
 
         private void App_DispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)

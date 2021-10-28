@@ -14,6 +14,7 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -30,9 +31,9 @@ namespace KlonoaHeroesPatcher
             NavigationItems = new ObservableCollection<NavigationItemViewModel>();
             PatchViewModels = new ObservableCollection<PatchViewModel>();
             PendingRelocatedData = new List<RelocatedData>();
-            OpenFileCommand = new RelayCommand(OpenFile);
-            SaveFileCommand = new RelayCommand(SaveFile);
-            SaveFileAsCommand = new RelayCommand(SaveFileAs);
+            OpenFileCommand = new AsyncRelayCommand(OpenFileAsync);
+            SaveFileCommand = new AsyncRelayCommand(SaveFileAsync);
+            SaveFileAsCommand = new AsyncRelayCommand(SaveFileAsAsync);
             SelectFontFileCommand = new RelayCommand(SelectFontFile);
             GenerateConfigCommand = new RelayCommand(GenerateConfig);
             OpenURLCommand = new RelayCommand(x => OpenURL(x?.ToString()));
@@ -80,6 +81,8 @@ namespace KlonoaHeroesPatcher
         public const string ConfigFileName = "Config.json";
         public const string LogFileName = "Log.txt";
         public AppConfig Config { get; set; }
+
+        public bool IsLoading { get; set; }
 
         public Context Context { get; set; }
         public KlonoaHeroesROM ROM { get; set; }
@@ -208,6 +211,24 @@ namespace KlonoaHeroesPatcher
 
         #region Public Methods
 
+        public async Task RunAsync(Action action)
+        {
+            // Throw if already loading. We could add a lock to wait, but we don't want this to ever happen as the loading should disable the UI.
+            if (IsLoading)
+                throw new Exception("Attempted to run an async operation while one was already running");
+
+            IsLoading = true;
+
+            try
+            {
+                await Task.Run(action);
+            }
+            finally
+            {
+                IsLoading = false;
+            }
+        }
+
         public void Init()
         {
             Config = LoadConfig();
@@ -261,7 +282,7 @@ namespace KlonoaHeroesPatcher
             Logger.Trace("Set app title to {0}", Title);
         }
 
-        public void OpenFile()
+        public async Task OpenFileAsync()
         {
             var dialog = new OpenFileDialog
             {
@@ -276,17 +297,17 @@ namespace KlonoaHeroesPatcher
 
             Logger.Info("Opening file...");
 
-            Load(dialog.FileName);
+            await LoadAsync(dialog.FileName);
         }
 
-        public void SaveFile()
+        public async Task SaveFileAsync()
         {
             Logger.Info("Saving file...");
 
-            Save(ROM.Offset.File.AbsolutePath);
+            await SaveAsync(ROM.Offset.File.AbsolutePath);
         }
 
-        public void SaveFileAs()
+        public async Task SaveFileAsAsync()
         {
             var dialog = new SaveFileDialog
             {
@@ -301,10 +322,10 @@ namespace KlonoaHeroesPatcher
 
             Logger.Info("Saving file as...");
 
-            Save(dialog.FileName);
+            await SaveAsync(dialog.FileName);
         }
 
-        public void Load(string romPath)
+        public async Task LoadAsync(string romPath)
         {
             Unload();
          
@@ -356,30 +377,34 @@ namespace KlonoaHeroesPatcher
                     // Don't parse the map pack normally since it's too slow (due to the map tile objects)
                     serializeFlags &= ~KlonoaHeroesROM.SerializeDataFlags.MapsPack;
 
-                    // Read the ROM
-                    ROM = FileFactory.Read<KlonoaHeroesROM>(romName, Context, (_, r) => r.Pre_SerializeFlags = serializeFlags);
-
                     var s = Context.Deserializer;
+                    ArchiveFile<RawData_File> rawMapsPack = null;
 
-                    // Read the maps pack as raw data
-                    var rawMapsPack = s.DoAt(Context.GetPreDefinedPointer(DefinedPointer.MapsPack, ROM.Offset.File), () => s.SerializeObject<ArchiveFile<RawData_File>>(default, x =>
+                    // Read the ROM
+                    await RunAsync(() =>
                     {
-                        x.Pre_Type = ArchiveFileType.KH_KW;
-                        x.Pre_ArchivedFilesEncoder = new BytePairEncoder();
-                    }, name: "RawMapsPack"));
+                        ROM = FileFactory.Read<KlonoaHeroesROM>(romName, Context, (_, r) => r.Pre_SerializeFlags = serializeFlags);
 
-                    Logger.Info("Read ROM with {0} relocated structs", Footer.RelocatedStructsCount);
-
-                    foreach (PatchedFooter.RelocatedStruct relocatedStruct in Footer.RelocatedStructs)
-                    {
-                        var rawData = s.DoAt(relocatedStruct.NewPointer, () => s.SerializeObject<Array<byte>>(default, x => x.Length = relocatedStruct.DataSize));
-                        var parentArchive = s.DoAt(relocatedStruct.ParentArchivePointer, () => s.SerializeObject<ArchiveFile>(default));
-
-                        AddRelocatedData(new RelocatedData(rawData, parentArchive)
+                        // Read the maps pack as raw data
+                        rawMapsPack = s.DoAt(Context.GetPreDefinedPointer(DefinedPointer.MapsPack, ROM.Offset.File), () => s.SerializeObject<ArchiveFile<RawData_File>>(default, x =>
                         {
-                            OriginPointer = relocatedStruct.OriginalPointer
-                        });
-                    }
+                            x.Pre_Type = ArchiveFileType.KH_KW;
+                            x.Pre_ArchivedFilesEncoder = new BytePairEncoder();
+                        }, name: "RawMapsPack"));
+
+                        Logger.Info("Read ROM with {0} relocated structs", Footer.RelocatedStructsCount);
+
+                        foreach (PatchedFooter.RelocatedStruct relocatedStruct in Footer.RelocatedStructs)
+                        {
+                            var rawData = s.DoAt(relocatedStruct.NewPointer, () => s.SerializeObject<Array<byte>>(default, x => x.Length = relocatedStruct.DataSize));
+                            var parentArchive = s.DoAt(relocatedStruct.ParentArchivePointer, () => s.SerializeObject<ArchiveFile>(default));
+
+                            AddRelocatedData(new RelocatedData(rawData, parentArchive)
+                            {
+                                OriginPointer = relocatedStruct.OriginalPointer
+                            });
+                        }
+                    });
 
                     NavigationItems.Clear();
 
@@ -437,7 +462,7 @@ namespace KlonoaHeroesPatcher
             return footer;
         }
 
-        public void Save(string romPath)
+        public async Task SaveAsync(string romPath)
         {
             Logger.Info("Saving ROM");
 
@@ -525,7 +550,7 @@ namespace KlonoaHeroesPatcher
             MessageBox.Show("The file was successfully saved", "Saved successfully");
 
             // Reload the file
-            Load(romPath);
+            await LoadAsync(romPath);
         }
 
         public void Unload()
