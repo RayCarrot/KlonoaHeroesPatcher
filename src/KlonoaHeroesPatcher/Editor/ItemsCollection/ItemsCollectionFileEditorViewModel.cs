@@ -29,7 +29,12 @@ namespace KlonoaHeroesPatcher
             set
             {
                 _selectedItem = value;
-                Load(false);
+
+                if (value == null)
+                    return;
+
+                RefreshValueFields();
+                base.Load(true);
             }
         }
 
