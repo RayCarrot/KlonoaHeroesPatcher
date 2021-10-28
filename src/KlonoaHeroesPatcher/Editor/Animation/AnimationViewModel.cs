@@ -12,7 +12,7 @@ using Microsoft.WindowsAPICodePack.Dialogs;
 
 namespace KlonoaHeroesPatcher
 {
-    public class AnimationViewModel : BaseViewModel
+    public class AnimationViewModel : BaseViewModel, IDisposable
     {
         public AnimationViewModel(Animation_File animationFile, int group, int anim)
         {
@@ -186,6 +186,11 @@ namespace KlonoaHeroesPatcher
             {
                 MessageBox.Show($"An error occurred when exporting. Error: {ex.Message}", "Error exporting", MessageBoxButton.OK, MessageBoxImage.Error);
             }
+        }
+
+        public void Dispose()
+        {
+            GIFStream?.Dispose();
         }
     }
 }

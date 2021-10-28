@@ -9,9 +9,14 @@ namespace KlonoaHeroesPatcher
 
         public string HexString { get; set; }
 
-        protected override void Load(bool firstLoad)
+        public override void Load(bool firstLoad)
         {
             HexString = RawFile.Data.ToHexString(align: 16);
+        }
+
+        public override void Unload()
+        {
+            HexString = null;
         }
     }
 }

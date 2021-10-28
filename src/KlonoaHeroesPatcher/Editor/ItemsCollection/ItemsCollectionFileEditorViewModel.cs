@@ -40,16 +40,16 @@ namespace KlonoaHeroesPatcher
             new TextItemViewModel(this, SelectedItem.Item.ShopDescription, "Shop Description"),
         };
 
-        protected override void Load(bool firstLoad)
+        public override void Load(bool firstLoad)
         {
             if (firstLoad)
             {
                 Items = new ObservableCollection<ItemViewModel>(ItemsCollectionFile.Items.Select(x => new ItemViewModel(x)));
                 _selectedItem = Items.First();
                 OnPropertyChanged(nameof(SelectedItem));
-            }
 
-            RefreshValueFields();
+                RefreshValueFields();
+            }
 
             // Load the text
             base.Load(firstLoad);

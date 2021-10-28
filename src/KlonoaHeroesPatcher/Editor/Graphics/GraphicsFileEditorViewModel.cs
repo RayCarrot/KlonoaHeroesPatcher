@@ -40,6 +40,9 @@ namespace KlonoaHeroesPatcher
 
                 _selectedMapTile = value;
 
+                if (MapTiles == null)
+                    return;
+
                 foreach (GraphicsMapTileViewModel tile in MapTiles)
                     tile.IsHighlighted = tile != value && tile.Tile.TileSetIndex == value?.Tile.TileSetIndex;
             }
@@ -70,15 +73,17 @@ namespace KlonoaHeroesPatcher
             }
         }
 
-        protected override void Load(bool firstLoad)
+        public override void Load(bool firstLoad)
         {
-            RefreshBasePalette();
+            if (firstLoad)
+                RefreshBasePalette();
+
             RefreshImage();
 
             if (HasPalette)
                 PalettePreviewImgSource = TileGraphicsHelpers.CreatePaletteImageSource(
-                    bmpPal: new BitmapPalette(ColorHelpers.ConvertColors(GraphicsFile.Palette, GraphicsFile.BPP, false)), 
-                    scale: 16, 
+                    bmpPal: new BitmapPalette(ColorHelpers.ConvertColors(GraphicsFile.Palette, GraphicsFile.BPP, false)),
+                    scale: 16,
                     optionalWrap: 16);
 
             int tileSize = (int)(TileGraphicsHelpers.TileWidth * TileGraphicsHelpers.TileHeight / (8f / GraphicsFile.BPP));
@@ -91,6 +96,15 @@ namespace KlonoaHeroesPatcher
                 new DuoGridItemViewModel("Tiles", $"{GraphicsFile.TileSet.Length / tileSize}"),
                 new DuoGridItemViewModel("Has map", $"{GraphicsFile.TileMap?.Any() == true}"),
             };
+        }
+
+        public override void Unload()
+        {
+            PreviewImgSource = null;
+            IsImageLoaded = false;
+            MapTiles = null;
+            PalettePreviewImgSource = null;
+            InfoItems = null;
         }
 
         public void RefreshBasePalette()
@@ -272,7 +286,7 @@ namespace KlonoaHeroesPatcher
                 RelocateFile();
 
                 // Reload
-                Load(false);
+                Load(true);
             }
             catch (Exception ex)
             {

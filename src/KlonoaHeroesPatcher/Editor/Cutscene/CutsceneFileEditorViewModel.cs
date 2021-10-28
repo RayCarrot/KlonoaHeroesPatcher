@@ -13,11 +13,18 @@ namespace KlonoaHeroesPatcher
         
         public string ScriptText { get; set; }
 
-        protected override void Load(bool firstLoad)
+        public override void Load(bool firstLoad)
         {
             base.Load(firstLoad);
 
             RefreshScripts();
+        }
+
+        public override void Unload()
+        {
+            base.Unload();
+
+            ScriptText = null;
         }
 
         protected override IEnumerable<TextItemViewModel> GetTextCommandViewModels()

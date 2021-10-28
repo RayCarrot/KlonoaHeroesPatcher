@@ -43,22 +43,32 @@ namespace KlonoaHeroesPatcher
         public TextItemViewModel SelectedTextItem { get; set; }
         public bool HasMultipleTextItems { get; set; }
 
-        protected override void Load(bool firstLoad)
+        public override void Load(bool firstLoad)
         {
-            TextItems = new ObservableCollection<TextItemViewModel>(GetTextCommandViewModels());
-
-            foreach (TextItemViewModel textItem in TextItems)
+            if (firstLoad)
             {
-                textItem.PendingTextChanges = false;
-                textItem.RefreshText();
-                textItem.RefreshTextPreview();
+                TextItems = new ObservableCollection<TextItemViewModel>(GetTextCommandViewModels());
+
+                foreach (TextItemViewModel textItem in TextItems)
+                {
+                    textItem.RefreshText();
+                    textItem.PendingTextChanges = false;
+                }
+
+                SelectedTextItem = TextItems.First();
+                HasMultipleTextItems = TextItems.Count > 1;
+
+                AllowedCharactersInfo = new ObservableCollection<DuoGridItemViewModel>(AppViewModel.Current.Config.FontTable.Select(x => new DuoGridItemViewModel($"{x.Key:X4}", String.Join(", ", x.Value))));
             }
 
-            SelectedTextItem = TextItems.First();
-            HasMultipleTextItems = TextItems.Count > 1;
+            foreach (TextItemViewModel textItem in TextItems)
+                textItem.RefreshTextPreview();
+        }
 
-            if (firstLoad)
-                AllowedCharactersInfo = new ObservableCollection<DuoGridItemViewModel>(AppViewModel.Current.Config.FontTable.Select(x => new DuoGridItemViewModel($"{x.Key:X4}", String.Join(", ", x.Value))));
+        public override void Unload()
+        {
+            foreach (TextItemViewModel textItem in TextItems)
+                textItem.TextPreviewImgSource = null;
         }
 
         protected abstract IEnumerable<TextItemViewModel> GetTextCommandViewModels();
@@ -278,7 +288,7 @@ namespace KlonoaHeroesPatcher
                 EditorViewModel.RelocateTextCommands();
 
                 // Reload
-                EditorViewModel.Load(false);
+                EditorViewModel.Load(true);
             }
 
             public void RefreshText()

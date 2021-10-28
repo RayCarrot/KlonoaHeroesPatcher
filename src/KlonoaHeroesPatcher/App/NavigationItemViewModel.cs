@@ -28,6 +28,8 @@ namespace KlonoaHeroesPatcher
             ExportBinaryCommand = new RelayCommand(ExportBinary);
             ImportBinaryCommand = new RelayCommand(ImportBinary);
 
+            EditorViewModel?.Init(this);
+
             if (SerializableObject == null)
                 return;
 
@@ -35,7 +37,7 @@ namespace KlonoaHeroesPatcher
         }
 
         private bool _isSelected;
-        private bool _hasInitialized;
+        private bool _hasLoaded;
 
         public ICommand ExportBinaryCommand { get; }
         public ICommand ImportBinaryCommand { get; }
@@ -59,10 +61,14 @@ namespace KlonoaHeroesPatcher
             {
                 _isSelected = value;
 
-                if (!_hasInitialized && IsSelected)
+                if (IsSelected)
                 {
-                    EditorViewModel?.Init(this);
-                    _hasInitialized = true;
+                    EditorViewModel?.Load(!_hasLoaded);
+                    _hasLoaded = true;
+                }
+                else if (!IsSelected)
+                {
+                    EditorViewModel?.Unload();
                 }
             }
         }
@@ -157,6 +163,9 @@ namespace KlonoaHeroesPatcher
 
                 // Re-initialize
                 EditorViewModel?.Init(this);
+
+                // Re-load
+                EditorViewModel?.Load(true);
 
                 // Relocate the file
                 RelocateFile();

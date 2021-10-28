@@ -11,7 +11,7 @@ namespace KlonoaHeroesPatcher
         public ObservableCollection<AnimationViewModel> Animations { get; set; }
         public AnimationViewModel SelectedAnimation { get; set; }
 
-        protected override void Load(bool firstLoad)
+        public override void Load(bool firstLoad)
         {
             Animations = new ObservableCollection<AnimationViewModel>();
 
@@ -35,6 +35,16 @@ namespace KlonoaHeroesPatcher
 
             SelectedAnimation = Animations.FirstOrDefault();
             SelectedAnimation?.RefreshGIF();
+        }
+
+        public override void Unload()
+        {
+            if (Animations != null)
+                foreach (AnimationViewModel anim in Animations)
+                    anim?.Dispose();
+
+            Animations = null;
+            SelectedAnimation = null;
         }
     }
 }

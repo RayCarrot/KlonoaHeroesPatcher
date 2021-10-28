@@ -9,7 +9,8 @@ namespace KlonoaHeroesPatcher
         public BinarySerializable SerializableObject { get; private set; }
         public NavigationItemViewModel NavigationItem { get; private set; }
 
-        protected abstract void Load(bool firstLoad);
+        public abstract void Load(bool firstLoad);
+        public abstract void Unload();
 
         public void RelocateFile(BinarySerializable obj = null) => NavigationItem.RelocateFile(obj);
 
@@ -18,7 +19,6 @@ namespace KlonoaHeroesPatcher
             SerializableObject = navigationItem.SerializableObject;
             ParentArchiveFile = navigationItem.ParentArchiveFile;
             NavigationItem = navigationItem;
-            Load(true);
         }
     }
 }
