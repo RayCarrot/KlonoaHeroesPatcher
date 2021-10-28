@@ -511,19 +511,21 @@ namespace KlonoaHeroesPatcher
                     }
 
                     s.SerializeObject<PatchedFooter>(Footer, name: nameof(Footer));
-
-                    Logger.Info("Saved ROM");
-
-                    MessageBox.Show("The file was successfully saved", "Saved successfully");
-
-                    // Reload the file
-                    Load(romPath);
                 }
                 catch (Exception ex)
                 {
                     MessageBox.Show($"Failed to save file. Error: {ex.Message}", "Error saving file", MessageBoxButton.OK, MessageBoxImage.Error);
+
+                    return;
                 }
             }
+
+            Logger.Info("Saved ROM");
+
+            MessageBox.Show("The file was successfully saved", "Saved successfully");
+
+            // Reload the file
+            Load(romPath);
         }
 
         public void Unload()
