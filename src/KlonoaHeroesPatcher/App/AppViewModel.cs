@@ -533,6 +533,7 @@ namespace KlonoaHeroesPatcher
             Context?.Dispose();
             Context = null;
             ROM = null;
+            Footer = null;
             NavigationItems.Clear();
             SelectedNavigationItem = null;
             PatchViewModels.Clear();
