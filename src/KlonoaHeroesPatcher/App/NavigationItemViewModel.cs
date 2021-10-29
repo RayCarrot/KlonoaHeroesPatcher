@@ -1,4 +1,5 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Windows;
 using System.Windows.Input;
@@ -12,17 +13,17 @@ namespace KlonoaHeroesPatcher
 {
     public class NavigationItemViewModel : BaseViewModel
     {
-        public NavigationItemViewModel(string title, PackIconMaterialKind icon, Color iconColor, ObservableCollection<DuoGridItemViewModel> fileInfo, BinarySerializable serializableObject, ArchiveFile parentArchiveFile, FileEditorViewModel editorViewModel, bool relocated, string overrideFileName = null)
+        public NavigationItemViewModel(string title, PackIconMaterialKind icon, Color iconColor, ObservableCollection<DuoGridItemViewModel> fileInfo, BinarySerializable serializableObject, FileEditorViewModel editorViewModel, bool relocated, ArchiveFile parentArchiveFile, ArchiveFile compressedParentArchiveFile)
         {
             Title = title;
             Icon = icon;
             IconColor = new SolidColorBrush(iconColor);
             FileInfo = fileInfo;
             SerializableObject = serializableObject;
-            ParentArchiveFile = parentArchiveFile;
             EditorViewModel = editorViewModel;
             Relocated = relocated;
-            OverrideFileName = overrideFileName;
+            ParentArchiveFile = parentArchiveFile;
+            CompressedParentArchiveFile = compressedParentArchiveFile;
             NavigationItems = new ObservableCollection<NavigationItemViewModel>();
 
             ExportBinaryCommand = new RelayCommand(ExportBinary);
@@ -30,10 +31,8 @@ namespace KlonoaHeroesPatcher
 
             EditorViewModel?.Init(this);
 
-            if (SerializableObject == null)
-                return;
-
-            Offset = BinaryHelpers.GetROMPointer(SerializableObject.Offset, throwOnError: false);
+            if (SerializableObject != null && !IsWithinCompressedArchive)
+                Offset = BinaryHelpers.GetROMPointer(SerializableObject.Offset);
         }
 
         private bool _isSelected;
@@ -48,11 +47,13 @@ namespace KlonoaHeroesPatcher
         public ObservableCollection<DuoGridItemViewModel> FileInfo { get; }
         public BinarySerializable SerializableObject { get; }
         public ArchiveFile ParentArchiveFile { get; }
+        public ArchiveFile CompressedParentArchiveFile { get; } // If not null then ParentArchiveFile is the parent to this file instead
+        public bool IsWithinCompressedArchive => CompressedParentArchiveFile != null;
         public bool IsNull => SerializableObject == null;
         public Pointer Offset { get; }
         public FileEditorViewModel EditorViewModel { get; }
         public bool Relocated { get; }
-        public string OverrideFileName { get; }
+        public string OverrideFileName { get; init; }
 
         public bool IsSelected
         {
@@ -78,21 +79,45 @@ namespace KlonoaHeroesPatcher
         public bool CanExportBinary => SerializableObject is BaseFile f && f.Pre_FileSize != -1 && Offset != null;
         public bool CanImportBinary => CanExportBinary && SerializableObject is not ArchiveFile;
 
-        public string DisplayName => $"{Offset?.StringAbsoluteOffset ?? (IsNull ? "NULL" : "_")} ({OverrideFileName ?? Title})";
+        public string DisplayOffset
+        {
+            get
+            {
+                if (IsNull)
+                    return "NULL";
+                else if (IsWithinCompressedArchive)
+                    return $"0x{BinaryHelpers.GetROMPointer(CompressedParentArchiveFile.Offset).StringAbsoluteOffset}_{SerializableObject.Offset.StringFileOffset}";
+                else
+                    return $"0x{Offset.StringAbsoluteOffset}";
+            }
+        }
+
+        public string DisplayName => $"{DisplayOffset} ({OverrideFileName ?? Title})";
+
         public ObservableCollection<NavigationItemViewModel> NavigationItems { get; }
 
         public void RelocateFile()
         {
-            if (IsNull || Offset == null)
+            if (IsNull)
             {
-                MessageBox.Show("The file can't be relocated. Most likely it's inside of a compressed archive which currently doesn't support relocating.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("Null files can't be relocated", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
-            AppViewModel.Current.AddRelocatedData(new RelocatedData(SerializableObject, ParentArchiveFile)
+            // If we're within a compressed archive we want to relocate that instead
+            BinarySerializable obj = IsWithinCompressedArchive ? CompressedParentArchiveFile : SerializableObject;
+
+            if (IsWithinCompressedArchive)
             {
-                Encoder = (SerializableObject as BaseFile)?.Pre_FileEncoder,
+                // TODO: Update archive offset tables
+                throw new NotImplementedException();
+            }
+
+            AppViewModel.Current.AddRelocatedData(new RelocatedData(obj, ParentArchiveFile)
+            {
+                Encoder = (obj as BaseFile)?.Pre_FileEncoder,
             });
+
             UnsavedChanges = true;
         }
 
@@ -102,7 +127,7 @@ namespace KlonoaHeroesPatcher
             {
                 Title = "Export binary",
                 Filter = "All files (*.*)|*.*",
-                FileName = $"{Offset.StringAbsoluteOffset}.bin"
+                FileName = $"{DisplayOffset}.bin"
             };
 
             var result = dialog.ShowDialog();

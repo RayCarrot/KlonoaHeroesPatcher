@@ -116,7 +116,7 @@ namespace KlonoaHeroesPatcher
             }
         }
 
-        private void AddNavigationItem(ICollection<NavigationItemViewModel> collection, string title, BinarySerializable obj, ArchiveFile parentArchiveFile, string overrideFileName = null)
+        private void AddNavigationItem(ICollection<NavigationItemViewModel> collection, string title, BinarySerializable obj, ArchiveFile parentArchiveFile, ArchiveFile compressedParentArchiveFile = null, string overrideFileName = null)
         {
             FileEditorViewModel editor;
             PackIconMaterialKind icon;
@@ -185,7 +185,10 @@ namespace KlonoaHeroesPatcher
 
             bool relocated = obj != null && Footer.RelocatedStructs.Any(x => x.NewPointer == BinaryHelpers.GetROMPointer(obj.Offset, throwOnError: false));
 
-            var navItem = new NavigationItemViewModel(title, icon, iconColor, info, obj, parentArchiveFile, editor, relocated, overrideFileName);
+            var navItem = new NavigationItemViewModel(title, icon, iconColor, info, obj, editor, relocated, parentArchiveFile, compressedParentArchiveFile)
+            {
+                OverrideFileName = overrideFileName,
+            };
             collection.Add(navItem);
 
             if (obj is not ArchiveFile archive)
@@ -203,7 +206,36 @@ namespace KlonoaHeroesPatcher
                     fileOverrideFileName = $"Map {entry.MapID1}-{entry.MapID2}-{entry.MapID3}";
                 }
 
-                AddNavigationItem(navItem.NavigationItems, fileName, file, archive, fileOverrideFileName);
+                ArchiveFile navItemParentArchiveFile;
+                ArchiveFile navItemcompressedParentArchiveFile;
+
+                // This is an archive within a compressed archive
+                if (compressedParentArchiveFile != null)
+                {
+                    // Use the same parent as before
+                    navItemParentArchiveFile = parentArchiveFile;
+                    navItemcompressedParentArchiveFile = compressedParentArchiveFile;
+                }
+                // This is a compressed archive
+                else if (archive.Pre_IsCompressed)
+                {
+                    // Use the same parent as before
+                    navItemParentArchiveFile = parentArchiveFile;
+                    navItemcompressedParentArchiveFile = archive;
+                }
+                else
+                {
+                    navItemParentArchiveFile = archive;
+                    navItemcompressedParentArchiveFile = null;
+                }
+
+                AddNavigationItem(
+                    collection: navItem.NavigationItems, 
+                    title: fileName, 
+                    obj: file, 
+                    parentArchiveFile: navItemParentArchiveFile, 
+                    compressedParentArchiveFile: navItemcompressedParentArchiveFile, 
+                    overrideFileName: fileOverrideFileName);
             }
         }
 
