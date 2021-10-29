@@ -1,11 +1,14 @@
-﻿using BinarySerializer;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Windows;
+using BinarySerializer;
 
 namespace KlonoaHeroesPatcher
 {
     public class PatchedFooter : BinarySerializable
     {
         public const string Magic = "EDIT";
-        public const int CurrentEditorVersion = 2;
+        public const int CurrentEditorVersion = 3;
 
         public int EditorVersion { get; set; } = CurrentEditorVersion;
 
@@ -62,6 +65,51 @@ namespace KlonoaHeroesPatcher
             }
 
             RelocatedStructs = s.SerializeObjectArray<RelocatedStruct>(RelocatedStructs, RelocatedStructsCount, name: nameof(RelocatedStructs));
+
+            // Editor versions below 3 had an issue where compressed data would create a new relocated struct each time, so attempt to correct it here
+            if (EditorVersion < 3)
+            {
+                var structsToHandle = RelocatedStructs.ToHashSet();
+                var structsToKeep = new List<RelocatedStruct>();
+
+                while (true)
+                {
+                    RelocatedStruct nextDuplicateStruct = structsToHandle.FirstOrDefault(x => x.OriginalPointer.AbsoluteOffset >= AppViewModel.Current.Config.ROMEndPointer && structsToHandle.All(d => x.NewPointer != d.OriginalPointer));
+
+                    if (nextDuplicateStruct == null)
+                        break;
+
+                    structsToHandle.Remove(nextDuplicateStruct);
+
+                    RelocatedStruct latest = nextDuplicateStruct;
+
+                    // Remove each duplicate until we find the original file
+                    while (true)
+                    {
+                        nextDuplicateStruct = structsToHandle.FirstOrDefault(x => x.NewPointer == nextDuplicateStruct.OriginalPointer);
+                        
+                        // We couldn't find the original :(
+                        if (nextDuplicateStruct == null)
+                        {
+                            MessageBox.Show("Due to an error from earlier versions there is duplicate data in the ROM footer", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
+                            break;
+                        }
+
+                        structsToHandle.Remove(nextDuplicateStruct);
+
+                        // We found the original struct
+                        if (nextDuplicateStruct.OriginalPointer.AbsoluteOffset < AppViewModel.Current.Config.ROMEndPointer)
+                        {
+                            nextDuplicateStruct.NewPointer = latest.NewPointer;
+                            nextDuplicateStruct.DataSize = latest.DataSize;
+                            structsToKeep.Add(nextDuplicateStruct);
+                            break;
+                        }
+                    }
+                }
+
+                RelocatedStructs = structsToHandle.Concat(structsToKeep).ToArray();
+            }
 
             // End with the footer offset and magic. This way the footer can be read without knowing where it begins.
             if (s.CurrentLength - s.CurrentPointer.FileOffset >= 12)
