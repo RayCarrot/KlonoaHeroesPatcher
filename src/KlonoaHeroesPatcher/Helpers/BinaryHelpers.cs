@@ -5,6 +5,12 @@ namespace KlonoaHeroesPatcher
 {
     public static class BinaryHelpers
     {
+        /// <summary>
+        /// Gets the pointer in the ROM. This is useful for compressed archive files where the start offset is within the encoded <see cref="StreamFile"/>.
+        /// </summary>
+        /// <param name="pointer">The pointer</param>
+        /// <param name="throwOnError">Indicates if an exception should be thrown on error, otherwise null is returned</param>
+        /// <returns>The ROM pointer or null if there was an error</returns>
         public static Pointer GetROMPointer(Pointer pointer, bool throwOnError = true)
         {
             if (pointer == null) 

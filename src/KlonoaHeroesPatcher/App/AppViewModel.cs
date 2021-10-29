@@ -641,7 +641,8 @@ namespace KlonoaHeroesPatcher
 
         public void AddRelocatedData(RelocatedData data)
         {
-            RelocatedData existingData = PendingRelocatedData.FirstOrDefault(x => x.Offset == data.Offset);
+            Pointer romOffset = BinaryHelpers.GetROMPointer(data.Offset);
+            RelocatedData existingData = PendingRelocatedData.FirstOrDefault(x => x.Offset == romOffset);
 
             if (existingData != null)
             {
