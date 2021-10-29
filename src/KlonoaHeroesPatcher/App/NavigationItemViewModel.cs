@@ -76,8 +76,15 @@ namespace KlonoaHeroesPatcher
         public bool IsExpanded { get; set; }
         public bool CanBeEdited => EditorViewModel != null;
         public bool UnsavedChanges { get; set; }
-        public bool CanExportBinary => SerializableObject is BaseFile f && f.Pre_FileSize != -1 && Offset != null;
-        public bool CanImportBinary => CanExportBinary && SerializableObject is not ArchiveFile;
+        public bool CanExportBinary => 
+            // Only base files can be exported as we need the size of the file
+            SerializableObject is BaseFile f && 
+            // The file can only be exported if a size is specified
+            f.Pre_FileSize != -1 && 
+            // Files within compressed archives can currently not be exported as the offset is no longer valid (due to being in a compressed StreamFile)
+            !IsWithinCompressedArchive;
+
+        public bool CanImportBinary => SerializableObject is not ArchiveFile;
 
         public string DisplayOffset
         {
