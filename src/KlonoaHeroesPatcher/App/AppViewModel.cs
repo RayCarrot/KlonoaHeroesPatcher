@@ -196,7 +196,7 @@ namespace KlonoaHeroesPatcher
 
             for (var fileIndex = 0; fileIndex < archive.ParsedFiles.Length; fileIndex++)
             {
-                (BinarySerializable file, string fileName) = archive.ParsedFiles[fileIndex];
+                ArchiveFile.ParsedFile file = archive.ParsedFiles[fileIndex];
                 
                 string fileOverrideFileName = null;
 
@@ -231,8 +231,8 @@ namespace KlonoaHeroesPatcher
 
                 AddNavigationItem(
                     collection: navItem.NavigationItems, 
-                    title: fileName, 
-                    obj: file, 
+                    title: file?.Name, 
+                    obj: file?.Obj, 
                     parentArchiveFile: navItemParentArchiveFile, 
                     compressedParentArchiveFile: navItemcompressedParentArchiveFile, 
                     overrideFileName: fileOverrideFileName);
