@@ -2,7 +2,8 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:local="clr-namespace:KlonoaHeroesPatcher"
                     xmlns:metro="http://metro.mahapps.com/winfx/xaml/controls"
-                    xmlns:gif="https://github.com/XamlAnimatedGif/XamlAnimatedGif">
+                    xmlns:gif="https://github.com/XamlAnimatedGif/XamlAnimatedGif"
+                    xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks">
 
     <DataTemplate x:Key="EditorTemplate.Section.Text" x:Shared="False" DataType="{x:Type local:BaseTextFileEditorViewModel}">
         <StackPanel>
@@ -128,6 +129,20 @@
                     <TextBlock Style="{StaticResource TextBlock.Header}"
                                Text="Script (read-only)"
                                Margin="0 0 0 5" />
+
+                    <Button Command="{Binding Path=CopyScriptToClipboardCommand, Mode=OneTime}"
+                            HorizontalAlignment="Left"
+                            Margin="0 0 0 5">
+                        <StackPanel Orientation="Horizontal">
+                            <iconPacks:PackIconMaterial Kind="ContentCopy"
+                                                        VerticalAlignment="Center" />
+
+                            <TextBlock Margin="5 0"
+                                       Text="Copy script to clipboard"
+                                       VerticalAlignment="Center" />
+
+                        </StackPanel>
+                    </Button>
 
                     <TextBox Text="{Binding Path=ScriptText}"
                              TextWrapping="Wrap"

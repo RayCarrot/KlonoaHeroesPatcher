@@ -3,12 +3,21 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Windows;
+using System.Windows.Input;
 using BinarySerializer;
 
 namespace KlonoaHeroesPatcher
 {
     public class CutsceneFileEditorViewModel : BaseTextFileEditorViewModel
     {
+        public CutsceneFileEditorViewModel()
+        {
+            CopyScriptToClipboardCommand = new RelayCommand(CopyScriptToClipboard);
+        }
+
+        public ICommand CopyScriptToClipboardCommand { get; }
+
         public Cutscene_File CutsceneFile => (Cutscene_File)SerializableObject;
         
         public string ScriptText { get; set; }
@@ -287,6 +296,12 @@ namespace KlonoaHeroesPatcher
             }
 
             ScriptText = scriptStr.ToString();
+        }
+
+        public void CopyScriptToClipboard()
+        {
+            if (ScriptText != null)
+                Clipboard.SetText(ScriptText);
         }
     }
 }
