@@ -12,9 +12,21 @@
         public Patch Patch { get; }
 
         public object _patchUI;
-        public object PatchUI => _patchUI ??= Patch.GetPatchUI();
+        public object PatchUI => _patchUI ??= IsEnabled ? Patch.GetPatchUI() : null;
 
         public bool WasEnabled { get; }
-        public bool IsEnabled { get; set; }
+
+        private bool _isEnabled;
+        public bool IsEnabled
+        {
+            get => _isEnabled;
+            set
+            {
+                _isEnabled = value;
+
+                if (_isEnabled)
+                    OnPropertyChanged(nameof(PatchUI));
+            }
+        }
     }
 }

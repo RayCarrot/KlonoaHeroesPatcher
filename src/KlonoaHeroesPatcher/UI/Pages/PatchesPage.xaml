@@ -31,7 +31,7 @@
                         </StackPanel>
 
                         <ContentPresenter Visibility="{Binding Path=IsEnabled, Converter={local:BooleanToVisibilityConverter}}" 
-                                          Content="{Binding Path=PatchUI, Mode=OneTime}" />
+                                          Content="{Binding Path=PatchUI}" />
 
                         <Separator />
 
