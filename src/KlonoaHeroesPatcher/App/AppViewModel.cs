@@ -505,6 +505,13 @@ namespace KlonoaHeroesPatcher
 
             footer.TryReadFromEnd(s, file.StartPointer);
 
+            // Verify the footer integrity
+            if (footer.RelocatedStructs.Any(x => x.OriginalPointer.AbsoluteOffset >= Config.ROMEndPointer))
+                MessageBox.Show("Some relocated data has the original pointer set to after the defined ROM end pointer", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
+
+            if (footer.RelocatedStructs.GroupBy(x => x.OriginalPointer).Any(x => x.Count() > 1))
+                MessageBox.Show("Multiple relocated data structs share the same original pointer", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
+
             return footer;
         }
 
