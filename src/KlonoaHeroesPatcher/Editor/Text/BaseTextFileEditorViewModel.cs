@@ -374,14 +374,14 @@ namespace KlonoaHeroesPatcher
 
                 byte[] cutomWidths = AppViewModel.Current.PatchViewModels.Select(x => x.Patch).OfType<VariableWidthFontPatch>().FirstOrDefault()?.Widths;
 
-                const int defaultX = 8;
-                const int defaultY = 8; // Defaults to 0x68, but that's quite a lot to show here so we ignore it
-                int xPos = defaultX;
-                int yPos = defaultY;
+                const int marginX = 8;
+                const int marginY = 8;
+                int xPos = marginX;
+                int yPos = marginY;
 
                 // Get the dimensions
-                int width = defaultX + GetTextPreviewWidth(cutomWidths);
-                int height = defaultY + (txtCmds.Count(x => x.Command is TextCommand.CommandType.Linebreak or TextCommand.CommandType.Clear) + 1) * TileGraphicsHelpers.TileHeight * 2;
+                int width = marginX * 2 + GetTextPreviewWidth(cutomWidths);
+                int height = marginY * 2 + (txtCmds.Count(x => x.Command is TextCommand.CommandType.Linebreak or TextCommand.CommandType.Clear) + 1) * TileGraphicsHelpers.TileHeight * 2;
 
                 // Get the format
                 var bpp = font.BPP;
@@ -406,7 +406,7 @@ namespace KlonoaHeroesPatcher
                         {
                             case TextCommand.CommandType.Clear:
                             case TextCommand.CommandType.Linebreak:
-                                xPos = defaultX;
+                                xPos = marginX;
                                 yPos += TileGraphicsHelpers.TileHeight * 2;
                                 break;
 
