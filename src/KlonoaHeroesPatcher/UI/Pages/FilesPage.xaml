@@ -105,19 +105,46 @@
                                 HorizontalAlignment="Center"
                                 Margin="0 0 0 5">
 
-                        <Button Content="Export Binary"
-                                IsEnabled="{Binding Path=CanExportBinary, Mode=OneTime}"
+                        <Button IsEnabled="{Binding Path=CanExportBinary, Mode=OneTime}"
                                 Command="{Binding Path=ExportBinaryCommand, Mode=OneTime}"
-                                Margin="0 0 5 0" />
+                                Margin="0 0 5 0">
+                            <StackPanel Orientation="Horizontal">
+                                <iconPacks:PackIconMaterial Kind="Export"
+                                                            VerticalAlignment="Center" />
 
-                        <Button Content="Import Binary"
-                                IsEnabled="{Binding Path=CanImportBinary, Mode=OneTime}"
+                                <TextBlock Margin="5 0"
+                                           Text="Export Binary"
+                                           VerticalAlignment="Center" />
+
+                            </StackPanel>
+                        </Button>
+
+                        <Button IsEnabled="{Binding Path=CanImportBinary, Mode=OneTime}"
                                 Command="{Binding Path=ImportBinaryCommand, Mode=OneTime}"
-                                Margin="0 0 5 0" />
+                                Margin="0 0 5 0">
+                            <StackPanel Orientation="Horizontal">
+                                <iconPacks:PackIconMaterial Kind="Import"
+                                                            VerticalAlignment="Center" />
 
-                        <Button Content="Refresh"
-                                Command="{Binding Path=RefreshCommand, Mode=OneTime}"
-                                Margin="0 0 5 0" />
+                                <TextBlock Margin="5 0"
+                                           Text="Import Binary"
+                                           VerticalAlignment="Center" />
+
+                            </StackPanel>
+                        </Button>
+
+                        <Button Command="{Binding Path=RefreshCommand, Mode=OneTime}"
+                                Margin="0 0 5 0">
+                            <StackPanel Orientation="Horizontal">
+                                <iconPacks:PackIconMaterial Kind="Refresh"
+                                                            VerticalAlignment="Center" />
+
+                                <TextBlock Margin="5 0"
+                                           Text="Refresh"
+                                           VerticalAlignment="Center" />
+
+                            </StackPanel>
+                        </Button>
 
                     </StackPanel>
 
