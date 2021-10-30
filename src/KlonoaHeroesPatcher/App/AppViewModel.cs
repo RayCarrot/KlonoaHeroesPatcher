@@ -86,7 +86,7 @@ namespace KlonoaHeroesPatcher
         #region Public Properties
 
         public string Title { get; set; }
-        public Version CurrentAppVersion => new Version(1, 5, 2, 0);
+        public Version CurrentAppVersion => new Version(1, 5, 3, 0);
 
         public const string ConfigFileName = "Config.json";
         public const string LogFileName = "Log.txt";
