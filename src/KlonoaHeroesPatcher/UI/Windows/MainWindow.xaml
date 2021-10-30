@@ -80,6 +80,10 @@
                 <local:PatchesPage />
             </TabItem>
 
+            <TabItem Header="Info" local:TabItemAssist.IconKind="InformationOutline" local:TabItemAssist.IconForeground="#2196F3">
+                <local:InfoPage />
+            </TabItem>
+
         </metro:MetroAnimatedTabControl>
 
         <metro:ProgressRing Grid.Row="1" 

@@ -14,6 +14,7 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
@@ -96,6 +97,7 @@ namespace KlonoaHeroesPatcher
         public Context Context { get; set; }
         public KlonoaHeroesROM ROM { get; set; }
         public PatchedFooter Footer { get; set; }
+        public string ROMInfo { get; set; }
 
         public ObservableCollection<NavigationItemViewModel> NavigationItems { get; }
         public NavigationItemViewModel SelectedNavigationItem { get; set; }
@@ -481,6 +483,9 @@ namespace KlonoaHeroesPatcher
 
                         PatchViewModels.Add(new PatchViewModel(patch, enabled));
                     }
+
+                    // Set the ROM info, useful for debugging
+                    RefreshROMInfo();
                 }
             }
             catch (Exception ex)
@@ -501,6 +506,49 @@ namespace KlonoaHeroesPatcher
             footer.TryReadFromEnd(s, file.StartPointer);
 
             return footer;
+        }
+
+        public void RefreshROMInfo()
+        {
+            var str = new StringBuilder();
+
+            str.AppendLine($"=== ROM ===");
+            str.AppendLine($"Title: {ROM.Header.GameTitle}");
+            str.AppendLine($"Code: {ROM.Header.GameCode}");
+            str.AppendLine($"Maker Code: {ROM.Header.MakerCode}");
+            str.AppendLine($"Version: {ROM.Header.SoftwareVersion}");
+
+            if (Footer.Offset != null)
+            {
+                str.AppendLine();
+                str.AppendLine();
+
+                str.AppendLine($"=== PATCH ===");
+                str.AppendLine($"Offset: 0x{Footer.Offset.StringAbsoluteOffset}");
+                str.AppendLine($"Version: {Footer.EditorVersion}");
+                str.AppendLine($"Relocated Structs: {Footer.RelocatedStructsCount}");
+
+                foreach (PatchedFooter.RelocatedStruct r in Footer.RelocatedStructs)
+                {
+                    str.AppendLine($"\t" +
+                                   $"Original: 0x{r.OriginalPointer.StringAbsoluteOffset}, " +
+                                   $"New: 0x{r.NewPointer.StringAbsoluteOffset}, " +
+                                   $"Archive: 0x{r.ParentArchivePointer.StringAbsoluteOffset}, " +
+                                   $"Size: {r.DataSize} bytes");
+                }
+
+                str.AppendLine($"Patches: {Footer.PatchDatasCount}");
+
+                foreach (PatchedFooter.PatchData p in Footer.PatchDatas)
+                {
+                    str.AppendLine($"\t" +
+                                   $"ID: {p.ID}, " +
+                                   $"Data: 0x{p.DataPointer}, " +
+                                   $"Size: {p.DataSize} bytes");
+                }
+            }
+
+            ROMInfo = str.ToString();
         }
 
         public async Task SaveAsync(string romPath)
@@ -602,6 +650,7 @@ namespace KlonoaHeroesPatcher
             Context = null;
             ROM = null;
             Footer = null;
+            ROMInfo = null;
             NavigationItems.Clear();
             SelectedNavigationItem = null;
             PatchViewModels.Clear();
