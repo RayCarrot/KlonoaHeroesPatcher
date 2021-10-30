@@ -10,15 +10,16 @@ namespace KlonoaHeroesPatcher
         public RelocatedData(BinarySerializable obj, ArchiveFile parentArchiveFile)
         {
             Obj = obj;
+            Offset = BinaryHelpers.GetROMPointer(Obj.Offset);
             ParentArchiveFile = parentArchiveFile;
         }
 
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
         protected BinarySerializable Obj { get; }
+        public Pointer Offset { get; }
         protected ArchiveFile ParentArchiveFile { get; }
 
-        public Pointer Offset => Obj.Offset;
         public Pointer OriginPointer { get; init; } // Only specified if it's not new data
         public bool IsNewData => OriginPointer == null; // Indicates if this data is being relocated first time. Otherwise it has been relocated before.
         public IStreamEncoder Encoder { get; init; }
