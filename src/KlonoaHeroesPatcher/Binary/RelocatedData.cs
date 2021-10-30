@@ -7,18 +7,18 @@ namespace KlonoaHeroesPatcher
 {
     public record RelocatedData
     {
-        public RelocatedData(BinarySerializable obj, ArchiveFile parentArchiveFile)
+        public RelocatedData(BinarySerializable obj, OffsetTable parentArchiveOffsetTable)
         {
             Obj = obj;
             Offset = BinaryHelpers.GetROMPointer(Obj.Offset);
-            ParentArchiveFile = parentArchiveFile;
+            ParentArchiveOffsetTable = parentArchiveOffsetTable;
         }
 
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
         protected BinarySerializable Obj { get; }
         public Pointer Offset { get; }
-        protected ArchiveFile ParentArchiveFile { get; }
+        protected OffsetTable ParentArchiveOffsetTable { get; }
 
         public Pointer OriginPointer { get; init; } // Only specified if it's not new data
         public bool IsNewData => OriginPointer == null; // Indicates if this data is being relocated first time. Otherwise it has been relocated before.
@@ -30,18 +30,18 @@ namespace KlonoaHeroesPatcher
             int count = 0;
 
             // Enumerate every offset which points to this file object
-            for (int fileIndex = 0; fileIndex < ParentArchiveFile.OffsetTable.FilesCount; fileIndex++)
+            for (int fileIndex = 0; fileIndex < ParentArchiveOffsetTable.FilesCount; fileIndex++)
             {
-                if (ParentArchiveFile.OffsetTable.FilePointers[fileIndex] != originalPointer)
+                if (ParentArchiveOffsetTable.FilePointers[fileIndex] != originalPointer)
                     continue;
 
-                Pointer anchor = ParentArchiveFile.Offset;
+                Pointer anchor = ParentArchiveOffsetTable.Offset;
 
                 // Perhaps this could be replaced by serializing the offset table object?
-                switch (ParentArchiveFile.Pre_Type)
+                switch (ParentArchiveOffsetTable.Pre_Type)
                 {
                     case ArchiveFileType.Default:
-                        s.DoAt(ParentArchiveFile.OffsetTable.Offset + 4 + (fileIndex * 4), () =>
+                        s.DoAt(ParentArchiveOffsetTable.Offset + 4 + (fileIndex * 4), () =>
                         {
                             // Update the offset to point to the new location
                             s.Serialize<uint>((uint)(newPointer.AbsoluteOffset - anchor.AbsoluteOffset));
@@ -49,13 +49,13 @@ namespace KlonoaHeroesPatcher
                         break;
 
                     case ArchiveFileType.KH_PF:
-                        anchor = ParentArchiveFile.OffsetTable.Offset + 4 + (ParentArchiveFile.OffsetTable.FilesCount * 4) + (ParentArchiveFile.OffsetTable.FilesCount * 4);
-                        s.DoAt(ParentArchiveFile.OffsetTable.Offset + 4 + (ParentArchiveFile.OffsetTable.FilesCount * 4) + (fileIndex * 4), () =>
+                        anchor = ParentArchiveOffsetTable.Offset + 4 + (ParentArchiveOffsetTable.FilesCount * 4) + (ParentArchiveOffsetTable.FilesCount * 4);
+                        s.DoAt(ParentArchiveOffsetTable.Offset + 4 + (ParentArchiveOffsetTable.FilesCount * 4) + (fileIndex * 4), () =>
                         {
                             // Update the offset to point to the new location
                             s.Serialize<uint>((uint)(newPointer.AbsoluteOffset - anchor.AbsoluteOffset));
                         });
-                        s.DoAt(ParentArchiveFile.OffsetTable.Offset + 4 + (fileIndex * 4), () =>
+                        s.DoAt(ParentArchiveOffsetTable.Offset + 4 + (fileIndex * 4), () =>
                         {
                             // Update the file size
                             s.Serialize<int>((int)fileSize);
@@ -63,7 +63,7 @@ namespace KlonoaHeroesPatcher
                         break;
 
                     case ArchiveFileType.KH_TP:
-                        s.DoAt(ParentArchiveFile.OffsetTable.KH_TP_FileOffsetsPointer + (fileIndex * 4), () =>
+                        s.DoAt(ParentArchiveOffsetTable.KH_TP_FileOffsetsPointer + (fileIndex * 4), () =>
                         {
                             // Update the offset to point to the new location
                             s.Serialize<uint>((uint)(newPointer.AbsoluteOffset - anchor.AbsoluteOffset));
@@ -71,7 +71,7 @@ namespace KlonoaHeroesPatcher
                         break;
 
                     case ArchiveFileType.KH_KW:
-                        s.DoAt(ParentArchiveFile.OffsetTable.KH_KW_FileOffsetsPointer + (fileIndex * 16) + 4, () =>
+                        s.DoAt(ParentArchiveOffsetTable.KH_KW_FileOffsetsPointer + (fileIndex * 16) + 4, () =>
                         {
                             // Update the offset to point to the new location
                             s.Serialize<uint>((uint)(newPointer.AbsoluteOffset - anchor.AbsoluteOffset));
@@ -79,7 +79,7 @@ namespace KlonoaHeroesPatcher
                         break;
 
                     default:
-                        throw new Exception($"Unsupported archive type {ParentArchiveFile.Pre_Type}");
+                        throw new Exception($"Unsupported archive type {ParentArchiveOffsetTable.Pre_Type}");
                 }
 
                 count++;
@@ -121,7 +121,7 @@ namespace KlonoaHeroesPatcher
             {
                 OriginalPointer = OriginPointer ?? originalPointer,
                 NewPointer = newPointer,
-                ParentArchivePointer = ParentArchiveFile.Offset,
+                ParentArchivePointer = ParentArchiveOffsetTable.Offset,
                 DataSize = dataSize
             };
         }

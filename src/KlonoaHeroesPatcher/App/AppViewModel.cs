@@ -440,9 +440,9 @@ namespace KlonoaHeroesPatcher
                         foreach (PatchedFooter.RelocatedStruct relocatedStruct in Footer.RelocatedStructs)
                         {
                             var rawData = s.DoAt(relocatedStruct.NewPointer, () => s.SerializeObject<Array<byte>>(default, x => x.Length = relocatedStruct.DataSize));
-                            var parentArchive = s.DoAt(relocatedStruct.ParentArchivePointer, () => s.SerializeObject<ArchiveFile>(default));
+                            var parentArchiveOffsetTable = Context.Cache.FromOffset<OffsetTable>(relocatedStruct.ParentArchivePointer);
 
-                            AddRelocatedData(new RelocatedData(rawData, parentArchive)
+                            AddRelocatedData(new RelocatedData(rawData, parentArchiveOffsetTable)
                             {
                                 OriginPointer = relocatedStruct.OriginalPointer
                             });
