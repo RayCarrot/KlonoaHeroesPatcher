@@ -14,11 +14,6 @@ namespace KlonoaHeroesPatcher
             DataContext = AppViewModel.Current;
         }
 
-        private void TreeView_OnSelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
-        {
-            AppViewModel.Current.SelectedNavigationItem = e.NewValue as NavigationItemViewModel;
-        }
-
         private void MainWindow_OnClosing(object sender, CancelEventArgs e)
         {
             if (AppViewModel.Current.UnsavedChanges)
