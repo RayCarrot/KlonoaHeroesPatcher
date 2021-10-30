@@ -28,6 +28,7 @@ namespace KlonoaHeroesPatcher
 
             ExportBinaryCommand = new RelayCommand(ExportBinary);
             ImportBinaryCommand = new RelayCommand(ImportBinary);
+            RefreshCommand = new RelayCommand(Refresh);
 
             EditorViewModel?.Init(this);
 
@@ -40,6 +41,7 @@ namespace KlonoaHeroesPatcher
 
         public ICommand ExportBinaryCommand { get; }
         public ICommand ImportBinaryCommand { get; }
+        public ICommand RefreshCommand { get; }
 
         public string Title { get; }
         public PackIconMaterialKind Icon { get; }
@@ -199,6 +201,11 @@ namespace KlonoaHeroesPatcher
                 SerializableObject.Init(originalOffset);
                 context.RemoveFile(streamFile);
             }
+        }
+
+        public void Refresh()
+        {
+            EditorViewModel?.Load(true);
         }
     }
 }
