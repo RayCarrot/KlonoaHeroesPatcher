@@ -95,6 +95,11 @@ namespace KlonoaHeroesPatcher
             // Get the original pointer
             Pointer originalPointer = BinaryHelpers.GetROMPointer(Obj.Offset);
 
+            // If it's a compressed archive we want to update the offsets to make sure the data is written correctly
+            if (Obj is ArchiveFile { Pre_IsCompressed: true } a)
+                a.RecalculateFileOffsets();
+
+            // Write the data
             s.DoEncodedIf(Encoder, IsCompressed, () =>
             {
                 // Init the object

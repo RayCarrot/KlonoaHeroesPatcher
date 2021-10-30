@@ -114,12 +114,6 @@ namespace KlonoaHeroesPatcher
             // If we're within a compressed archive we want to relocate that instead
             BinarySerializable obj = IsWithinCompressedArchive ? CompressedParentArchiveFile : SerializableObject;
 
-            if (IsWithinCompressedArchive)
-            {
-                // TODO: Update archive offset tables
-                throw new NotImplementedException();
-            }
-
             AppViewModel.Current.AddRelocatedData(new RelocatedData(obj, ParentArchiveFile)
             {
                 Encoder = (obj as BaseFile)?.Pre_FileEncoder,
