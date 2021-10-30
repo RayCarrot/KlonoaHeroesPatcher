@@ -49,6 +49,15 @@ namespace KlonoaHeroesPatcher
 
         #endregion
 
+        #region Constant Fields
+
+        /// <summary>
+        /// The application base path to use for WPF related operations
+        /// </summary>
+        public const string WPFApplicationBasePath = "pack://application:,,,/KlonoaHeroesPatcher;component/";
+
+        #endregion
+
         #region Public Static Properties
 
         public static AppViewModel Current => App.Current.AppViewModel;
