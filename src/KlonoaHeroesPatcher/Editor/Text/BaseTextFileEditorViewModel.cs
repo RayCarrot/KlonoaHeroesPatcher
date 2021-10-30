@@ -323,7 +323,7 @@ namespace KlonoaHeroesPatcher
                 OnPropertyChanged(nameof(Text));
             }
 
-            public int GetTextPreviewWidth(byte[] cutomWidths)
+            public int GetTextPreviewWidth()
             {
                 int maxWidth = 0;
                 int xPos = 0;
@@ -353,10 +353,7 @@ namespace KlonoaHeroesPatcher
                     }
                     else
                     {
-                        if (cutomWidths != null && cmd.FontIndex < cutomWidths.Length)
-                            xPos += cutomWidths[cmd.FontIndex];
-                        else
-                            xPos += 8;
+                        xPos += 8;
                     }
                 }
 
@@ -380,7 +377,7 @@ namespace KlonoaHeroesPatcher
                 int yPos = marginY;
 
                 // Get the dimensions
-                int width = marginX * 2 + GetTextPreviewWidth(cutomWidths);
+                int width = marginX * 2 + GetTextPreviewWidth();
                 int height = marginY * 2 + (txtCmds.Count(x => x.Command is TextCommand.CommandType.Linebreak or TextCommand.CommandType.Clear) + 1) * TileGraphicsHelpers.TileHeight * 2;
 
                 // Get the format
