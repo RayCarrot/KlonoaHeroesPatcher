@@ -323,6 +323,46 @@ namespace KlonoaHeroesPatcher
                 OnPropertyChanged(nameof(Text));
             }
 
+            public int GetTextPreviewWidth(byte[] cutomWidths)
+            {
+                int maxWidth = 0;
+                int xPos = 0;
+
+                foreach (TextCommand cmd in TextCommands.Commands)
+                {
+                    if (cmd.IsCommand)
+                    {
+                        switch (cmd.Command)
+                        {
+                            case TextCommand.CommandType.End:
+                            case TextCommand.CommandType.Clear:
+                            case TextCommand.CommandType.Linebreak:
+                                if (xPos > maxWidth)
+                                    maxWidth = xPos;
+                                xPos = 0;
+                                break;
+
+                            case TextCommand.CommandType.Speaker:
+                                xPos += 0x28;
+                                break;
+
+                            case TextCommand.CommandType.BlankSpace:
+                                xPos += cmd.CommandArgument == 0 ? 0x28 : cmd.CommandArgument;
+                                break;
+                        }
+                    }
+                    else
+                    {
+                        if (cutomWidths != null && cmd.FontIndex < cutomWidths.Length)
+                            xPos += cutomWidths[cmd.FontIndex];
+                        else
+                            xPos += 8;
+                    }
+                }
+
+                return maxWidth;
+            }
+
             public void RefreshTextPreview()
             {
                 // Get the font
@@ -340,7 +380,7 @@ namespace KlonoaHeroesPatcher
                 int yPos = defaultY;
 
                 // Get the dimensions
-                int width = GBAConstants.ScreenWidth;
+                int width = defaultX + GetTextPreviewWidth(cutomWidths);
                 int height = defaultY + (txtCmds.Count(x => x.Command is TextCommand.CommandType.Linebreak or TextCommand.CommandType.Clear) + 1) * TileGraphicsHelpers.TileHeight * 2;
 
                 // Get the format
