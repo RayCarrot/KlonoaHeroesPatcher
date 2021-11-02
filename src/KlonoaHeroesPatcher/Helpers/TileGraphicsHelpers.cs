@@ -17,7 +17,7 @@ namespace KlonoaHeroesPatcher
         public const double DpiX = 96;
         public const double DpiY = 96;
 
-        public static BitmapSource CreateImageSource(byte[] tileSet, int bpp, IList<BaseColor> palette, GraphicsTile[] tileMap, int width, int height, int basePalette)
+        public static BitmapSource CreateImageSource(byte[] tileSet, int bpp, IList<BaseColor> palette, MapTile[] tileMap, int width, int height, int basePalette)
         {
             // Get the format
             PixelFormat format = PixelFormats.Indexed8; // Always do 8-bit since 4-bit images can use multiple palettes
@@ -58,8 +58,8 @@ namespace KlonoaHeroesPatcher
                     if (tileMap != null && tileMap[mapIndex] == null)
                         continue;
 
-                    GraphicsTile mapTile = tileMap?[mapIndex];
-                    int tileIndex = mapTile?.TileSetIndex ?? mapIndex;
+                    MapTile mapTile = tileMap?[mapIndex];
+                    int tileIndex = mapTile?.TileIndex ?? mapIndex;
                     int tileSetOffset = tileIndex * tileLength;
 
                     int palOffset = 0;
@@ -175,7 +175,7 @@ namespace KlonoaHeroesPatcher
             return BitmapSource.Create(width, height, DpiX, DpiY, format, bmpPal, bytes, GetStride(width, format));
         }
 
-        public static (byte[] tileSet, GraphicsTile[] tileMap) CreateTileData(byte[] srcImgData, PixelFormat srcFormat, BitmapPalette srcPalette, int dstBpp, BaseColor[] dstPalette, int width, int height, bool createMap, int basePalette)
+        public static (byte[] tileSet, MapTile[] tileMap) CreateTileData(byte[] srcImgData, PixelFormat srcFormat, BitmapPalette srcPalette, int dstBpp, BaseColor[] dstPalette, int width, int height, bool createMap, int basePalette)
         {
             // Get the format
             float tileSetBppFactor = dstBpp / 8f;
@@ -189,7 +189,7 @@ namespace KlonoaHeroesPatcher
             int tileLength = (int)(TileWidth * TileHeight * tileSetBppFactor);
 
             var tileSet = new byte[tilesWidth * tilesHeight * tileLength]; // Max size, might be smaller if we reuse tiles in which case we shrink it later
-            var tileMap = new GraphicsTile[createMap ? tilesWidth * tilesHeight : 0];
+            var tileMap = new MapTile[createMap ? tilesWidth * tilesHeight : 0];
 
             int tileSetIndex = 0;
 
@@ -219,9 +219,9 @@ namespace KlonoaHeroesPatcher
                     int tileMapIndex = tileY * tilesWidth + tileX;
 
                     if (createMap)
-                        tileMap[tileMapIndex] = new GraphicsTile
+                        tileMap[tileMapIndex] = new MapTile
                         {
-                            TileSetIndex = tileSetIndex,
+                            TileIndex = tileSetIndex,
                             PaletteIndex = basePalette, // TODO: Support tiles having different palette indices
                         };
 
@@ -332,7 +332,7 @@ namespace KlonoaHeroesPatcher
 
                             if (matchesNormal || matchesFlipX || matchesFlipY || matchesFlipXY)
                             {
-                                tileMap[tileMapIndex].TileSetIndex = i;
+                                tileMap[tileMapIndex].TileIndex = i;
 
                                 if (!matchesNormal)
                                 {

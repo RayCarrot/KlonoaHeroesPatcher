@@ -8,6 +8,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
+using BinarySerializer.GBA;
 
 namespace KlonoaHeroesPatcher
 {
@@ -44,7 +45,7 @@ namespace KlonoaHeroesPatcher
                     return;
 
                 foreach (GraphicsMapTileViewModel tile in MapTiles)
-                    tile.IsHighlighted = tile != value && tile.Tile.TileSetIndex == value?.Tile.TileSetIndex;
+                    tile.IsHighlighted = tile != value && tile.Tile.TileIndex == value?.Tile.TileIndex;
             }
         }
         public int SelectedMapTileIndex { get; set; }
@@ -263,7 +264,7 @@ namespace KlonoaHeroesPatcher
                 img.CopyPixels(imgData, TileGraphicsHelpers.GetStride(img.PixelWidth, img.Format), 0);
 
                 // Create the tile set and map
-                (byte[] tileSet, GraphicsTile[] tileMap) = TileGraphicsHelpers.CreateTileData(
+                (byte[] tileSet, MapTile[] tileMap) = TileGraphicsHelpers.CreateTileData(
                     srcImgData: imgData, 
                     srcFormat: img.Format, 
                     srcPalette: img.Palette,

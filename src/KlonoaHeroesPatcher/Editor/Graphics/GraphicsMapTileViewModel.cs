@@ -1,18 +1,18 @@
 ﻿using System.Windows.Input;
 using System.Windows.Media.Imaging;
-using BinarySerializer.Klonoa.KH;
+using BinarySerializer.GBA;
 
 namespace KlonoaHeroesPatcher
 {
     public class GraphicsMapTileViewModel : BaseViewModel
     {
-        public GraphicsMapTileViewModel(GraphicsFileEditorViewModel editorViewModel, CroppedBitmap previewImgSource, GraphicsTile tile, int tilesCount)
+        public GraphicsMapTileViewModel(GraphicsFileEditorViewModel editorViewModel, CroppedBitmap previewImgSource, MapTile tile, int tilesCount)
         {
             EditorViewModel = editorViewModel;
             PreviewImgSource = previewImgSource;
             Tile = tile;
 
-            TileSetIndex = Tile.TileSetIndex;
+            TileSetIndex = Tile.TileIndex;
             MinTileSetIndex = 0;
             MaxTileSetIndex = tilesCount - 1;
 
@@ -30,7 +30,7 @@ namespace KlonoaHeroesPatcher
 
         public GraphicsFileEditorViewModel EditorViewModel { get; }
         public CroppedBitmap PreviewImgSource { get; }
-        public GraphicsTile Tile { get; }
+        public MapTile Tile { get; }
 
         public int TileSetIndex { get; set; }
         public int MinTileSetIndex { get; }
@@ -48,7 +48,7 @@ namespace KlonoaHeroesPatcher
         public void Apply()
         {
             // Update the properties
-            Tile.TileSetIndex = TileSetIndex;
+            Tile.TileIndex = TileSetIndex;
             Tile.PaletteIndex = PaletteIndex;
             Tile.FlipX = FlipX;
             Tile.FlipY = FlipY;
