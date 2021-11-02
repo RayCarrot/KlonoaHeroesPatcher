@@ -14,7 +14,7 @@ namespace KlonoaHeroesPatcher
 {
     public class NavigationItemViewModel : BaseViewModel
     {
-        public NavigationItemViewModel(NavigationItemViewModel parent, string title, PackIconMaterialKind icon, Color iconColor, ObservableCollection<DuoGridItemViewModel> fileInfo, BinarySerializable serializableObject, FileEditorViewModel editorViewModel, bool relocated, ArchiveFile parentArchiveFile, ArchiveFile compressedParentArchiveFile)
+        public NavigationItemViewModel(NavigationItemViewModel parent, string title, PackIconMaterialKind icon, Color iconColor, ObservableCollection<DuoGridItemViewModel> fileInfo, BinarySerializable serializableObject, FileEditorViewModel editorViewModel, PatchedFooter.RelocatedStruct relocatedStruct, ArchiveFile parentArchiveFile, ArchiveFile compressedParentArchiveFile)
         {
             Parent = parent;
             Title = title;
@@ -23,7 +23,7 @@ namespace KlonoaHeroesPatcher
             FileInfo = fileInfo;
             SerializableObject = serializableObject;
             EditorViewModel = editorViewModel;
-            Relocated = relocated;
+            RelocatedStruct = relocatedStruct;
             ParentArchiveFile = parentArchiveFile;
             CompressedParentArchiveFile = compressedParentArchiveFile;
             NavigationItems = new ObservableCollection<NavigationItemViewModel>();
@@ -57,7 +57,8 @@ namespace KlonoaHeroesPatcher
         public bool IsNull => SerializableObject == null;
         public Pointer Offset { get; }
         public FileEditorViewModel EditorViewModel { get; }
-        public bool Relocated { get; }
+        public PatchedFooter.RelocatedStruct RelocatedStruct { get; }
+        public bool Relocated => RelocatedStruct != null;
         public string OverrideFileName { get; init; }
 
         public bool IsSelected
@@ -99,12 +100,25 @@ namespace KlonoaHeroesPatcher
                     return "NULL";
                 else if (IsWithinCompressedArchive)
                     return $"0x{BinaryHelpers.GetROMPointer(CompressedParentArchiveFile.Offset).StringAbsoluteOffset}_{SerializableObject.Offset.StringFileOffset}";
+                else if (Relocated)
+                    return $"0x{RelocatedStruct.OriginalPointer.StringAbsoluteOffset}";
                 else
                     return $"0x{Offset.StringAbsoluteOffset}";
             }
         }
 
-        public string DisplayName => $"{DisplayOffset} ({OverrideFileName ?? Title})";
+        public string DisplayName
+        {
+            get
+            {
+                var displayOffset = DisplayOffset;
+
+                if (RelocatedStruct != null)
+                    displayOffset += $"->0x{RelocatedStruct.NewPointer.StringAbsoluteOffset}";
+
+                return $"{displayOffset} ({OverrideFileName ?? Title})";
+            }
+        }
 
         public ObservableCollection<NavigationItemViewModel> NavigationItems { get; }
 

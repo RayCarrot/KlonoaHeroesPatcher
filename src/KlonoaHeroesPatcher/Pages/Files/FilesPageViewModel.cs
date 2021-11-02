@@ -127,9 +127,11 @@ namespace KlonoaHeroesPatcher
                 iconColor = Color.FromRgb(0x8B, 0x00, 0x8B);
             }
 
-            bool relocated = obj != null && footer.RelocatedStructs.Any(x => x.NewPointer == BinaryHelpers.GetROMPointer(obj.Offset, throwOnError: false));
+            PatchedFooter.RelocatedStruct relocatedStruct = obj != null 
+                ? footer.RelocatedStructs.FirstOrDefault(x => x.NewPointer == BinaryHelpers.GetROMPointer(obj.Offset, throwOnError: false)) 
+                : null;
 
-            var navItem = new NavigationItemViewModel(parent, title, icon, iconColor, info, obj, editor, relocated, parentArchiveFile, compressedParentArchiveFile)
+            var navItem = new NavigationItemViewModel(parent, title, icon, iconColor, info, obj, editor, relocatedStruct, parentArchiveFile, compressedParentArchiveFile)
             {
                 OverrideFileName = overrideFileName,
             };
