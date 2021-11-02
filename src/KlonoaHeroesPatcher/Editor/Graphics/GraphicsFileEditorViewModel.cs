@@ -181,7 +181,7 @@ namespace KlonoaHeroesPatcher
 
                             var tilesCount = (int)(GraphicsFile.TileSetLength / (TileGraphicsHelpers.TileWidth * TileGraphicsHelpers.TileHeight * (GraphicsFile.BPP / 8f)));
 
-                            MapTiles.Add(new GraphicsMapTileViewModel(this, bmp, GraphicsFile.TileMap[y * tilesWidth + x], tilesCount));
+                            MapTiles.Add(new GraphicsMapTileViewModel(this, bmp, GraphicsFile.TileMap[y * tilesWidth + x], tilesCount, GraphicsFile.BPP, GraphicsFile.IsAffine));
                         }
                     }
                 }
@@ -271,7 +271,7 @@ namespace KlonoaHeroesPatcher
                     dstBpp: GraphicsFile.BPP, 
                     dstPalette: GraphicsFile.Palette, 
                     width: img.PixelWidth, height: img.PixelHeight, 
-                    createMap: GraphicsFile.TileMapLength != 0,
+                    createMap: GraphicsFile.HasTileMap,
                     basePalette: BasePalette + MinBasePalette);
 
                 // Update the properties
@@ -280,7 +280,7 @@ namespace KlonoaHeroesPatcher
                 GraphicsFile.TileSet = tileSet;
                 GraphicsFile.TileSetLength = (uint)tileSet.Length;
                 GraphicsFile.TileMap = tileMap;
-                GraphicsFile.TileMapLength = (uint)(tileMap.Length * 2);
+                GraphicsFile.TileMapLength = (uint)(tileMap.Length * (GraphicsFile.IsAffine ? 1 : 2));
                 GraphicsFile.TileMapOffset = GraphicsFile.TileSetOffset + GraphicsFile.TileSetLength;
 
                 // Relocate the data
