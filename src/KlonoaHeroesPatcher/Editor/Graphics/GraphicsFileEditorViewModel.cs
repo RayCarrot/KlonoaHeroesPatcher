@@ -96,6 +96,7 @@ namespace KlonoaHeroesPatcher
                 new DuoGridItemViewModel("BPP", $"{GraphicsFile.BPP}"),
                 new DuoGridItemViewModel("Tiles", $"{GraphicsFile.TileSet.Length / tileSize}"),
                 new DuoGridItemViewModel("Has map", $"{GraphicsFile.TileMap?.Any() == true}"),
+                new DuoGridItemViewModel("Is affine", $"{GraphicsFile.IsAffine}"),
             };
         }
 
