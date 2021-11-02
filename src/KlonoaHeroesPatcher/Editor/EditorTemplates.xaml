@@ -47,6 +47,7 @@
 
                     <TextBox Grid.Column="0"
                              Text="{Binding Path=Text, UpdateSourceTrigger=PropertyChanged}"
+                             AcceptsReturn="True"
                              TextWrapping="Wrap"
                              Margin="0 0 10 0" />
 
