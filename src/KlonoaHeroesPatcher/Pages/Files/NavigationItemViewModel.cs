@@ -89,7 +89,7 @@ namespace KlonoaHeroesPatcher
             // Files within compressed archives can currently not be exported as the offset is no longer valid (due to being in a compressed StreamFile)
             !IsWithinCompressedArchive;
 
-        public bool CanImportBinary => SerializableObject is not ArchiveFile;
+        public bool CanImportBinary => SerializableObject is not ArchiveFile && !IsNull;
 
         public string DisplayOffset
         {
