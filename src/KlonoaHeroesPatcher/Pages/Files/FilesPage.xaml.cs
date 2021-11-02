@@ -15,7 +15,8 @@ namespace KlonoaHeroesPatcher
 
         private void TreeView_OnSelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
-            AppViewModel.Current.FilesPageViewModel.SelectedNavigationItem = e.NewValue as NavigationItemViewModel;
+            if (AppViewModel.Current.FilesPageViewModel != null)
+                AppViewModel.Current.FilesPageViewModel.SelectedNavigationItem = e.NewValue as NavigationItemViewModel;
         }
     }
 }
