@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Windows;
@@ -13,8 +14,9 @@ namespace KlonoaHeroesPatcher
 {
     public class NavigationItemViewModel : BaseViewModel
     {
-        public NavigationItemViewModel(string title, PackIconMaterialKind icon, Color iconColor, ObservableCollection<DuoGridItemViewModel> fileInfo, BinarySerializable serializableObject, FileEditorViewModel editorViewModel, bool relocated, ArchiveFile parentArchiveFile, ArchiveFile compressedParentArchiveFile)
+        public NavigationItemViewModel(NavigationItemViewModel parent, string title, PackIconMaterialKind icon, Color iconColor, ObservableCollection<DuoGridItemViewModel> fileInfo, BinarySerializable serializableObject, FileEditorViewModel editorViewModel, bool relocated, ArchiveFile parentArchiveFile, ArchiveFile compressedParentArchiveFile)
         {
+            Parent = parent;
             Title = title;
             Icon = icon;
             IconColor = new SolidColorBrush(iconColor);
@@ -43,6 +45,7 @@ namespace KlonoaHeroesPatcher
         public ICommand ImportBinaryCommand { get; }
         public ICommand RefreshCommand { get; }
 
+        public NavigationItemViewModel Parent { get; }
         public string Title { get; }
         public PackIconMaterialKind Icon { get; }
         public SolidColorBrush IconColor { get; }
@@ -104,6 +107,21 @@ namespace KlonoaHeroesPatcher
         public string DisplayName => $"{DisplayOffset} ({OverrideFileName ?? Title})";
 
         public ObservableCollection<NavigationItemViewModel> NavigationItems { get; }
+
+        public IEnumerable<NavigationItemViewModel> GetAllChildren(bool includeSelf = false)
+        {
+            if (includeSelf)
+                yield return this;
+
+            foreach (NavigationItemViewModel child in NavigationItems)
+            {
+                if (child == null)
+                    continue;
+
+                foreach (NavigationItemViewModel subChild in child.GetAllChildren(true))
+                    yield return subChild;
+            }
+        }
 
         public void RelocateFile()
         {

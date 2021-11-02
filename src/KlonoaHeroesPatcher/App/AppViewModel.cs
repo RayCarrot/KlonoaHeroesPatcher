@@ -29,6 +29,8 @@ namespace KlonoaHeroesPatcher
 
         public AppViewModel()
         {
+            SearchProvider = new BaseSuggestionProvider(SearchForEntries);
+
             NavigationItems = new ObservableCollection<NavigationItemViewModel>();
             PatchViewModels = new ObservableCollection<PatchViewModel>();
             PendingRelocatedData = new List<RelocatedData>();
@@ -102,6 +104,24 @@ namespace KlonoaHeroesPatcher
         public ObservableCollection<NavigationItemViewModel> NavigationItems { get; }
         public NavigationItemViewModel SelectedNavigationItem { get; set; }
 
+        private NavigationItemViewModel _selectedSearchEntry;
+        public NavigationItemViewModel SelectedSearchEntry
+        {
+            get => _selectedSearchEntry;
+            set
+            {
+                _selectedSearchEntry = value;
+
+                // If an entry has been selected we navigate to it and then clear the value
+                if (SelectedSearchEntry != null)
+                {
+                    SelectItem(SelectedSearchEntry);
+                    SelectedSearchEntry = null;
+                }
+            }
+        }
+        public BaseSuggestionProvider SearchProvider { get; }
+
         public ObservableCollection<PatchViewModel> PatchViewModels { get; }
 
         public List<RelocatedData> PendingRelocatedData { get; }
@@ -110,6 +130,13 @@ namespace KlonoaHeroesPatcher
         #endregion
 
         #region Private Methods
+
+        private IEnumerable<NavigationItemViewModel> EnumerateNavigationItems() => NavigationItems.SelectMany(x => x.GetAllChildren(true));
+
+        private IEnumerable<NavigationItemViewModel> SearchForEntries(string search)
+        {
+            return EnumerateNavigationItems().Where(y => y.DisplayName.IndexOf(search, StringComparison.InvariantCultureIgnoreCase) > -1);
+        }
 
         private AppConfig LoadConfig()
         {
@@ -127,7 +154,7 @@ namespace KlonoaHeroesPatcher
             }
         }
 
-        private void AddNavigationItem(ICollection<NavigationItemViewModel> collection, string title, BinarySerializable obj, ArchiveFile parentArchiveFile, ArchiveFile compressedParentArchiveFile = null, string overrideFileName = null)
+        private void AddNavigationItem(NavigationItemViewModel parent, ICollection<NavigationItemViewModel> collection, string title, BinarySerializable obj, ArchiveFile parentArchiveFile, ArchiveFile compressedParentArchiveFile = null, string overrideFileName = null)
         {
             FileEditorViewModel editor;
             PackIconMaterialKind icon;
@@ -196,7 +223,7 @@ namespace KlonoaHeroesPatcher
 
             bool relocated = obj != null && Footer.RelocatedStructs.Any(x => x.NewPointer == BinaryHelpers.GetROMPointer(obj.Offset, throwOnError: false));
 
-            var navItem = new NavigationItemViewModel(title, icon, iconColor, info, obj, editor, relocated, parentArchiveFile, compressedParentArchiveFile)
+            var navItem = new NavigationItemViewModel(parent, title, icon, iconColor, info, obj, editor, relocated, parentArchiveFile, compressedParentArchiveFile)
             {
                 OverrideFileName = overrideFileName,
             };
@@ -246,6 +273,7 @@ namespace KlonoaHeroesPatcher
                 }
 
                 AddNavigationItem(
+                    parent: navItem,
                     collection: navItem.NavigationItems, 
                     title: file?.Name, 
                     obj: file?.Obj, 
@@ -258,6 +286,25 @@ namespace KlonoaHeroesPatcher
         #endregion
 
         #region Public Methods
+
+        public void SelectItem(NavigationItemViewModel navItem)
+        {
+            // Expand the parent items
+            var parent = navItem;
+
+            while (parent != null)
+            {
+                // Only expand if there are children
+                if (parent.NavigationItems.Any())
+                    parent.IsExpanded = true;
+
+                // Get the next parent
+                parent = parent.Parent;
+            }
+
+            // Select the item
+            navItem.IsSelected = true;
+        }
 
         public async Task RunAsync(Action action)
         {
@@ -456,14 +503,14 @@ namespace KlonoaHeroesPatcher
 
                     NavigationItems.Clear();
 
-                    AddNavigationItem(NavigationItems, nameof(ROM.MenuPack), ROM.MenuPack, null);
-                    AddNavigationItem(NavigationItems, nameof(ROM.EnemyAnimationsPack), ROM.EnemyAnimationsPack, null);
-                    AddNavigationItem(NavigationItems, nameof(ROM.GameplayPack), ROM.GameplayPack, null);
-                    AddNavigationItem(NavigationItems, nameof(ROM.ItemsPack), ROM.ItemsPack, null);
-                    AddNavigationItem(NavigationItems, nameof(ROM.UIPack), ROM.UIPack, null);
-                    AddNavigationItem(NavigationItems, nameof(ROM.StoryPack), ROM.StoryPack, null);
-                    AddNavigationItem(NavigationItems, nameof(ROM.MapsPack), rawMapsPack, null);
-                    AddNavigationItem(NavigationItems, nameof(ROM.WorldMapPack), ROM.WorldMapPack, null);
+                    AddNavigationItem(null, NavigationItems, nameof(ROM.MenuPack), ROM.MenuPack, null);
+                    AddNavigationItem(null, NavigationItems, nameof(ROM.EnemyAnimationsPack), ROM.EnemyAnimationsPack, null);
+                    AddNavigationItem(null, NavigationItems, nameof(ROM.GameplayPack), ROM.GameplayPack, null);
+                    AddNavigationItem(null, NavigationItems, nameof(ROM.ItemsPack), ROM.ItemsPack, null);
+                    AddNavigationItem(null, NavigationItems, nameof(ROM.UIPack), ROM.UIPack, null);
+                    AddNavigationItem(null, NavigationItems, nameof(ROM.StoryPack), ROM.StoryPack, null);
+                    AddNavigationItem(null, NavigationItems, nameof(ROM.MapsPack), rawMapsPack, null);
+                    AddNavigationItem(null, NavigationItems, nameof(ROM.WorldMapPack), ROM.WorldMapPack, null);
 
                     // Create the patches
                     var patches = new Patch[]

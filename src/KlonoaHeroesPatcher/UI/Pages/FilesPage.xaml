@@ -5,158 +5,206 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:KlonoaHeroesPatcher"
              xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
+             xmlns:editors="http://wpfcontrols.com/"
+             xmlns:metro="http://metro.mahapps.com/winfx/xaml/controls"
              mc:Ignorable="d" 
              Background="{DynamicResource MahApps.Brushes.ThemeBackground}"
              Foreground="{DynamicResource MahApps.Brushes.ThemeForeground}"
              d:DesignHeight="450" d:DesignWidth="800"
              d:DataContext="{d:DesignInstance local:AppViewModel}">
     <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="Auto" />
-            <ColumnDefinition Width="*" />
-        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
 
-        <TreeView Grid.Column="0"
-                  ItemsSource="{Binding Path=NavigationItems, Mode=OneTime}"
-                  SelectedItemChanged="TreeView_OnSelectedItemChanged">
+        <!-- Search bar -->
 
-            <TreeView.ItemContainerStyle>
-                <Style TargetType="{x:Type TreeViewItem}" BasedOn="{StaticResource {x:Type TreeViewItem}}">
-                    <Setter Property="IsSelected" Value="{Binding Path=IsSelected}" />
-                    <Setter Property="IsExpanded" Value="{Binding Path=IsExpanded}" />
-                </Style>
-            </TreeView.ItemContainerStyle>
+        <editors:AutoCompleteTextBox Grid.Row="0"
+                                     Margin="5 0 5 5"
+                                     DisplayMember="FileName"
+                                     Provider="{Binding Path=SearchProvider, Mode=OneTime}"
+                                     SelectedItem="{Binding Path=SelectedSearchEntry, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                     metro:TextBoxHelper.Watermark="Search"
+                                     metro:TextBoxHelper.SelectAllOnFocus="True">
 
-            <TreeView.ItemTemplate>
-                <HierarchicalDataTemplate ItemsSource="{Binding Path=NavigationItems, Mode=OneTime}">
+            <editors:AutoCompleteTextBox.ItemTemplate>
+                <DataTemplate DataType="{x:Type local:NavigationItemViewModel}">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="5" />
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
 
-                        <iconPacks:PackIconMaterial Kind="{Binding Path=Icon, Mode=OneTime}"
+                        <iconPacks:PackIconMaterial Grid.Column="0" 
+                                                    Kind="{Binding Path=Icon, Mode=OneTime}"
                                                     Foreground="{Binding Path=IconColor, Mode=OneTime}"
-                                                    VerticalAlignment="Center"
-                                                    Background="Transparent"
-                                                    Margin="0 0 5 0">
-                            <iconPacks:PackIconMaterial.ToolTip>
-                                <ItemsControl Grid.IsSharedSizeScope="True"
-                                              ItemsSource="{Binding Path=FileInfo, Mode=OneTime}">
-                                    <ItemsControl.ItemTemplate>
-                                        <DataTemplate>
-                                            <local:DuoGridItem Header="{Binding Path=Header}"
-                                                               Text="{Binding Path=Text}" />
-                                        </DataTemplate>
-                                    </ItemsControl.ItemTemplate>
-                                </ItemsControl>
-                            </iconPacks:PackIconMaterial.ToolTip>
-                        </iconPacks:PackIconMaterial>
+                                                    VerticalAlignment="Center" />
 
-                        <iconPacks:PackIconMaterial Grid.Column="1"
-                                                    Visibility="{Binding Path=Relocated, Converter={local:BooleanToVisibilityConverter}}"
-                                                    Kind="FileEditOutline"
-                                                    Height="12"
-                                                    VerticalAlignment="Center"
-                                                    ToolTip="Modified"
-                                                    Background="Transparent"
-                                                    Margin="0 0 5 0" />
-
-                        <iconPacks:PackIconMaterial Grid.Column="2"
-                                                    Visibility="{Binding Path=UnsavedChanges, Converter={local:BooleanToVisibilityConverter}}"
-                                                    Kind="FileUploadOutline"
-                                                    Height="12"
-                                                    VerticalAlignment="Center"
-                                                    ToolTip="Unsaved changes"
-                                                    Background="Transparent"
-                                                    Foreground="#D81B60"
-                                                    Margin="0 0 5 0" />
-
-                        <TextBlock Grid.Column="3"
+                        <TextBlock Grid.Column="2"
                                    Text="{Binding Path=DisplayName, Mode=OneTime}"
+                                   VerticalAlignment="Center"
                                    Margin="0 0 10 0" />
 
-
                     </Grid>
-                </HierarchicalDataTemplate>
-            </TreeView.ItemTemplate>
 
-        </TreeView>
+                </DataTemplate>
+            </editors:AutoCompleteTextBox.ItemTemplate>
 
-        <Grid Grid.Column="1"
-              DataContext="{Binding Path=SelectedNavigationItem}"
-              Visibility="{Binding Converter={local:InvertedObjectNullToVisibilityConverter}}">
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="*" />
-                </Grid.RowDefinitions>
+        </editors:AutoCompleteTextBox>
 
-                <StackPanel Grid.Row="0">
+        <!-- Files/folders -->
 
-                    <TextBlock Text="{Binding Path=DisplayName, Mode=OneTime}"
-                               FontSize="16"
-                               HorizontalAlignment="Center"
-                               Margin="0 0 0 5" />
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
 
-                    <StackPanel Orientation="Horizontal"
-                                HorizontalAlignment="Center"
-                                Margin="0 0 0 5">
+            <TreeView Grid.Column="0"
+                      ItemsSource="{Binding Path=NavigationItems, Mode=OneTime}"
+                      SelectedItemChanged="TreeView_OnSelectedItemChanged">
 
-                        <Button IsEnabled="{Binding Path=CanExportBinary, Mode=OneTime}"
-                                Command="{Binding Path=ExportBinaryCommand, Mode=OneTime}"
-                                Margin="0 0 5 0">
-                            <StackPanel Orientation="Horizontal">
-                                <iconPacks:PackIconMaterial Kind="Export"
-                                                            VerticalAlignment="Center" />
+                <TreeView.ItemContainerStyle>
+                    <Style TargetType="{x:Type TreeViewItem}" BasedOn="{StaticResource {x:Type TreeViewItem}}">
+                        <Setter Property="IsSelected" Value="{Binding Path=IsSelected, Mode=TwoWay}" />
+                        <Setter Property="IsExpanded" Value="{Binding Path=IsExpanded, Mode=TwoWay}" />
+                    </Style>
+                </TreeView.ItemContainerStyle>
 
-                                <TextBlock Margin="5 0"
-                                           Text="Export Binary"
-                                           VerticalAlignment="Center" />
+                <TreeView.ItemTemplate>
+                    <HierarchicalDataTemplate ItemsSource="{Binding Path=NavigationItems, Mode=OneTime}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
 
-                            </StackPanel>
-                        </Button>
+                            <iconPacks:PackIconMaterial Kind="{Binding Path=Icon, Mode=OneTime}"
+                                                        Foreground="{Binding Path=IconColor, Mode=OneTime}"
+                                                        VerticalAlignment="Center"
+                                                        Background="Transparent"
+                                                        Margin="0 0 5 0">
+                                <iconPacks:PackIconMaterial.ToolTip>
+                                    <ItemsControl Grid.IsSharedSizeScope="True"
+                                                  ItemsSource="{Binding Path=FileInfo, Mode=OneTime}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <local:DuoGridItem Header="{Binding Path=Header}"
+                                                                   Text="{Binding Path=Text}" />
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </iconPacks:PackIconMaterial.ToolTip>
+                            </iconPacks:PackIconMaterial>
 
-                        <Button IsEnabled="{Binding Path=CanImportBinary, Mode=OneTime}"
-                                Command="{Binding Path=ImportBinaryCommand, Mode=OneTime}"
-                                Margin="0 0 5 0">
-                            <StackPanel Orientation="Horizontal">
-                                <iconPacks:PackIconMaterial Kind="Import"
-                                                            VerticalAlignment="Center" />
+                            <iconPacks:PackIconMaterial Grid.Column="1"
+                                                        Visibility="{Binding Path=Relocated, Converter={local:BooleanToVisibilityConverter}}"
+                                                        Kind="FileEditOutline"
+                                                        Height="12"
+                                                        VerticalAlignment="Center"
+                                                        ToolTip="Modified"
+                                                        Background="Transparent"
+                                                        Margin="0 0 5 0" />
 
-                                <TextBlock Margin="5 0"
-                                           Text="Import Binary"
-                                           VerticalAlignment="Center" />
+                            <iconPacks:PackIconMaterial Grid.Column="2"
+                                                        Visibility="{Binding Path=UnsavedChanges, Converter={local:BooleanToVisibilityConverter}}"
+                                                        Kind="FileUploadOutline"
+                                                        Height="12"
+                                                        VerticalAlignment="Center"
+                                                        ToolTip="Unsaved changes"
+                                                        Background="Transparent"
+                                                        Foreground="#D81B60"
+                                                        Margin="0 0 5 0" />
 
-                            </StackPanel>
-                        </Button>
+                            <TextBlock Grid.Column="3"
+                                       Text="{Binding Path=DisplayName, Mode=OneTime}"
+                                       Margin="0 0 10 0" />
 
-                        <Button Command="{Binding Path=RefreshCommand, Mode=OneTime}"
-                                Margin="0 0 5 0">
-                            <StackPanel Orientation="Horizontal">
-                                <iconPacks:PackIconMaterial Kind="Refresh"
-                                                            VerticalAlignment="Center" />
 
-                                <TextBlock Margin="5 0"
-                                           Text="Refresh"
-                                           VerticalAlignment="Center" />
+                        </Grid>
+                    </HierarchicalDataTemplate>
+                </TreeView.ItemTemplate>
 
-                            </StackPanel>
-                        </Button>
+            </TreeView>
+
+            <Grid Grid.Column="1"
+                  DataContext="{Binding Path=SelectedNavigationItem}"
+                  Visibility="{Binding Converter={local:InvertedObjectNullToVisibilityConverter}}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Grid.Row="0">
+
+                        <TextBlock Text="{Binding Path=DisplayName, Mode=OneTime}"
+                                   FontSize="16"
+                                   HorizontalAlignment="Center"
+                                   Margin="0 0 0 5" />
+
+                        <StackPanel Orientation="Horizontal"
+                                    HorizontalAlignment="Center"
+                                    Margin="0 0 0 5">
+
+                            <Button IsEnabled="{Binding Path=CanExportBinary, Mode=OneTime}"
+                                    Command="{Binding Path=ExportBinaryCommand, Mode=OneTime}"
+                                    Margin="0 0 5 0">
+                                <StackPanel Orientation="Horizontal">
+                                    <iconPacks:PackIconMaterial Kind="Export"
+                                                                VerticalAlignment="Center" />
+
+                                    <TextBlock Margin="5 0"
+                                               Text="Export Binary"
+                                               VerticalAlignment="Center" />
+
+                                </StackPanel>
+                            </Button>
+
+                            <Button IsEnabled="{Binding Path=CanImportBinary, Mode=OneTime}"
+                                    Command="{Binding Path=ImportBinaryCommand, Mode=OneTime}"
+                                    Margin="0 0 5 0">
+                                <StackPanel Orientation="Horizontal">
+                                    <iconPacks:PackIconMaterial Kind="Import"
+                                                                VerticalAlignment="Center" />
+
+                                    <TextBlock Margin="5 0"
+                                               Text="Import Binary"
+                                               VerticalAlignment="Center" />
+
+                                </StackPanel>
+                            </Button>
+
+                            <Button Command="{Binding Path=RefreshCommand, Mode=OneTime}"
+                                    Margin="0 0 5 0">
+                                <StackPanel Orientation="Horizontal">
+                                    <iconPacks:PackIconMaterial Kind="Refresh"
+                                                                VerticalAlignment="Center" />
+
+                                    <TextBlock Margin="5 0"
+                                               Text="Refresh"
+                                               VerticalAlignment="Center" />
+
+                                </StackPanel>
+                            </Button>
+
+                        </StackPanel>
 
                     </StackPanel>
 
-                </StackPanel>
+                    <ContentPresenter Grid.Row="1" Content="{Binding Path=EditorViewModel, Mode=OneTime}">
+                        <ContentPresenter.ContentTemplateSelector>
+                            <local:EditorTemplateSelector />
+                        </ContentPresenter.ContentTemplateSelector>
+                    </ContentPresenter>
 
-                <ContentPresenter Grid.Row="1" Content="{Binding Path=EditorViewModel, Mode=OneTime}">
-                    <ContentPresenter.ContentTemplateSelector>
-                        <local:EditorTemplateSelector />
-                    </ContentPresenter.ContentTemplateSelector>
-                </ContentPresenter>
-
+                </Grid>
             </Grid>
+
         </Grid>
 
     </Grid>
