@@ -70,6 +70,8 @@ namespace KlonoaHeroesPatcher
 
         public override T DoAt<T>(Pointer offset, Func<T> action) => default;
 
+        public override void SerializeBitValues(Action<SerializeBits64> serializeFunc) => throw new InvalidOperationException();
+
         public override void SerializeBitValues<T>(Action<SerializeBits> serializeFunc)
         {
             serializeFunc((value, length, name) =>
