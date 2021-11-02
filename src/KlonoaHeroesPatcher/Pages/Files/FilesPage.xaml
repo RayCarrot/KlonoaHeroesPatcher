@@ -11,7 +11,7 @@
              Background="{DynamicResource MahApps.Brushes.ThemeBackground}"
              Foreground="{DynamicResource MahApps.Brushes.ThemeForeground}"
              d:DesignHeight="450" d:DesignWidth="800"
-             d:DataContext="{d:DesignInstance local:AppViewModel}">
+             d:DataContext="{d:DesignInstance local:FilesPageViewModel}">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />

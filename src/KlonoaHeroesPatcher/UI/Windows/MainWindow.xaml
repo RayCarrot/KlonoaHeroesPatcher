@@ -73,7 +73,7 @@
                                        Visibility="{Binding Path=ROM, Converter={local:InvertedObjectNullToVisibilityConverter}}">
 
             <TabItem Header="Files" local:TabItemAssist.IconKind="FileMultipleOutline" local:TabItemAssist.IconForeground="#8B008B">
-                <local:FilesPage />
+                <local:FilesPage DataContext="{Binding Path=FilesPageViewModel}" />
             </TabItem>
 
             <TabItem Header="Patches" local:TabItemAssist.IconKind="BriefcaseOutline" local:TabItemAssist.IconForeground="#4CAF50">
