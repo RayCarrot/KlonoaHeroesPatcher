@@ -216,6 +216,11 @@ namespace KlonoaHeroesPatcher
                     var entry = archive.OffsetTable.KH_KW_Entries[fileIndex];
                     fileOverrideFileName = $"Map {entry.MapID1}-{entry.MapID2}-{entry.MapID3}";
                 }
+                else if (archive.Pre_Type == ArchiveFileType.KH_WMAP)
+                {
+                    var entry = archive.OffsetTable.KH_WMAP_Entries[fileIndex];
+                    fileOverrideFileName = $"{entry.Name} {entry.ID}";
+                }
 
                 ArchiveFile navItemParentArchiveFile;
                 ArchiveFile navItemcompressedParentArchiveFile;
@@ -458,6 +463,7 @@ namespace KlonoaHeroesPatcher
                     AddNavigationItem(NavigationItems, nameof(ROM.UIPack), ROM.UIPack, null);
                     AddNavigationItem(NavigationItems, nameof(ROM.StoryPack), ROM.StoryPack, null);
                     AddNavigationItem(NavigationItems, nameof(ROM.MapsPack), rawMapsPack, null);
+                    AddNavigationItem(NavigationItems, nameof(ROM.WorldMapPack), ROM.WorldMapPack, null);
 
                     // Create the patches
                     var patches = new Patch[]

@@ -78,6 +78,17 @@ namespace KlonoaHeroesPatcher
                         });
                         break;
 
+                    case ArchiveFileType.KH_WMAP:
+                        s.DoAt(ParentArchiveOffsetTable.Offset + (fileIndex * 16) + 8, () =>
+                        {
+                            // Update the file size
+                            s.Serialize<int>((int)fileSize);
+
+                            // Update the offset to point to the new location
+                            s.Serialize<uint>((uint)(newPointer.AbsoluteOffset - anchor.AbsoluteOffset));
+                        });
+                        break;
+
                     default:
                         throw new Exception($"Unsupported archive type {ParentArchiveOffsetTable.Pre_Type}");
                 }
