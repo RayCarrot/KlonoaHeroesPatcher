@@ -38,12 +38,40 @@ namespace KlonoaHeroesPatcher
             };
         }
 
+        protected BaseTextFileEditorViewModel()
+        {
+            KlonoaHeroesROM rom = AppViewModel.Current.ROM;
+
+            TextPreviewFonts = new ObservableCollection<TextPreviewFontViewModel>()
+            {
+                new TextPreviewFontViewModel(nameof(rom.UIPack.Font_0), rom.UIPack.Font_0, true),
+                new TextPreviewFontViewModel(nameof(rom.UIPack.Font_1), rom.UIPack.Font_1, false),
+            };
+
+            _selectedTextPreviewFont = TextPreviewFonts.First();
+        }
+
         public static ObservableCollection<DuoGridItemViewModel> AllowedCharactersInfo { get; }
         public static ObservableCollection<DuoGridItemViewModel> AllowedCommandsInfo { get; }
 
         public ObservableCollection<TextItemViewModel> TextItems { get; set; }
         public TextItemViewModel SelectedTextItem { get; set; }
         public bool HasMultipleTextItems { get; set; }
+
+        public ObservableCollection<TextPreviewFontViewModel> TextPreviewFonts { get; }
+
+        private TextPreviewFontViewModel _selectedTextPreviewFont;
+        public TextPreviewFontViewModel SelectedTextPreviewFont
+        {
+            get => _selectedTextPreviewFont;
+            set
+            {
+                _selectedTextPreviewFont = value;
+
+                foreach (TextItemViewModel textItem in TextItems)
+                    textItem.RefreshTextPreview(SelectedTextPreviewFont);
+            }
+        }
 
         public override void Load(bool firstLoad)
         {
@@ -62,7 +90,7 @@ namespace KlonoaHeroesPatcher
             }
 
             foreach (TextItemViewModel textItem in TextItems)
-                textItem.RefreshTextPreview();
+                textItem.RefreshTextPreview(SelectedTextPreviewFont);
         }
 
         public override void Unload()
@@ -360,133 +388,167 @@ namespace KlonoaHeroesPatcher
                 return maxWidth;
             }
 
-            public void RefreshTextPreview()
+            public void RefreshTextPreview(TextPreviewFontViewModel fontViewModel)
             {
-                // Get the font
-                KlonoaHeroesROM rom = AppViewModel.Current.ROM;
-                Graphics_File font = rom.UIPack.Font_0;
-
-                // Get the text commands
-                TextCommand[] txtCmds = TextCommands.Commands;
-
-                byte[] cutomWidths = AppViewModel.Current.PatchViewModels.Select(x => x.Patch).OfType<VariableWidthFontPatch>().FirstOrDefault()?.Widths;
-
-                const int marginX = 8;
-                const int marginY = 8;
-                int xPos = marginX;
-                int yPos = marginY;
-
-                // Get the dimensions
-                int width = marginX * 2 + GetTextPreviewWidth();
-                int height = marginY * 2 + (txtCmds.Count(x => x.Command is TextCommand.CommandType.Linebreak or TextCommand.CommandType.Clear) + 1) * TileGraphicsHelpers.TileHeight * 2;
-
-                // Get the format
-                var bpp = font.BPP;
-                PixelFormat format = PixelFormats.Indexed8;
-                float bppFactor = bpp / 8f;
-                int stride = TileGraphicsHelpers.GetStride(width, format);
-
-                // Get the palette
-                BitmapPalette bmpPal = new BitmapPalette(ColorHelpers.ConvertColors(font.Palette, bpp, false));
-
-                // Create a buffer for the image data
-                var imgData = new byte[width * height];
-
-                // Get the length of each tile in bytes
-                int tileLength = (int)(TileGraphicsHelpers.TileWidth * TileGraphicsHelpers.TileHeight * bppFactor);
-
-                foreach (TextCommand cmd in txtCmds)
+                try
                 {
-                    if (cmd.IsCommand)
+                    // Get the rom and font
+                    KlonoaHeroesROM rom = AppViewModel.Current.ROM;
+                    Graphics_File font = fontViewModel.Font;
+
+                    // Get the text commands
+                    TextCommand[] txtCmds = TextCommands.Commands;
+
+                    byte[] cutomWidths = AppViewModel.Current.PatchViewModels.Select(x => x.Patch).OfType<VariableWidthFontPatch>().FirstOrDefault()?.Widths;
+
+                    const int marginX = 8;
+                    const int marginY = 8;
+                    int xPos = marginX;
+                    int yPos = marginY;
+
+                    // Get the dimensions
+                    int width = marginX * 2 + GetTextPreviewWidth();
+                    int height = marginY * 2 + (txtCmds.Count(x => x.Command is TextCommand.CommandType.Linebreak or TextCommand.CommandType.Clear) + 1) * TileGraphicsHelpers.TileHeight;
+
+                    if (fontViewModel.UsesDoubleHeight)
+                        height *= 2;
+
+                    // Get the format
+                    var bpp = font.BPP;
+                    PixelFormat format = PixelFormats.Indexed8;
+                    float bppFactor = bpp / 8f;
+                    int stride = TileGraphicsHelpers.GetStride(width, format);
+
+                    // Get the palette
+                    BitmapPalette bmpPal = new BitmapPalette(ColorHelpers.ConvertColors(font.Palette, bpp, false));
+
+                    // Create a buffer for the image data
+                    var imgData = new byte[width * height];
+
+                    // Get the length of each tile in bytes
+                    int tileLength = (int)(TileGraphicsHelpers.TileWidth * TileGraphicsHelpers.TileHeight * bppFactor);
+
+                    foreach (TextCommand cmd in txtCmds)
                     {
-                        switch (cmd.Command)
+                        if (cmd.IsCommand)
                         {
-                            case TextCommand.CommandType.Clear:
-                            case TextCommand.CommandType.Linebreak:
-                                xPos = marginX;
-                                yPos += TileGraphicsHelpers.TileHeight * 2;
-                                break;
+                            switch (cmd.Command)
+                            {
+                                case TextCommand.CommandType.Clear:
+                                case TextCommand.CommandType.Linebreak:
+                                    xPos = marginX;
+                                    yPos += TileGraphicsHelpers.TileHeight;
 
-                            case TextCommand.CommandType.Speaker:
-                                if (cmd.CommandArgument <= 0x44)
-                                {
-                                    Graphics_File speakerGraphics = rom.StoryPack.Speakers.Files[cmd.CommandArgument];
+                                    if (fontViewModel.UsesDoubleHeight)
+                                        yPos += TileGraphicsHelpers.TileHeight;
 
-                                    for (int y = 0; y < 2; y++)
+                                    break;
+
+                                case TextCommand.CommandType.Speaker:
+                                    if (cmd.CommandArgument <= 0x44)
                                     {
-                                        for (int x = 0; x < 4; x++)
+                                        Graphics_File speakerGraphics = rom.StoryPack.Speakers.Files[cmd.CommandArgument];
+
+                                        for (int y = 0; y < 2; y++)
                                         {
-                                            TileGraphicsHelpers.DrawTileTo8BPPImg(
-                                                tileSet: speakerGraphics.TileSet,
-                                                tileSetOffset: tileLength * (y * 4 + x),
-                                                tileSetBpp: speakerGraphics.BPP,
-                                                paletteOffset: 3 * 16, // Use palette 3
-                                                flipX: false,
-                                                flipY: false,
-                                                imgData: imgData,
-                                                xPos: xPos + (x * TileGraphicsHelpers.TileWidth),
-                                                yPos: yPos + (y * TileGraphicsHelpers.TileHeight),
-                                                imgWidth: width);
+                                            for (int x = 0; x < 4; x++)
+                                            {
+                                                TileGraphicsHelpers.DrawTileTo8BPPImg(
+                                                    tileSet: speakerGraphics.TileSet,
+                                                    tileSetOffset: tileLength * (y * 4 + x),
+                                                    tileSetBpp: speakerGraphics.BPP,
+                                                    paletteOffset: 3 * 16, // Use palette 3
+                                                    flipX: false,
+                                                    flipY: false,
+                                                    imgData: imgData,
+                                                    xPos: xPos + (x * TileGraphicsHelpers.TileWidth),
+                                                    yPos: yPos + (y * TileGraphicsHelpers.TileHeight),
+                                                    imgWidth: width);
+                                            }
                                         }
                                     }
-                                }
 
-                                xPos += 0x28;
-                                break;
+                                    xPos += 0x28;
+                                    break;
 
-                            case TextCommand.CommandType.BlankSpace:
-                                xPos += cmd.CommandArgument == 0 ? 0x28 : cmd.CommandArgument;
-                                break;
+                                case TextCommand.CommandType.BlankSpace:
+                                    xPos += cmd.CommandArgument == 0 ? 0x28 : cmd.CommandArgument;
+                                    break;
+                            }
+                        }
+                        else
+                        {
+                            var fontWidth = font.TileMapWidth / TileGraphicsHelpers.TileWidth;
+                            var fontX = cmd.FontIndex % fontWidth;
+                            var fontY = cmd.FontIndex / fontWidth;
+
+                            if (fontViewModel.UsesDoubleHeight)
+                                fontY *= 2;
+
+                            var tileIndexTop = fontY * fontWidth + fontX;
+                            var tileIndexBottom = (fontY + 1) * fontWidth + fontX;
+
+                            TileGraphicsHelpers.DrawTileTo8BPPImg(
+                                tileSet: font.TileSet,
+                                tileSetOffset: tileLength * tileIndexTop,
+                                tileSetBpp: bpp,
+                                paletteOffset: 3 * 16, // Use palette 3
+                                flipX: false,
+                                flipY: false,
+                                imgData: imgData,
+                                xPos: xPos,
+                                yPos: yPos,
+                                imgWidth: width);
+
+                            if (fontViewModel.UsesDoubleHeight)
+                                TileGraphicsHelpers.DrawTileTo8BPPImg(
+                                tileSet: font.TileSet,
+                                tileSetOffset: tileLength * tileIndexBottom,
+                                tileSetBpp: bpp,
+                                paletteOffset: 3 * 16, // Use palette 3
+                                flipX: false,
+                                flipY: false,
+                                imgData: imgData,
+                                xPos: xPos,
+                                yPos: yPos + TileGraphicsHelpers.TileHeight,
+                                imgWidth: width);
+
+                            if (cutomWidths != null && cmd.FontIndex < cutomWidths.Length)
+                                xPos += cutomWidths[cmd.FontIndex];
+                            else
+                                xPos += 8;
                         }
                     }
-                    else
-                    {
-                        var fontWidth = font.TileMapWidth / TileGraphicsHelpers.TileWidth;
-                        var fontX = cmd.FontIndex % fontWidth;
-                        var fontY = cmd.FontIndex / fontWidth;
-                        fontY *= 2;
 
-                        var tileIndexTop = fontY * fontWidth + fontX;
-                        var tileIndexBottom = (fontY + 1) * fontWidth + fontX;
+                    TextPreviewImgSource = BitmapSource.Create(width, height, TileGraphicsHelpers.DpiX, TileGraphicsHelpers.DpiY, format, bmpPal, imgData, stride);
 
-                        TileGraphicsHelpers.DrawTileTo8BPPImg(
-                            tileSet: font.TileSet,
-                            tileSetOffset: tileLength * tileIndexTop,
-                            tileSetBpp: bpp,
-                            paletteOffset: 3 * 16, // Use palette 3
-                            flipX: false,
-                            flipY: false,
-                            imgData: imgData,
-                            xPos: xPos,
-                            yPos: yPos,
-                            imgWidth: width);
-
-                        TileGraphicsHelpers.DrawTileTo8BPPImg(
-                            tileSet: font.TileSet,
-                            tileSetOffset: tileLength * tileIndexBottom,
-                            tileSetBpp: bpp,
-                            paletteOffset: 3 * 16, // Use palette 3
-                            flipX: false,
-                            flipY: false,
-                            imgData: imgData,
-                            xPos: xPos,
-                            yPos: yPos + TileGraphicsHelpers.TileHeight,
-                            imgWidth: width);
-
-                        if (cutomWidths != null && cmd.FontIndex < cutomWidths.Length)
-                            xPos += cutomWidths[cmd.FontIndex];
-                        else
-                            xPos += 8;
-                    }
+                    // Display at double the size
+                    TextPreviewWidth = width * 2;
                 }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"An error occurred refreshing the text preview. Error: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
 
-                TextPreviewImgSource = BitmapSource.Create(width, height, TileGraphicsHelpers.DpiX, TileGraphicsHelpers.DpiY, format, bmpPal, imgData, stride);
-
-                // Display at twice the size
-                TextPreviewWidth = width * 2;
+                    TextPreviewImgSource = null;
+                    TextPreviewWidth = 0;
+                }
             }
 
             #endregion
+        }
+
+        public class TextPreviewFontViewModel : BaseViewModel
+        {
+            public TextPreviewFontViewModel(string displayName, Graphics_File font, bool usesDoubleHeight)
+            {
+                DisplayName = displayName;
+                Font = font;
+                UsesDoubleHeight = usesDoubleHeight;
+            }
+
+            public string DisplayName { get; }
+            public Graphics_File Font { get; }
+            public bool UsesDoubleHeight { get; }
         }
     }
 }

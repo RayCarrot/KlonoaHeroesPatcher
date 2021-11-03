@@ -38,7 +38,7 @@
                 </ItemsControl>
             </Expander>
 
-            <StackPanel DataContext="{Binding Path=SelectedTextItem}">
+            <StackPanel>
                 <Grid Margin="0 0 0 5">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
@@ -46,23 +46,40 @@
                     </Grid.ColumnDefinitions>
 
                     <TextBox Grid.Column="0"
+                             DataContext="{Binding Path=SelectedTextItem}"
                              Text="{Binding Path=Text, UpdateSourceTrigger=PropertyChanged}"
                              AcceptsReturn="True"
                              TextWrapping="Wrap"
                              Margin="0 0 10 0" />
 
-                    <Border Grid.Column="1"
-                            HorizontalAlignment="Left"
-                            Background="Gray">
-                        <Image Source="{Binding Path=TextPreviewImgSource}"
-                               Width="{Binding Path=TextPreviewWidth}"
-                               RenderOptions.BitmapScalingMode="NearestNeighbor" />
-                    </Border>
+                    <Grid Grid.Column="1">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+
+                        <ComboBox Grid.Row="0"
+                                  Margin="0 0 0 5"
+                                  ItemsSource="{Binding Path=TextPreviewFonts, Mode=OneTime}"
+                                  SelectedItem="{Binding Path=SelectedTextPreviewFont}"
+                                  DisplayMemberPath="DisplayName"/>
+
+                        <Border Grid.Row="1"
+                                DataContext="{Binding Path=SelectedTextItem}"
+                                HorizontalAlignment="Left"
+                                Background="Gray">
+                            <Image Source="{Binding Path=TextPreviewImgSource}"
+                                   Width="{Binding Path=TextPreviewWidth}"
+                                   RenderOptions.BitmapScalingMode="NearestNeighbor" />
+                        </Border>
+
+                    </Grid>
 
                 </Grid>
 
                 <Button Content="Apply"
                         Margin="0 0 0 5"
+                        DataContext="{Binding Path=SelectedTextItem}"
                         IsEnabled="{Binding Path=PendingTextChanges}"
                         Command="{Binding Path=ApplyTextChangesCommand, Mode=OneTime}" />
             </StackPanel>
