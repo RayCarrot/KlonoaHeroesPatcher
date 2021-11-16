@@ -29,7 +29,7 @@ namespace KlonoaHeroesPatcher
                     if (Animations.Any(x => x.Animation == anim))
                         continue;
 
-                    Animations.Add(new AnimationViewModel(AnimationFile, groupIndex, animIndex));
+                    Animations.Add(new AnimationViewModel(this, AnimationFile, groupIndex, animIndex));
                 }
             }
 

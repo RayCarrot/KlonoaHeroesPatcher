@@ -200,13 +200,11 @@ namespace KlonoaHeroesPatcher
 
         public void ExportImage()
         {
-            Pointer offset = BinaryHelpers.GetROMPointer(GraphicsFile.Offset);
-
             var dialog = new SaveFileDialog()
             {
                 Title = "Export image",
                 Filter = "Image Files (*.png, *.jpg)|*.png;*.jpg",
-                FileName = $"{offset.StringAbsoluteOffset}.png"
+                FileName = $"{NavigationItem.DisplayOffset}.png"
             };
 
             var result = dialog.ShowDialog();

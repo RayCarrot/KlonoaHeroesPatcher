@@ -14,8 +14,9 @@ namespace KlonoaHeroesPatcher
 {
     public class AnimationViewModel : BaseViewModel, IDisposable
     {
-        public AnimationViewModel(Animation_File animationFile, int group, int anim)
+        public AnimationViewModel(AnimationFileEditorViewModel animationEditor, Animation_File animationFile, int group, int anim)
         {
+            AnimationEditor = animationEditor;
             AnimationFile = animationFile;
             AnimGroup = group;
             AnimIndex = anim;
@@ -28,6 +29,7 @@ namespace KlonoaHeroesPatcher
         public ICommand ExportCommand { get; }
         public ICommand ExportFramesCommand { get; }
 
+        public AnimationFileEditorViewModel AnimationEditor { get; }
         public Animation_File AnimationFile { get; }
         public int AnimGroup { get; }
         public int AnimIndex { get; }
@@ -128,13 +130,11 @@ namespace KlonoaHeroesPatcher
 
         public void Export()
         {
-            Pointer offset = BinaryHelpers.GetROMPointer(AnimationFile.Offset);
-
             var dialog = new SaveFileDialog()
             {
                 Title = "Export animation",
                 Filter = "GIF Files (*.gif)|*.gif",
-                FileName = $"{offset.StringAbsoluteOffset}.gif"
+                FileName = $"{AnimationEditor.NavigationItem.DisplayOffset}.gif"
             };
 
             var result = dialog.ShowDialog();
