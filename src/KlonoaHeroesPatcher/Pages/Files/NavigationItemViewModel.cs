@@ -218,21 +218,21 @@ namespace KlonoaHeroesPatcher
 
                 SerializableObject.Init(s.CurrentPointer);
                 SerializableObject.SerializeImpl(s);
-
-                // Re-initialize
-                EditorViewModel?.Init(this);
-
-                // Re-load
-                EditorViewModel?.Load(true);
-
-                // Relocate the file
-                RelocateFile();
             }
             finally
             {
                 SerializableObject.Init(originalOffset);
                 context.RemoveFile(streamFile);
             }
+
+            // Re-initialize
+            EditorViewModel?.Init(this);
+
+            // Re-load
+            EditorViewModel?.Load(true);
+
+            // Relocate the file
+            RelocateFile();
         }
 
         public void Refresh()
