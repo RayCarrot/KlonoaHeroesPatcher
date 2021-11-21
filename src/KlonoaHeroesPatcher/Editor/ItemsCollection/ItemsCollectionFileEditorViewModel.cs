@@ -98,7 +98,6 @@ namespace KlonoaHeroesPatcher
                 {
                     new ItemValueIntFieldViewModel("Price", (int) SelectedItem.Item.Price, x => SelectedItem.Item.Price = (uint) x),
                     new ItemValueIntFieldViewModel("Icon", SelectedItem.Item.I_IconIndex, x => SelectedItem.Item.I_IconIndex = (ushort) x),
-                    new ItemValueIntFieldViewModel("Unknown", SelectedItem.Item.I_Unknown, x => SelectedItem.Item.I_Unknown = (ushort) x),
                 },
                 Item_Category.E => new ObservableCollection<ItemValueIntFieldViewModel>()
                 {
