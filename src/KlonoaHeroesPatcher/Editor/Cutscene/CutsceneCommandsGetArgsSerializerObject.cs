@@ -72,24 +72,23 @@ namespace KlonoaHeroesPatcher
 
         public override void SerializeBitValues(Action<SerializeBits64> serializeFunc) => throw new InvalidOperationException();
 
-        public override void SerializeBitValues<T>(Action<SerializeBits> serializeFunc)
+        public override void DoBits<T>(Action<BitSerializerObject> serializeFunc)
         {
-            serializeFunc((value, length, name) =>
-            {
-                Arguments.Add(new CommandArgument(name, value, typeof(T)));
-                return value;
-            });
-        }
-
-        public override void SerializeBitValues64<T>(Action<SerializeBits64> serializeFunc)
-        {
-            serializeFunc((value, length, name) =>
-            {
-                Arguments.Add(new CommandArgument(name, value, typeof(T)));
-                return value;
-            });
+            serializeFunc(new CutsceneCommandsGetArgsBitSerializerObject(this, CurrentPointer));
         }
 
         public record CommandArgument(string Name, object Value, Type type);
+
+        private class CutsceneCommandsGetArgsBitSerializerObject : BitSerializerObject
+        {
+            public CutsceneCommandsGetArgsBitSerializerObject(CutsceneCommandsGetArgsSerializerObject serializerObject, Pointer valueOffset) : base(serializerObject, valueOffset, default, default)
+            { }
+
+            public override T SerializeBits<T>(T value, int length, string name = null)
+            {
+                ((CutsceneCommandsGetArgsSerializerObject)SerializerObject).Arguments.Add(new CommandArgument(name, value, typeof(T)));
+                return value;
+            }
+        }
     }
 }
