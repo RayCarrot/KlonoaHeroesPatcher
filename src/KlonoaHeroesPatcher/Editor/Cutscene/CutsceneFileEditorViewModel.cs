@@ -178,6 +178,10 @@ namespace KlonoaHeroesPatcher
                         writeLine($"SET TEXT {getFileOffsetString(cmd.TextCommands.Offset)}");
                         break;
 
+                    case CutsceneCommand.CommandType.WaitForText:
+                        writeLine($"WAIT FOR TEXT");
+                        break;
+
                     case CutsceneCommand.CommandType.UnknownEndOfFrame:
                         writeLine($"WAIT 1 FRAME");
                         break;
