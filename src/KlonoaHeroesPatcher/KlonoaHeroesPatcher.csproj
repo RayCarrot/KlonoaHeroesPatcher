@@ -4,7 +4,7 @@
     <OutputType>WinExe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <UseWPF>true</UseWPF>
-    <LangVersion>9</LangVersion>
+    <LangVersion>10</LangVersion>
     <Version>1.6.4.0</Version>
     <Authors>RayCarrot</Authors>
     <Product>Klonoa Heroes Patcher</Product>
