@@ -1,15 +1,14 @@
 ﻿using System.Windows.Controls;
 
-namespace KlonoaHeroesPatcher
+namespace KlonoaHeroesPatcher;
+
+/// <summary>
+/// Interaction logic for InfoPage.xaml
+/// </summary>
+public partial class InfoPage : UserControl
 {
-    /// <summary>
-    /// Interaction logic for InfoPage.xaml
-    /// </summary>
-    public partial class InfoPage : UserControl
+    public InfoPage()
     {
-        public InfoPage()
-        {
-            InitializeComponent();
-        }
+        InitializeComponent();
     }
 }

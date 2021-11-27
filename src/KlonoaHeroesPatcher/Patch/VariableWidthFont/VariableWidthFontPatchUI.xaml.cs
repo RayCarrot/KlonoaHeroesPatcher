@@ -1,15 +1,14 @@
 ﻿using System.Windows.Controls;
 
-namespace KlonoaHeroesPatcher
+namespace KlonoaHeroesPatcher;
+
+/// <summary>
+/// Interaction logic for VariableWidthFontPatchUI.xaml
+/// </summary>
+public partial class VariableWidthFontPatchUI : UserControl
 {
-    /// <summary>
-    /// Interaction logic for VariableWidthFontPatchUI.xaml
-    /// </summary>
-    public partial class VariableWidthFontPatchUI : UserControl
+    public VariableWidthFontPatchUI()
     {
-        public VariableWidthFontPatchUI()
-        {
-            InitializeComponent();
-        }
+        InitializeComponent();
     }
 }

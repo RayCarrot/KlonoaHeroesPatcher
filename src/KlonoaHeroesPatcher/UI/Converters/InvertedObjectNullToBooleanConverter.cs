@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Globalization;
 
-namespace KlonoaHeroesPatcher
+namespace KlonoaHeroesPatcher;
+
+public class InvertedObjectNullToBooleanConverter : BaseValueConverter<InvertedObjectNullToBooleanConverter>
 {
-    public class InvertedObjectNullToBooleanConverter : BaseValueConverter<InvertedObjectNullToBooleanConverter>
-    {
-        public override object Convert(object value, Type targetType, object parameter, CultureInfo culture) =>
-            value != null;
-    }
+    public override object Convert(object value, Type targetType, object parameter, CultureInfo culture) =>
+        value != null;
 }

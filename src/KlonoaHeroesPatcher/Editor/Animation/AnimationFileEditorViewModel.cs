@@ -2,49 +2,48 @@
 using BinarySerializer.Klonoa.KH;
 using System.Linq;
 
-namespace KlonoaHeroesPatcher
+namespace KlonoaHeroesPatcher;
+
+public class AnimationFileEditorViewModel : FileEditorViewModel
 {
-    public class AnimationFileEditorViewModel : FileEditorViewModel
+    public Animation_File AnimationFile => (Animation_File)SerializableObject;
+
+    public ObservableCollection<AnimationViewModel> Animations { get; set; }
+    public AnimationViewModel SelectedAnimation { get; set; }
+
+    public override void Load(bool firstLoad)
     {
-        public Animation_File AnimationFile => (Animation_File)SerializableObject;
+        Animations = new ObservableCollection<AnimationViewModel>();
 
-        public ObservableCollection<AnimationViewModel> Animations { get; set; }
-        public AnimationViewModel SelectedAnimation { get; set; }
-
-        public override void Load(bool firstLoad)
+        for (int groupIndex = 0; groupIndex < AnimationFile.AnimationGroups.Length; groupIndex++)
         {
-            Animations = new ObservableCollection<AnimationViewModel>();
+            AnimationGroup group = AnimationFile.AnimationGroups[groupIndex];
 
-            for (int groupIndex = 0; groupIndex < AnimationFile.AnimationGroups.Length; groupIndex++)
+            for (int animIndex = 0; animIndex < group.Animations.Length; animIndex++)
             {
-                AnimationGroup group = AnimationFile.AnimationGroups[groupIndex];
+                Animation anim = group.Animations[animIndex];
 
-                for (int animIndex = 0; animIndex < group.Animations.Length; animIndex++)
-                {
-                    Animation anim = group.Animations[animIndex];
+                if (anim == null)
+                    continue;
 
-                    if (anim == null)
-                        continue;
+                if (Animations.Any(x => x.Animation == anim))
+                    continue;
 
-                    if (Animations.Any(x => x.Animation == anim))
-                        continue;
-
-                    Animations.Add(new AnimationViewModel(this, AnimationFile, groupIndex, animIndex));
-                }
+                Animations.Add(new AnimationViewModel(this, AnimationFile, groupIndex, animIndex));
             }
-
-            SelectedAnimation = Animations.FirstOrDefault();
-            SelectedAnimation?.RefreshGIF();
         }
 
-        public override void Unload()
-        {
-            if (Animations != null)
-                foreach (AnimationViewModel anim in Animations)
-                    anim?.Dispose();
+        SelectedAnimation = Animations.FirstOrDefault();
+        SelectedAnimation?.RefreshGIF();
+    }
 
-            Animations = null;
-            SelectedAnimation = null;
-        }
+    public override void Unload()
+    {
+        if (Animations != null)
+            foreach (AnimationViewModel anim in Animations)
+                anim?.Dispose();
+
+        Animations = null;
+        SelectedAnimation = null;
     }
 }
