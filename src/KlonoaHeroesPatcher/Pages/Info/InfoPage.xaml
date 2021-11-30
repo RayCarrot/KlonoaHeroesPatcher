@@ -9,7 +9,8 @@
              Foreground="{DynamicResource MahApps.Brushes.ThemeForeground}"
              d:DesignHeight="450" d:DesignWidth="800"
              d:DataContext="{d:DesignInstance local:AppViewModel}">
-    <TextBox Margin="5" 
-             Text="{Binding Path=ROMInfo}"
-             IsReadOnly="True"/>
+    <ScrollViewer Padding="5">
+        <TextBox Text="{Binding Path=ROMInfo}"
+                 IsReadOnly="True"/>
+    </ScrollViewer>
 </UserControl>

@@ -425,7 +425,7 @@ public class AppViewModel : BaseViewModel
             {
                 str.AppendLine($"\t" +
                                $"ID: {p.ID}, " +
-                               $"Data: 0x{p.DataPointer}, " +
+                               $"Data: 0x{p.DataPointer.StringAbsoluteOffset}, " +
                                $"Size: {p.DataSize} bytes");
             }
         }
