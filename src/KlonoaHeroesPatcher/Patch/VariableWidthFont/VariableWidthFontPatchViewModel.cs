@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Input;
@@ -30,24 +29,7 @@ public class VariableWidthFontPatchViewModel : BaseViewModel
 
     public void RefreshItems()
     {
-        var count = (Font.TileMapWidth / TileGraphicsHelpers.TileWidth) * (Font.TileMapHeight / (TileGraphicsHelpers.TileHeight * 2));
-
-        Patch.Widths ??= new byte[count];
-
-        // Resize
-        if (Patch.Widths.Length != count)
-        {
-            var widths = Patch.Widths;
-            Array.Resize(ref widths, count);
-            Patch.Widths = widths;
-        }
-
-        // Default to a width of 8
-        for (int i = 0; i < Patch.Widths.Length; i++)
-        {
-            if (Patch.Widths[i] == 0)
-                Patch.Widths[i] = 8;
-        }
+        Patch.UpdateArraySize();
 
         var img = TileGraphicsHelpers.CreateImageSource(
             tileSet: Font.TileSet,
@@ -60,7 +42,7 @@ public class VariableWidthFontPatchViewModel : BaseViewModel
 
         int fontWidth = Font.TileMapWidth / TileGraphicsHelpers.TileWidth;
             
-        Items = new ObservableCollection<ItemViewModel>(Enumerable.Range(0, count).Select(i =>
+        Items = new ObservableCollection<ItemViewModel>(Enumerable.Range(0, Patch.Widths.Length).Select(i =>
         {
             int fontX = i % fontWidth;
             int fontY = i / fontWidth;

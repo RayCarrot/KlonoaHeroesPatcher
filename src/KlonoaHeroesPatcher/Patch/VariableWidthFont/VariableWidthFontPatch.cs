@@ -1,4 +1,6 @@
-﻿using BinarySerializer;
+﻿using System;
+using BinarySerializer;
+using BinarySerializer.Klonoa.KH;
 
 namespace KlonoaHeroesPatcher;
 
@@ -38,6 +40,32 @@ public class VariableWidthFontPatch : Patch
     public override string DisplayName => "Variable Width Font";
     public byte[] Widths { get; set; }
 
+    public void UpdateArraySize()
+    {
+        Graphics_File font = AppViewModel.Current.ROM.UIPack.Font_0;
+
+        // Get the number of characters in the font
+        int count = (font.TileMapWidth / TileGraphicsHelpers.TileWidth) * (font.TileMapHeight / (TileGraphicsHelpers.TileHeight * 2));
+
+        // Create the array if null
+        Widths ??= new byte[count];
+
+        // Resize if the size doesn't match
+        if (Widths.Length != count)
+        {
+            byte[] widths = Widths;
+            Array.Resize(ref widths, count);
+            Widths = widths;
+        }
+
+        // Default to a width of 8 for any items where a width has not been set (0 is invalid)
+        for (int i = 0; i < Widths.Length; i++)
+        {
+            if (Widths[i] == 0)
+                Widths[i] = 8;
+        }
+    }
+
     public override object GetPatchUI() => new VariableWidthFontPatchUI()
     {
         DataContext = new VariableWidthFontPatchViewModel(this, AppViewModel.Current.ROM.UIPack.Font_0)
@@ -57,6 +85,9 @@ public class VariableWidthFontPatch : Patch
 
     public override void Apply(BinarySerializer.BinarySerializer s, BinaryFile romFile)
     {
+        // Start by always making sure the array size matches the font
+        UpdateArraySize();
+     
         Pointer dataAddress = s.CurrentPointer;
 
         // Patch the text render function
