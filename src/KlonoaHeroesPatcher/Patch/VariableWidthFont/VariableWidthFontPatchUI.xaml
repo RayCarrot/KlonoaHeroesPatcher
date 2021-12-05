@@ -14,40 +14,44 @@
 
         <Button Content="Refresh"
                 Command="{Binding Path=RefreshCommand, Mode=OneTime}"
-                HorizontalAlignment="Left"/>
+                HorizontalAlignment="Left"
+                Margin="0 0 0 5"/>
 
-        <ItemsControl ItemsSource="{Binding Path=Items}">
-            
-            <ItemsControl.ItemsPanel>
-                <ItemsPanelTemplate>
-                    <WrapPanel />
-                </ItemsPanelTemplate>
-            </ItemsControl.ItemsPanel>
+        <Expander Header="Font Characters" 
+                  ToolTip="Expanding this might cause the application to freeze for a few seconds as it's loading each font character">
+            <ItemsControl ItemsSource="{Binding Path=Items}">
 
-            <ItemsControl.ItemTemplate>
-                <DataTemplate>
-                    <Grid Margin="15" 
-                          Background="Transparent" 
-                          ToolTip="{Binding Path=Index, Mode=OneTime}">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="*" />
-                            <RowDefinition Height="5" />
-                            <RowDefinition Height="Auto" />
-                        </Grid.RowDefinitions>
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
 
-                        <Border Grid.Row="0" Background="Gray" Width="32" Height="64">
-                            <Image Source="{Binding Path=ImageSource, Mode=OneTime}"
-                                   RenderOptions.BitmapScalingMode="NearestNeighbor" />
-                        </Border>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Grid Margin="15" 
+                              Background="Transparent" 
+                              ToolTip="{Binding Path=Index, Mode=OneTime}">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*" />
+                                <RowDefinition Height="5" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
 
-                        <metro:NumericUpDown Grid.Row="2"
-                                             Minimum="1" Maximum="8"
-                                             Value="{Binding Path=Width}" />
+                            <Border Grid.Row="0" Background="Gray" Width="32" Height="64">
+                                <Image Source="{Binding Path=ImageSource, Mode=OneTime}"
+                                       RenderOptions.BitmapScalingMode="NearestNeighbor" />
+                            </Border>
 
-                    </Grid>
-                </DataTemplate>
-            </ItemsControl.ItemTemplate>
+                            <metro:NumericUpDown Grid.Row="2"
+                                                 Minimum="1" Maximum="8"
+                                                 Value="{Binding Path=Width}" />
 
-        </ItemsControl>
+                        </Grid>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+
+            </ItemsControl>
+        </Expander>
     </StackPanel>
 </UserControl>
