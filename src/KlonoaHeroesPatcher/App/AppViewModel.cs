@@ -338,6 +338,7 @@ public class AppViewModel : BaseViewModel
                 var patches = new Patch[]
                 {
                     new VariableWidthFontPatch(),
+                    new ModifiedSFXTextPatch(),
                 };
 
                 // Create patch view models
