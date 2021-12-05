@@ -122,7 +122,8 @@ public class ModifiedSFXTextPatchViewModel : BaseViewModel
                 indexes.Add(index);
             }
 
-            AnimGroupIndexes = indexes.ToArray();
+            AnimGroupIndexes = indexes.Take(8).ToArray();
+            Text = String.Join(' ', AnimGroupIndexes);
 
             UnsavedChanges = false;
 
