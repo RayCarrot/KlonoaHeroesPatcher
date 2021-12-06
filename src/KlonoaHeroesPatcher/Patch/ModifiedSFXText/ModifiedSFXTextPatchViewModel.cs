@@ -30,13 +30,15 @@ public class ModifiedSFXTextPatchViewModel : BaseViewModel
 
     public void RefreshItems()
     {
-        SFXEntries = new ObservableCollection<SFXEntryViewModel>(Enumerable.Range(0, 6).Select(x => new SFXEntryViewModel(AnimationFile, Patch.Entries[x].AnimGroupIndices, Patch.Entries[x].AnimIndex)));
+        SFXEntries = new ObservableCollection<SFXEntryViewModel>(Enumerable.Range(0, 6).Select(x => new SFXEntryViewModel(Patch, x, AnimationFile, Patch.Entries[x].AnimGroupIndices, Patch.Entries[x].AnimIndex)));
     }
 
     public class SFXEntryViewModel : BaseViewModel
     {
-        public SFXEntryViewModel(Animation_File animationFile, int[] animGroupIndexes, int animIndex)
+        public SFXEntryViewModel(ModifiedSFXTextPatch patch, int index, Animation_File animationFile, int[] animGroupIndexes, int animIndex)
         {
+            Patch = patch;
+            Index = index;
             AnimationFile = animationFile;
             AnimGroupIndexes = animGroupIndexes;
             AnimIndex = animIndex;
@@ -52,6 +54,8 @@ public class ModifiedSFXTextPatchViewModel : BaseViewModel
 
         public ICommand ApplyCommand { get; }
 
+        public ModifiedSFXTextPatch Patch { get; }
+        public int Index { get; }
         public Animation_File AnimationFile { get; }
 
         private bool _isRed;
@@ -124,6 +128,8 @@ public class ModifiedSFXTextPatchViewModel : BaseViewModel
 
             AnimGroupIndexes = indexes.Take(8).ToArray();
             Text = String.Join(' ', AnimGroupIndexes);
+
+            Patch.Entries[Index] = new ModifiedSFXTextPatch.Entry(AnimGroupIndexes, AnimIndex);
 
             UnsavedChanges = false;
 
