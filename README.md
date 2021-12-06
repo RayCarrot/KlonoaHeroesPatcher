@@ -46,3 +46,13 @@ The Patches tab shows the available patches which can be enabled. These will mod
 The Variable Width Font patch allows each font character to have a specific width rather than the default 8 pixels. This does not effect the actual width of the image sprite rendered on screen, which is why it can't be greater than 8, but rather the space until the next character is drawn on screen. This will only work if the text is drawn to the screen using sprites, which it always is in cutscenes. In other places however it will usually be drawn through tile maps in which case the width can't be modified.
 
 ![Variable Width Font patch](img/vwf_patch.png)
+
+### Modify SFX Text
+The Modify SFX Text patch allows the SFX text which can appear for certain in-game actions to be modified.
+
+## TODO
+Although the tool is complete there are certain potential features which could be added:
+- Add the option to restore modified files. The original data never gets overwritten and can thus be restored by updating the file offset.
+- Add option to import/export graphics file palettes. Right now the only way to modify them is through the binary data.
+- Add option to modify cutscene scripts.
+- Add in-app settings UI to allow the config to be modified more easily.
