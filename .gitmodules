@@ -1,0 +1,9 @@
+[submodule "submodules/BinarySerializer.Klonoa"]
+	path = submodules/BinarySerializer.Klonoa
+	url = https://github.com/BinarySerializer/BinarySerializer.Klonoa
+[submodule "submodules/BinarySerializer.GBA"]
+	path = submodules/BinarySerializer.GBA
+	url = https://github.com/BinarySerializer/BinarySerializer.GBA
+[submodule "submodules/BinarySerializer"]
+	path = submodules/BinarySerializer
+	url = https://github.com/BinarySerializer/BinarySerializer

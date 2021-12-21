@@ -1,19 +1,19 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.31702.278
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.32014.148
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KlonoaHeroesPatcher", "KlonoaHeroesPatcher\KlonoaHeroesPatcher.csproj", "{B50823C3-7ED9-4321-9C1D-C83B4385E727}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Libraries", "Libraries", "{0297E748-C7B5-4DC4-80E0-7ED64E9B0A33}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Binary", "Binary", "{0297E748-C7B5-4DC4-80E0-7ED64E9B0A33}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BinarySerializer", "..\..\Binary\BinarySerializer\src\BinarySerializer.csproj", "{6583FDF0-69CC-44B8-82D3-3D636F815192}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BinarySerializer", "..\submodules\BinarySerializer\src\BinarySerializer.csproj", "{D679530E-CB02-4E6D-A8E0-C13165ACB443}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BinarySerializer.GBA", "..\..\Binary\BinarySerializer.GBA\src\BinarySerializer.GBA.csproj", "{DB8D7276-8C5C-4776-99F9-A4A7AFF4E5CF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BinarySerializer.GBA", "..\submodules\BinarySerializer.GBA\src\BinarySerializer.GBA.csproj", "{0821B702-EF7E-4C59-808A-F0C4FD3960BA}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BinarySerializer.Klonoa", "..\..\Binary\BinarySerializer.Klonoa\src\BinarySerializer.Klonoa\BinarySerializer.Klonoa.csproj", "{98B676A1-BB20-411C-A516-7FC844832B3A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BinarySerializer.Klonoa", "..\submodules\BinarySerializer.Klonoa\src\BinarySerializer.Klonoa\BinarySerializer.Klonoa.csproj", "{2E8CCC2B-85E4-48C7-A1C4-5D49ECBDD53E}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BinarySerializer.Klonoa.KH", "..\..\Binary\BinarySerializer.Klonoa\src\BinarySerializer.Klonoa.KH\BinarySerializer.Klonoa.KH.csproj", "{8608E15F-ECE3-4AEB-BB3D-E95A918FFBFF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BinarySerializer.Klonoa.KH", "..\submodules\BinarySerializer.Klonoa\src\BinarySerializer.Klonoa.KH\BinarySerializer.Klonoa.KH.csproj", "{0EDA4027-F44D-461D-941B-98AEFFE862B7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -25,31 +25,31 @@ Global
 		{B50823C3-7ED9-4321-9C1D-C83B4385E727}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B50823C3-7ED9-4321-9C1D-C83B4385E727}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B50823C3-7ED9-4321-9C1D-C83B4385E727}.Release|Any CPU.Build.0 = Release|Any CPU
-		{6583FDF0-69CC-44B8-82D3-3D636F815192}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6583FDF0-69CC-44B8-82D3-3D636F815192}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{6583FDF0-69CC-44B8-82D3-3D636F815192}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{6583FDF0-69CC-44B8-82D3-3D636F815192}.Release|Any CPU.Build.0 = Release|Any CPU
-		{DB8D7276-8C5C-4776-99F9-A4A7AFF4E5CF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{DB8D7276-8C5C-4776-99F9-A4A7AFF4E5CF}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{DB8D7276-8C5C-4776-99F9-A4A7AFF4E5CF}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{DB8D7276-8C5C-4776-99F9-A4A7AFF4E5CF}.Release|Any CPU.Build.0 = Release|Any CPU
-		{98B676A1-BB20-411C-A516-7FC844832B3A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{98B676A1-BB20-411C-A516-7FC844832B3A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{98B676A1-BB20-411C-A516-7FC844832B3A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{98B676A1-BB20-411C-A516-7FC844832B3A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{8608E15F-ECE3-4AEB-BB3D-E95A918FFBFF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{8608E15F-ECE3-4AEB-BB3D-E95A918FFBFF}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{8608E15F-ECE3-4AEB-BB3D-E95A918FFBFF}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{8608E15F-ECE3-4AEB-BB3D-E95A918FFBFF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D679530E-CB02-4E6D-A8E0-C13165ACB443}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D679530E-CB02-4E6D-A8E0-C13165ACB443}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D679530E-CB02-4E6D-A8E0-C13165ACB443}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D679530E-CB02-4E6D-A8E0-C13165ACB443}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0821B702-EF7E-4C59-808A-F0C4FD3960BA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0821B702-EF7E-4C59-808A-F0C4FD3960BA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0821B702-EF7E-4C59-808A-F0C4FD3960BA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0821B702-EF7E-4C59-808A-F0C4FD3960BA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2E8CCC2B-85E4-48C7-A1C4-5D49ECBDD53E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2E8CCC2B-85E4-48C7-A1C4-5D49ECBDD53E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2E8CCC2B-85E4-48C7-A1C4-5D49ECBDD53E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2E8CCC2B-85E4-48C7-A1C4-5D49ECBDD53E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0EDA4027-F44D-461D-941B-98AEFFE862B7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0EDA4027-F44D-461D-941B-98AEFFE862B7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0EDA4027-F44D-461D-941B-98AEFFE862B7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0EDA4027-F44D-461D-941B-98AEFFE862B7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{6583FDF0-69CC-44B8-82D3-3D636F815192} = {0297E748-C7B5-4DC4-80E0-7ED64E9B0A33}
-		{DB8D7276-8C5C-4776-99F9-A4A7AFF4E5CF} = {0297E748-C7B5-4DC4-80E0-7ED64E9B0A33}
-		{98B676A1-BB20-411C-A516-7FC844832B3A} = {0297E748-C7B5-4DC4-80E0-7ED64E9B0A33}
-		{8608E15F-ECE3-4AEB-BB3D-E95A918FFBFF} = {0297E748-C7B5-4DC4-80E0-7ED64E9B0A33}
+		{D679530E-CB02-4E6D-A8E0-C13165ACB443} = {0297E748-C7B5-4DC4-80E0-7ED64E9B0A33}
+		{0821B702-EF7E-4C59-808A-F0C4FD3960BA} = {0297E748-C7B5-4DC4-80E0-7ED64E9B0A33}
+		{2E8CCC2B-85E4-48C7-A1C4-5D49ECBDD53E} = {0297E748-C7B5-4DC4-80E0-7ED64E9B0A33}
+		{0EDA4027-F44D-461D-941B-98AEFFE862B7} = {0297E748-C7B5-4DC4-80E0-7ED64E9B0A33}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {9E513852-7183-4110-BB0F-63A21CE3FE98}

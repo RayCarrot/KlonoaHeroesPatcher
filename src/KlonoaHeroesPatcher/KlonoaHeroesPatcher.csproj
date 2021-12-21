@@ -26,10 +26,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\Binary\BinarySerializer\src\BinarySerializer.csproj" />
-    <ProjectReference Include="..\..\..\Binary\BinarySerializer.GBA\src\BinarySerializer.GBA.csproj" />
-    <ProjectReference Include="..\..\..\Binary\BinarySerializer.Klonoa\src\BinarySerializer.Klonoa\BinarySerializer.Klonoa.csproj" />
-    <ProjectReference Include="..\..\..\Binary\BinarySerializer.Klonoa\src\BinarySerializer.Klonoa.KH\BinarySerializer.Klonoa.KH.csproj" />
+    <ProjectReference Include="..\..\submodules\BinarySerializer\src\BinarySerializer.csproj" />
+    <ProjectReference Include="..\..\submodules\BinarySerializer.GBA\src\BinarySerializer.GBA.csproj" />
+    <ProjectReference Include="..\..\submodules\BinarySerializer.Klonoa\src\BinarySerializer.Klonoa\BinarySerializer.Klonoa.csproj" />
+    <ProjectReference Include="..\..\submodules\BinarySerializer.Klonoa\src\BinarySerializer.Klonoa.KH\BinarySerializer.Klonoa.KH.csproj" />
   </ItemGroup>
 
   <!-- Resources -->
