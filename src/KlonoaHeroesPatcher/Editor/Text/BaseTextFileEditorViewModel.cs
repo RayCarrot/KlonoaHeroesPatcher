@@ -31,7 +31,7 @@ public abstract class BaseTextFileEditorViewModel : FileEditorViewModel
             new DuoGridItemViewModel("[PROMPT]", "Waits for the player to press a button before continuing."),
             new DuoGridItemViewModel("[PAUSE]", "Unknown"),
             new DuoGridItemViewModel("[CMD_0B]", "Unknown"),
-            new DuoGridItemViewModel("[CMD_0C:X]", "Unknown"),
+            new DuoGridItemViewModel("[Speed:X]", "Sets the text speed where the argument is the speed in frames."),
             new DuoGridItemViewModel("[CMD_0D:X]", "Unknown"),
             new DuoGridItemViewModel("[CMD_0E]", "Unknown"),
             new DuoGridItemViewModel("[CMD_0F]", "Unknown"),
