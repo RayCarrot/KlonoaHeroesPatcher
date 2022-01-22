@@ -28,7 +28,6 @@ public class KlonoaContext : Context
 
         protected StreamWriter LogWriter => _logWriter ??= GetFile();
         public bool IsEnabled => true;
-        public string OverrideLogPath { get; set; }
         public string LogFile { get; }
 
         public StreamWriter GetFile()

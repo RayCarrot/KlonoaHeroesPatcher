@@ -44,10 +44,11 @@ public class CutsceneCommandsGetArgsSerializerObject : SerializerObject
     public override T SerializeObject<T>(T obj, Action<T> onPreSerialize = null, string name = null) => throw new InvalidOperationException();
 
     public override Pointer SerializePointer(Pointer obj, PointerSize size = PointerSize.Pointer32, Pointer anchor = null,
-        bool allowInvalid = false, string name = null) => throw new InvalidOperationException();
+        bool allowInvalid = false, long? nullValue = null, string name = null) => throw new InvalidOperationException();
 
     public override Pointer<T> SerializePointer<T>(Pointer<T> obj, PointerSize size = PointerSize.Pointer32, Pointer anchor = null,
-        bool resolve = false, Action<T> onPreSerialize = null, bool allowInvalid = false, string name = null) => throw new InvalidOperationException();
+        bool resolve = false, Action<T> onPreSerialize = null, bool allowInvalid = false, long? nullValue = null,
+        string name = null) => throw new InvalidOperationException();
 
     public override string SerializeString(string obj, long? length = null, Encoding encoding = null, string name = null) => throw new InvalidOperationException();
 
@@ -55,14 +56,21 @@ public class CutsceneCommandsGetArgsSerializerObject : SerializerObject
 
     public override T[] SerializeArray<T>(T[] obj, long count, string name = null) => throw new InvalidOperationException();
 
-    public override T[] SerializeObjectArray<T>(T[] obj, long count, Action<T> onPreSerialize = null, string name = null) => throw new InvalidOperationException();
+    public override T[] SerializeObjectArray<T>(T[] obj, long count, Action<T, int> onPreSerialize = null, string name = null) => throw new InvalidOperationException();
+
+    public override T[] SerializeArrayUntil<T>(T[] obj, Func<T, bool> conditionCheckFunc, Func<T> getLastObjFunc = null, string name = null) => throw new InvalidOperationException();
+
+    public override T[] SerializeObjectArrayUntil<T>(T[] obj, Func<T, bool> conditionCheckFunc, Func<T> getLastObjFunc = null,
+        Action<T, int> onPreSerialize = null, string name = null) => throw new InvalidOperationException();
 
     public override Pointer[] SerializePointerArray(Pointer[] obj, long count, PointerSize size = PointerSize.Pointer32,
-        Pointer anchor = null, bool allowInvalid = false, string name = null) => throw new InvalidOperationException();
+        Pointer anchor = null, bool allowInvalid = false, long? nullValue = null, string name = null) =>
+        throw new InvalidOperationException();
 
     public override Pointer<T>[] SerializePointerArray<T>(Pointer<T>[] obj, long count, PointerSize size = PointerSize.Pointer32,
-        Pointer anchor = null, bool resolve = false, Action<T> onPreSerialize = null, bool allowInvalid = false,
-        string name = null) => throw new InvalidOperationException();
+        Pointer anchor = null, bool resolve = false, Action<T, int> onPreSerialize = null, bool allowInvalid = false,
+        long? nullValue = null, string name = null) =>
+        throw new InvalidOperationException();
 
     public override string[] SerializeStringArray(string[] obj, long count, int length, Encoding encoding = null, string name = null) => throw new InvalidOperationException();
 

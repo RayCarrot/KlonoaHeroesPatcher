@@ -300,7 +300,7 @@ public class AppViewModel : BaseViewModel
                 // Read the ROM
                 await RunAsync(() =>
                 {
-                    ROM = FileFactory.Read<KlonoaHeroesROM>(romName, Context, (_, r) => r.Pre_SerializeFlags = serializeFlags);
+                    ROM = FileFactory.Read<KlonoaHeroesROM>(Context, romName, (_, r) => r.Pre_SerializeFlags = serializeFlags);
 
                     // Read the maps pack as raw data
                     rawMapsPack = s.DoAt(Context.GetPreDefinedPointer(DefinedPointer.MapsPack, ROM.Offset.File), () => s.SerializeObject<ArchiveFile<RawData_File>>(default, x =>
@@ -313,7 +313,7 @@ public class AppViewModel : BaseViewModel
 
                     foreach (PatchedFooter.RelocatedStruct relocatedStruct in Footer.RelocatedStructs)
                     {
-                        var rawData = s.DoAt(relocatedStruct.NewPointer, () => s.SerializeObject<Array<byte>>(default, x => x.Length = relocatedStruct.DataSize));
+                        var rawData = s.DoAt(relocatedStruct.NewPointer, () => s.SerializeObject<Array<byte>>(default, x => x.Pre_Length = relocatedStruct.DataSize));
                         var parentArchiveOffsetTable = Context.Cache.FromOffset<OffsetTable>(relocatedStruct.ParentArchivePointer);
 
                         AddRelocatedData(new RelocatedData(rawData, parentArchiveOffsetTable)
