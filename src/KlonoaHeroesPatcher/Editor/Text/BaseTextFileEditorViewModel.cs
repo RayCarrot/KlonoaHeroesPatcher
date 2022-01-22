@@ -354,7 +354,8 @@ public abstract class BaseTextFileEditorViewModel : FileEditorViewModel
         public int GetTextPreviewWidth()
         {
             int maxWidth = 0;
-            int xPos = 0;
+            int startXPos = 0;
+            int xPos = startXPos;
 
             foreach (TextCommand cmd in TextCommands.Commands)
             {
@@ -367,11 +368,16 @@ public abstract class BaseTextFileEditorViewModel : FileEditorViewModel
                         case TextCommand.CommandType.Linebreak:
                             if (xPos > maxWidth)
                                 maxWidth = xPos;
-                            xPos = 0;
+
+                            if (cmd.Command == TextCommand.CommandType.Clear)
+                                startXPos = 0;
+                                
+                            xPos = startXPos;
                             break;
 
                         case TextCommand.CommandType.Speaker:
                             xPos += 0x28;
+                            startXPos = 0x28;
                             break;
 
                         case TextCommand.CommandType.BlankSpace:
@@ -403,7 +409,8 @@ public abstract class BaseTextFileEditorViewModel : FileEditorViewModel
 
                 const int marginX = 8;
                 const int marginY = 8;
-                int xPos = marginX;
+                int startXPos = marginX;
+                int xPos = startXPos;
                 int yPos = marginY;
 
                 // Get the dimensions
@@ -436,7 +443,11 @@ public abstract class BaseTextFileEditorViewModel : FileEditorViewModel
                         {
                             case TextCommand.CommandType.Clear:
                             case TextCommand.CommandType.Linebreak:
-                                xPos = marginX;
+
+                                if (cmd.Command == TextCommand.CommandType.Clear)
+                                    startXPos = marginX;
+
+                                xPos = startXPos;
                                 yPos += TileGraphicsHelpers.TileHeight;
 
                                 if (fontViewModel.UsesDoubleHeight)
@@ -469,6 +480,7 @@ public abstract class BaseTextFileEditorViewModel : FileEditorViewModel
                                 }
 
                                 xPos += 0x28;
+                                startXPos = marginX + 0x28;
                                 break;
 
                             case TextCommand.CommandType.BlankSpace:
