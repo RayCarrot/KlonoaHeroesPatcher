@@ -11,6 +11,7 @@
              d:DataContext="{d:DesignInstance local:AppViewModel}">
     <ScrollViewer Padding="5">
         <TextBox Text="{Binding Path=ROMInfo}"
+                 FontFamily="{StaticResource Font.Code}"
                  IsReadOnly="True"/>
     </ScrollViewer>
 </UserControl>

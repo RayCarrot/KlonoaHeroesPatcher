@@ -116,6 +116,7 @@
                                Margin="0 0 0 5" />
 
                     <TextBox Text="{Binding Path=HexString}"
+                             FontFamily="{StaticResource Font.Code}"
                              IsReadOnly="True" />
 
                 </StackPanel>
@@ -163,6 +164,7 @@
                     </Button>
 
                     <TextBox Text="{Binding Path=ScriptText}"
+                             FontFamily="{StaticResource Font.Code}"
                              TextWrapping="Wrap"
                              IsReadOnly="True" />
 
