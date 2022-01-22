@@ -456,9 +456,12 @@ public class AppViewModel : BaseViewModel
                 if (file.SourcePath != file.DestinationPath)
                     File.Copy(file.SourcePath, file.DestinationPath, true);
 
-                // Trim the file
+                // Trim the file of previously appended data and then force size to 32 MB
                 using (var f = File.OpenWrite(file.DestinationPath))
+                {
                     f.SetLength(Config.ROMEndPointer - file.StartPointer.AbsoluteOffset);
+                    f.SetLength(0x2000000);
+                }
 
                 // Go to the end of the ROM where we'll start appending data
                 var relocatePointer = new Pointer(Config.ROMEndPointer, file);
