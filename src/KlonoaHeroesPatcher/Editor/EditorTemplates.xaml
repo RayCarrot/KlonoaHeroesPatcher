@@ -64,14 +64,21 @@
                                   SelectedItem="{Binding Path=SelectedTextPreviewFont}"
                                   DisplayMemberPath="DisplayName"/>
 
-                        <Border Grid.Row="1"
-                                DataContext="{Binding Path=SelectedTextItem}"
-                                HorizontalAlignment="Left"
-                                Background="Gray">
-                            <Image Source="{Binding Path=TextPreviewImgSource}"
-                                   Width="{Binding Path=TextPreviewWidth}"
-                                   RenderOptions.BitmapScalingMode="NearestNeighbor" />
-                        </Border>
+                        <ItemsControl Grid.Row="1"
+                                      HorizontalAlignment="Left"
+                                      Width="{Binding Path=TextPreviewWidth}"
+                                      DataContext="{Binding Path=SelectedTextItem}"
+                                      ItemsSource="{Binding Path=TextPreviewImages}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Background="Gray"
+                                            Margin="0 0 0 4">
+                                        <Image Source="{Binding Mode=OneTime}"
+                                               RenderOptions.BitmapScalingMode="NearestNeighbor"/>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
 
                     </Grid>
 

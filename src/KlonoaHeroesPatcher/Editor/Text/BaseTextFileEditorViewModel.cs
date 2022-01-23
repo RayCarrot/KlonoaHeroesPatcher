@@ -7,7 +7,6 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using BinarySerializer.GBA;
 using BinarySerializer.Klonoa.KH;
 
 namespace KlonoaHeroesPatcher;
@@ -96,7 +95,7 @@ public abstract class BaseTextFileEditorViewModel : FileEditorViewModel
     public override void Unload()
     {
         foreach (TextItemViewModel textItem in TextItems)
-            textItem.TextPreviewImgSource = null;
+            textItem.TextPreviewImages = null;
     }
 
     protected abstract IEnumerable<TextItemViewModel> GetTextCommandViewModels();
@@ -144,7 +143,7 @@ public abstract class BaseTextFileEditorViewModel : FileEditorViewModel
         }
         public bool PendingTextChanges { get; set; }
 
-        public ImageSource TextPreviewImgSource { get; set; }
+        public ObservableCollection<ImageSource> TextPreviewImages { get; set; }
         public int TextPreviewWidth { get; set; }
 
         #endregion
@@ -351,7 +350,7 @@ public abstract class BaseTextFileEditorViewModel : FileEditorViewModel
             OnPropertyChanged(nameof(Text));
         }
 
-        public int GetTextPreviewWidth()
+        public int GetTextPreviewsMaxWidth()
         {
             int maxWidth = 0;
             int startXPos = 0;
@@ -409,139 +408,181 @@ public abstract class BaseTextFileEditorViewModel : FileEditorViewModel
 
                 const int marginX = 8;
                 const int marginY = 8;
-                int startXPos = marginX;
-                int xPos = startXPos;
-                int yPos = marginY;
-
-                // Get the dimensions
-                int width = marginX * 2 + GetTextPreviewWidth();
-                int height = marginY * 2 + (txtCmds.Count(x => x.Command is TextCommand.CommandType.Linebreak or TextCommand.CommandType.Clear) + 1) * TileGraphicsHelpers.TileHeight;
-
-                if (fontViewModel.UsesDoubleHeight)
-                    height *= 2;
 
                 // Get the format
                 var bpp = font.BPP;
                 PixelFormat format = PixelFormats.Indexed8;
                 float bppFactor = bpp / 8f;
-                int stride = TileGraphicsHelpers.GetStride(width, format);
-
-                // Get the palette
-                BitmapPalette bmpPal = new BitmapPalette(ColorHelpers.ConvertColors(font.Palette, bpp, false));
-
-                // Create a buffer for the image data
-                var imgData = new byte[width * height];
 
                 // Get the length of each tile in bytes
                 int tileLength = (int)(TileGraphicsHelpers.TileWidth * TileGraphicsHelpers.TileHeight * bppFactor);
 
-                foreach (TextCommand cmd in txtCmds)
+                // Get the palette
+                BitmapPalette bmpPal = new BitmapPalette(ColorHelpers.ConvertColors(font.Palette, bpp, false));
+
+                // Get the max width to use for all images
+                int width = marginX * 2 + GetTextPreviewsMaxWidth();
+
+                // Display at double the size in the UI
+                TextPreviewWidth = width * 2;
+
+                TextPreviewImages = new ObservableCollection<ImageSource>();
+
+                int cmdIndex = 0;
+                while (cmdIndex < txtCmds.Length)
                 {
-                    if (cmd.IsCommand)
+                    // Ignore if only the end command
+                    if (cmdIndex + 1 == txtCmds.Length && txtCmds.Last().Command == TextCommand.CommandType.End)
+                        break;
+
+                    int startXPos = marginX;
+                    int xPos = startXPos;
+                    int yPos = marginY;
+
+                    // Get the dimensions
+                    int height = (txtCmds.
+                        Skip(cmdIndex).
+                        TakeWhile(x => x.Command != TextCommand.CommandType.Clear).
+                        Count(x => x.Command is TextCommand.CommandType.Linebreak or TextCommand.CommandType.Clear) + 1) 
+                        * TileGraphicsHelpers.TileHeight;
+
+                    if (fontViewModel.UsesDoubleHeight)
+                        height *= 2;
+
+                    // Add a margin to the height so it's not right against the top and bottom edges
+                    height += marginY * 2;
+
+                    // Create a buffer for the image data
+                    var imgData = new byte[width * height];
+
+                    while (cmdIndex < txtCmds.Length)
                     {
-                        switch (cmd.Command)
+                        TextCommand cmd = txtCmds[cmdIndex];
+
+                        if (cmd.Command == TextCommand.CommandType.Clear)
                         {
-                            case TextCommand.CommandType.Clear:
-                            case TextCommand.CommandType.Linebreak:
+                            cmdIndex++;
+                            break;
+                        }
 
-                                if (cmd.Command == TextCommand.CommandType.Clear)
-                                    startXPos = marginX;
+                        if (cmd.IsCommand)
+                        {
+                            switch (cmd.Command)
+                            {
+                                case TextCommand.CommandType.Clear:
+                                case TextCommand.CommandType.Linebreak:
 
-                                xPos = startXPos;
-                                yPos += TileGraphicsHelpers.TileHeight;
+                                    if (cmd.Command == TextCommand.CommandType.Clear)
+                                        startXPos = marginX;
 
-                                if (fontViewModel.UsesDoubleHeight)
+                                    xPos = startXPos;
                                     yPos += TileGraphicsHelpers.TileHeight;
 
-                                break;
+                                    if (fontViewModel.UsesDoubleHeight)
+                                        yPos += TileGraphicsHelpers.TileHeight;
 
-                            case TextCommand.CommandType.Speaker:
-                                if (cmd.CommandArgument <= 0x44)
-                                {
-                                    Graphics_File speakerGraphics = rom.StoryPack.Speakers.Files[cmd.CommandArgument];
+                                    break;
 
-                                    for (int y = 0; y < 2; y++)
+                                case TextCommand.CommandType.Speaker:
+                                    if (!fontViewModel.UsesDoubleHeight)
+                                        break;
+
+                                    if (cmd.CommandArgument <= 0x44)
                                     {
-                                        for (int x = 0; x < 4; x++)
+                                        Graphics_File speakerGraphics = rom.StoryPack.Speakers.Files[cmd.CommandArgument];
+
+                                        for (int y = 0; y < 2; y++)
                                         {
-                                            TileGraphicsHelpers.DrawTileTo8BPPImg(
-                                                tileSet: speakerGraphics.TileSet,
-                                                tileSetOffset: tileLength * (y * 4 + x),
-                                                tileSetBpp: speakerGraphics.BPP,
-                                                paletteOffset: 3 * 16, // Use palette 3
-                                                flipX: false,
-                                                flipY: false,
-                                                imgData: imgData,
-                                                xPos: xPos + (x * TileGraphicsHelpers.TileWidth),
-                                                yPos: yPos + (y * TileGraphicsHelpers.TileHeight),
-                                                imgWidth: width);
+                                            for (int x = 0; x < 4; x++)
+                                            {
+                                                TileGraphicsHelpers.DrawTileTo8BPPImg(
+                                                    tileSet: speakerGraphics.TileSet,
+                                                    tileSetOffset: tileLength * (y * 4 + x),
+                                                    tileSetBpp: speakerGraphics.BPP,
+                                                    paletteOffset: 3 * 16, // Use palette 3
+                                                    flipX: false,
+                                                    flipY: false,
+                                                    imgData: imgData,
+                                                    xPos: xPos + (x * TileGraphicsHelpers.TileWidth),
+                                                    yPos: yPos + (y * TileGraphicsHelpers.TileHeight),
+                                                    imgWidth: width);
+                                            }
                                         }
                                     }
-                                }
 
-                                xPos += 0x28;
-                                startXPos = marginX + 0x28;
-                                break;
+                                    xPos += 0x28;
+                                    startXPos = marginX + 0x28;
+                                    break;
 
-                            case TextCommand.CommandType.BlankSpace:
-                                xPos += cmd.CommandArgument == 0 ? 0x28 : cmd.CommandArgument;
-                                break;
+                                case TextCommand.CommandType.BlankSpace:
+                                    xPos += cmd.CommandArgument == 0 ? 0x28 : cmd.CommandArgument;
+                                    break;
+                            }
                         }
-                    }
-                    else
-                    {
-                        var fontWidth = font.TileMapWidth / TileGraphicsHelpers.TileWidth;
-                        var fontX = cmd.FontIndex % fontWidth;
-                        var fontY = cmd.FontIndex / fontWidth;
+                        else
+                        {
+                            var fontWidth = font.TileMapWidth / TileGraphicsHelpers.TileWidth;
+                            var fontX = cmd.FontIndex % fontWidth;
+                            var fontY = cmd.FontIndex / fontWidth;
 
-                        if (fontViewModel.UsesDoubleHeight)
-                            fontY *= 2;
+                            if (fontViewModel.UsesDoubleHeight)
+                                fontY *= 2;
 
-                        var tileIndexTop = fontY * fontWidth + fontX;
-                        var tileIndexBottom = (fontY + 1) * fontWidth + fontX;
+                            var tileIndexTop = fontY * fontWidth + fontX;
+                            var tileIndexBottom = (fontY + 1) * fontWidth + fontX;
 
-                        TileGraphicsHelpers.DrawTileTo8BPPImg(
-                            tileSet: font.TileSet,
-                            tileSetOffset: tileLength * tileIndexTop,
-                            tileSetBpp: bpp,
-                            paletteOffset: 3 * 16, // Use palette 3
-                            flipX: false,
-                            flipY: false,
-                            imgData: imgData,
-                            xPos: xPos,
-                            yPos: yPos,
-                            imgWidth: width);
-
-                        if (fontViewModel.UsesDoubleHeight)
                             TileGraphicsHelpers.DrawTileTo8BPPImg(
                                 tileSet: font.TileSet,
-                                tileSetOffset: tileLength * tileIndexBottom,
+                                tileSetOffset: tileLength * tileIndexTop,
                                 tileSetBpp: bpp,
                                 paletteOffset: 3 * 16, // Use palette 3
                                 flipX: false,
                                 flipY: false,
                                 imgData: imgData,
                                 xPos: xPos,
-                                yPos: yPos + TileGraphicsHelpers.TileHeight,
+                                yPos: yPos,
                                 imgWidth: width);
 
-                        if (cutomWidths != null && cmd.FontIndex < cutomWidths.Length)
-                            xPos += cutomWidths[cmd.FontIndex];
-                        else
-                            xPos += 8;
+                            if (fontViewModel.UsesDoubleHeight)
+                                TileGraphicsHelpers.DrawTileTo8BPPImg(
+                                    tileSet: font.TileSet,
+                                    tileSetOffset: tileLength * tileIndexBottom,
+                                    tileSetBpp: bpp,
+                                    paletteOffset: 3 * 16, // Use palette 3
+                                    flipX: false,
+                                    flipY: false,
+                                    imgData: imgData,
+                                    xPos: xPos,
+                                    yPos: yPos + TileGraphicsHelpers.TileHeight,
+                                    imgWidth: width);
+
+                            if (cutomWidths != null && cmd.FontIndex < cutomWidths.Length)
+                                xPos += cutomWidths[cmd.FontIndex];
+                            else
+                                xPos += 8;
+                        }
+
+                        cmdIndex++;
                     }
+
+                    BitmapSource img = BitmapSource.Create(
+                        pixelWidth: width, 
+                        pixelHeight: height, 
+                        dpiX: TileGraphicsHelpers.DpiX, 
+                        dpiY: TileGraphicsHelpers.DpiY, 
+                        pixelFormat: format, 
+                        palette: bmpPal, 
+                        pixels: imgData, 
+                        stride: TileGraphicsHelpers.GetStride(width, format));
+
+                    TextPreviewImages.Add(img);
                 }
-
-                TextPreviewImgSource = BitmapSource.Create(width, height, TileGraphicsHelpers.DpiX, TileGraphicsHelpers.DpiY, format, bmpPal, imgData, stride);
-
-                // Display at double the size
-                TextPreviewWidth = width * 2;
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"An error occurred refreshing the text preview. Error: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
 
-                TextPreviewImgSource = null;
+                TextPreviewImages = null;
                 TextPreviewWidth = 0;
             }
         }
