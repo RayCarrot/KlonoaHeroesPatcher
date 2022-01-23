@@ -8,7 +8,7 @@ Klonoa Heroes stores most of its data in archives of data blocks. This data gets
 Selecting a file will allow it to be edited in the panel to the right of the navigation panel. Any file can be modified by exporting and then importing the binary data. Supported file formats also have additional options.
 
 ### Graphics
-Graphics files can be exported and imported to/from PNG and JPEG files. The exported file will be in either 4 or 8 BPP (bits per pixel). Importing the file can be in either 4, 8, 24 or 32 BPP. When importing an image file the image will be replaced to match that, using the closest matching colors from the selected base palette. If a tile map is used then a new one will be generated.
+Graphics files can be exported and imported to/from PNG and JPEG files. The exported file will be 8 BPP (bits per pixel). Importing the file can be in either 4, 8, 24 or 32 BPP. When importing an image file the image will be replaced to match that, using the closest matching colors from the selected base palette. If a tile map is used then a new one will be generated.
 
 There are certain limitations to importing an image. For example if the original is 4-bit and uses multiple palettes then importing a new version of it will only use a single palette, thus limiting the number of colors.
 

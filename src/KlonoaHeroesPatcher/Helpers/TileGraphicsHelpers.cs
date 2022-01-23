@@ -28,8 +28,12 @@ public static class TileGraphicsHelpers
         int tilesHeight = height / TileHeight;
         int stride = GetStride(width, format);
 
+        // Create a dummy palette if none is given
         if (palette?.Any() != true)
             palette = ColorHelpers.CreateDummyPalette(256, true, wrap: ColorHelpers.GetPaletteLength(bpp));
+        // Force the palette to always have 256 colors
+        else if (palette.Count != 256)
+            palette = palette.Concat(ColorHelpers.CreateDummyPalette(256 - palette.Count, true, wrap: ColorHelpers.GetPaletteLength(bpp))).ToArray();
 
         // Get the palette
         BitmapPalette bmpPal = new BitmapPalette(ColorHelpers.ConvertColors(palette, bpp, false));
