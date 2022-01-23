@@ -83,7 +83,7 @@ public class AppViewModel : BaseViewModel
     #region Public Properties
 
     public string Title { get; set; }
-    public Version CurrentAppVersion => new Version(1, 7, 0, 0);
+    public Version CurrentAppVersion => new Version(1, 8, 0, 0);
 
     public const string ConfigFileName = "Config.json";
     public const string LogFileName = "Log.txt";
