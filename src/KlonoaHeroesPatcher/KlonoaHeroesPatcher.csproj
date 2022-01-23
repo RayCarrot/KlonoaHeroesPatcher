@@ -35,9 +35,11 @@
   <!-- Resources -->
   <ItemGroup>
     <None Remove="Img\AppIcon.ico" />
+    <None Remove="Img\CutsceneTextBox.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Img\AppIcon.ico" />
+    <Resource Include="Img\CutsceneTextBox.png" />
   </ItemGroup>
   
 </Project>

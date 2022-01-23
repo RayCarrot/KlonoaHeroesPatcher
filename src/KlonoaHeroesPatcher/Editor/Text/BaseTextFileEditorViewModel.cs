@@ -143,8 +143,8 @@ public abstract class BaseTextFileEditorViewModel : FileEditorViewModel
         }
         public bool PendingTextChanges { get; set; }
 
-        public ObservableCollection<ImageSource> TextPreviewImages { get; set; }
-        public int TextPreviewWidth { get; set; }
+        public ObservableCollection<TextPreviewImageViewModel> TextPreviewImages { get; set; }
+        public int SelectedTextPreviewIndex { get; set; }
 
         #endregion
 
@@ -353,8 +353,8 @@ public abstract class BaseTextFileEditorViewModel : FileEditorViewModel
         public int GetTextPreviewsMaxWidth()
         {
             int maxWidth = 0;
-            int startXPos = 0;
-            int xPos = startXPos;
+            int xPos = 0;
+            bool hasSpeaker = false;
 
             foreach (TextCommand cmd in TextCommands.Commands)
             {
@@ -369,14 +369,14 @@ public abstract class BaseTextFileEditorViewModel : FileEditorViewModel
                                 maxWidth = xPos;
 
                             if (cmd.Command == TextCommand.CommandType.Clear)
-                                startXPos = 0;
-                                
-                            xPos = startXPos;
+                                hasSpeaker = false;
+
+                            xPos = 0;
                             break;
 
                         case TextCommand.CommandType.Speaker:
                             xPos += 0x28;
-                            startXPos = 0x28;
+                            hasSpeaker = true;
                             break;
 
                         case TextCommand.CommandType.BlankSpace:
@@ -386,6 +386,9 @@ public abstract class BaseTextFileEditorViewModel : FileEditorViewModel
                 }
                 else
                 {
+                    if (xPos == 0 && hasSpeaker)
+                        xPos += 0x28;
+
                     xPos += 8;
                 }
             }
@@ -404,7 +407,7 @@ public abstract class BaseTextFileEditorViewModel : FileEditorViewModel
                 // Get the text commands
                 TextCommand[] txtCmds = TextCommands.Commands;
 
-                byte[] cutomWidths = AppViewModel.Current.PatchViewModels.Select(x => x.Patch).OfType<VariableWidthFontPatch>().FirstOrDefault()?.Widths;
+                byte[] customWidths = AppViewModel.Current.PatchViewModels.Select(x => x.Patch).OfType<VariableWidthFontPatch>().FirstOrDefault()?.Widths;
 
                 const int marginX = 8;
                 const int marginY = 8;
@@ -424,9 +427,9 @@ public abstract class BaseTextFileEditorViewModel : FileEditorViewModel
                 int width = marginX * 2 + GetTextPreviewsMaxWidth();
 
                 // Display at double the size in the UI
-                TextPreviewWidth = width * 2;
+                int imgWidth = width * 2;
 
-                TextPreviewImages = new ObservableCollection<ImageSource>();
+                TextPreviewImages = new ObservableCollection<TextPreviewImageViewModel>();
 
                 int cmdIndex = 0;
                 while (cmdIndex < txtCmds.Length)
@@ -435,9 +438,10 @@ public abstract class BaseTextFileEditorViewModel : FileEditorViewModel
                     if (cmdIndex + 1 == txtCmds.Length && txtCmds.Last().Command == TextCommand.CommandType.End)
                         break;
 
-                    int startXPos = marginX;
-                    int xPos = startXPos;
+                    int xPos = marginX;
                     int yPos = marginY;
+
+                    bool hasSpeaker = false;
 
                     // Get the dimensions
                     int height = (txtCmds.
@@ -453,7 +457,8 @@ public abstract class BaseTextFileEditorViewModel : FileEditorViewModel
                     height += marginY * 2;
 
                     // Create a buffer for the image data
-                    var imgData = new byte[width * height];
+                    var imgData_0 = new byte[width * height];
+                    var imgData_3 = new byte[width * height];
 
                     while (cmdIndex < txtCmds.Length)
                     {
@@ -471,11 +476,7 @@ public abstract class BaseTextFileEditorViewModel : FileEditorViewModel
                             {
                                 case TextCommand.CommandType.Clear:
                                 case TextCommand.CommandType.Linebreak:
-
-                                    if (cmd.Command == TextCommand.CommandType.Clear)
-                                        startXPos = marginX;
-
-                                    xPos = startXPos;
+                                    xPos = marginX;
                                     yPos += TileGraphicsHelpers.TileHeight;
 
                                     if (fontViewModel.UsesDoubleHeight)
@@ -495,23 +496,29 @@ public abstract class BaseTextFileEditorViewModel : FileEditorViewModel
                                         {
                                             for (int x = 0; x < 4; x++)
                                             {
-                                                TileGraphicsHelpers.DrawTileTo8BPPImg(
-                                                    tileSet: speakerGraphics.TileSet,
-                                                    tileSetOffset: tileLength * (y * 4 + x),
-                                                    tileSetBpp: speakerGraphics.BPP,
-                                                    paletteOffset: 3 * 16, // Use palette 3
-                                                    flipX: false,
-                                                    flipY: false,
-                                                    imgData: imgData,
-                                                    xPos: xPos + (x * TileGraphicsHelpers.TileWidth),
-                                                    yPos: yPos + (y * TileGraphicsHelpers.TileHeight),
-                                                    imgWidth: width);
+                                                drawSpeakerTile(imgData_0, 0);
+                                                drawSpeakerTile(imgData_3, 3);
+
+                                                void drawSpeakerTile(byte[] imgData, int pal)
+                                                {
+                                                    TileGraphicsHelpers.DrawTileTo8BPPImg(
+                                                        tileSet: speakerGraphics.TileSet,
+                                                        tileSetOffset: tileLength * (y * 4 + x),
+                                                        tileSetBpp: speakerGraphics.BPP,
+                                                        paletteOffset: pal * 16,
+                                                        flipX: false,
+                                                        flipY: false,
+                                                        imgData: imgData,
+                                                        xPos: xPos + (x * TileGraphicsHelpers.TileWidth),
+                                                        yPos: yPos + (y * TileGraphicsHelpers.TileHeight),
+                                                        imgWidth: width);
+                                                }
                                             }
                                         }
                                     }
 
                                     xPos += 0x28;
-                                    startXPos = marginX + 0x28;
+                                    hasSpeaker = true;
                                     break;
 
                                 case TextCommand.CommandType.BlankSpace:
@@ -521,6 +528,9 @@ public abstract class BaseTextFileEditorViewModel : FileEditorViewModel
                         }
                         else
                         {
+                            if (hasSpeaker && xPos == marginX)
+                                xPos += 0x28;
+
                             var fontWidth = font.TileMapWidth / TileGraphicsHelpers.TileWidth;
                             var fontX = cmd.FontIndex % fontWidth;
                             var fontY = cmd.FontIndex / fontWidth;
@@ -531,33 +541,32 @@ public abstract class BaseTextFileEditorViewModel : FileEditorViewModel
                             var tileIndexTop = fontY * fontWidth + fontX;
                             var tileIndexBottom = (fontY + 1) * fontWidth + fontX;
 
-                            TileGraphicsHelpers.DrawTileTo8BPPImg(
-                                tileSet: font.TileSet,
-                                tileSetOffset: tileLength * tileIndexTop,
-                                tileSetBpp: bpp,
-                                paletteOffset: 3 * 16, // Use palette 3
-                                flipX: false,
-                                flipY: false,
-                                imgData: imgData,
-                                xPos: xPos,
-                                yPos: yPos,
-                                imgWidth: width);
+                            drawTextTile(imgData_0, 0, tileIndexTop);
+                            drawTextTile(imgData_3, 3, tileIndexTop);
 
                             if (fontViewModel.UsesDoubleHeight)
+                            {
+                                drawTextTile(imgData_0, 0, tileIndexBottom, yOffset: TileGraphicsHelpers.TileHeight);
+                                drawTextTile(imgData_3, 3, tileIndexBottom, yOffset: TileGraphicsHelpers.TileHeight);
+                            }
+
+                            void drawTextTile(byte[] imgData, int pal, int tileIndex, int xOffset = 0, int yOffset = 0)
+                            {
                                 TileGraphicsHelpers.DrawTileTo8BPPImg(
                                     tileSet: font.TileSet,
-                                    tileSetOffset: tileLength * tileIndexBottom,
+                                    tileSetOffset: tileLength * tileIndex,
                                     tileSetBpp: bpp,
-                                    paletteOffset: 3 * 16, // Use palette 3
+                                    paletteOffset: pal * 16,
                                     flipX: false,
                                     flipY: false,
                                     imgData: imgData,
-                                    xPos: xPos,
-                                    yPos: yPos + TileGraphicsHelpers.TileHeight,
+                                    xPos: xPos + xOffset,
+                                    yPos: yPos + yOffset,
                                     imgWidth: width);
+                            }
 
-                            if (cutomWidths != null && cmd.FontIndex < cutomWidths.Length)
-                                xPos += cutomWidths[cmd.FontIndex];
+                            if (customWidths != null && cmd.FontIndex < customWidths.Length)
+                                xPos += customWidths[cmd.FontIndex];
                             else
                                 xPos += 8;
                         }
@@ -565,17 +574,26 @@ public abstract class BaseTextFileEditorViewModel : FileEditorViewModel
                         cmdIndex++;
                     }
 
-                    BitmapSource img = BitmapSource.Create(
+                    BitmapSource img_0 = BitmapSource.Create(
                         pixelWidth: width, 
                         pixelHeight: height, 
                         dpiX: TileGraphicsHelpers.DpiX, 
                         dpiY: TileGraphicsHelpers.DpiY, 
                         pixelFormat: format, 
                         palette: bmpPal, 
-                        pixels: imgData, 
+                        pixels: imgData_0, 
+                        stride: TileGraphicsHelpers.GetStride(width, format));
+                    BitmapSource img_3 = BitmapSource.Create(
+                        pixelWidth: width, 
+                        pixelHeight: height, 
+                        dpiX: TileGraphicsHelpers.DpiX, 
+                        dpiY: TileGraphicsHelpers.DpiY, 
+                        pixelFormat: format, 
+                        palette: bmpPal, 
+                        pixels: imgData_3, 
                         stride: TileGraphicsHelpers.GetStride(width, format));
 
-                    TextPreviewImages.Add(img);
+                    TextPreviewImages.Add(new TextPreviewImageViewModel(img_0, img_3, imgWidth));
                 }
             }
             catch (Exception ex)
@@ -583,8 +601,9 @@ public abstract class BaseTextFileEditorViewModel : FileEditorViewModel
                 MessageBox.Show($"An error occurred refreshing the text preview. Error: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
 
                 TextPreviewImages = null;
-                TextPreviewWidth = 0;
             }
+
+            SelectedTextPreviewIndex = 0;
         }
 
         #endregion
@@ -602,5 +621,19 @@ public abstract class BaseTextFileEditorViewModel : FileEditorViewModel
         public string DisplayName { get; }
         public Graphics_File Font { get; }
         public bool UsesDoubleHeight { get; }
+    }
+
+    public class TextPreviewImageViewModel : BaseViewModel
+    {
+        public TextPreviewImageViewModel(ImageSource image_0, ImageSource image_3, int width)
+        {
+            Image_0 = image_0;
+            Image_3 = image_3;
+            Width = width;
+        }
+
+        public ImageSource Image_0 { get; }
+        public ImageSource Image_3 { get; }
+        public int Width { get; }
     }
 }

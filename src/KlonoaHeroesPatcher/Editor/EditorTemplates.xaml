@@ -55,6 +55,7 @@
                     <Grid Grid.Column="1">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
                             <RowDefinition Height="*" />
                         </Grid.RowDefinitions>
 
@@ -64,16 +65,45 @@
                                   SelectedItem="{Binding Path=SelectedTextPreviewFont}"
                                   DisplayMemberPath="DisplayName"/>
 
-                        <ItemsControl Grid.Row="1"
-                                      HorizontalAlignment="Left"
-                                      Width="{Binding Path=TextPreviewWidth}"
+                        <metro:FlipView Grid.Row="1"
+                                        SelectedIndex="{Binding Path=SelectedTextPreviewIndex}"
+                                        CircularNavigation="False" 
+                                        ShowIndex="False" 
+                                        IsBannerEnabled="False" 
+                                        NavigationButtonsPosition="Outside"
+                                        MouseHoverBorderEnabled="False" 
+                                        HorizontalAlignment="Left"
+                                        RenderOptions.BitmapScalingMode="Linear"
+                                        DataContext="{Binding Path=SelectedTextItem}"
+                                        ItemsSource="{Binding Path=TextPreviewImages}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid>
+                                        <Image Source="../Img/CutsceneTextBox.png"
+                                               Width="480"
+                                               HorizontalAlignment="Left"
+                                               VerticalAlignment="Top"
+                                               RenderOptions.BitmapScalingMode="NearestNeighbor"/>
+                                        <Image Source="{Binding Path=Image_0, Mode=OneTime}"
+                                               Width="{Binding Path=Width, Mode=OneTime}"
+                                               HorizontalAlignment="Left"
+                                               VerticalAlignment="Top"
+                                               RenderOptions.BitmapScalingMode="NearestNeighbor"/>
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </metro:FlipView>
+
+                        <ItemsControl Grid.Row="2"
                                       DataContext="{Binding Path=SelectedTextItem}"
                                       ItemsSource="{Binding Path=TextPreviewImages}">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
-                                    <Border Background="Gray"
-                                            Margin="0 0 0 4">
-                                        <Image Source="{Binding Mode=OneTime}"
+                                    <Border Background="Gray">
+                                        <Image Source="{Binding Path=Image_3, Mode=OneTime}"
+                                               Width="{Binding Path=Width, Mode=OneTime}"
+                                               HorizontalAlignment="Left"
+                                               VerticalAlignment="Top"
                                                RenderOptions.BitmapScalingMode="NearestNeighbor"/>
                                     </Border>
                                 </DataTemplate>
