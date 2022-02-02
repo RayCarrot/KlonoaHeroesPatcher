@@ -327,7 +327,7 @@ public static class TileGraphicsHelpers
                                     var pixel = tileSet[(int)(baseTileIndex * tileLength + (yOffset * TileWidth + xOffset) * tileSetBppFactor)];
 
                                     if (dstBpp == 4)
-                                        pixel = (byte)BitHelpers.ExtractBits(pixel, 4, x % 2 == 0 ? 0 : 4);
+                                        pixel = (byte)BitHelpers.ExtractBits(pixel, 4, xOffset % 2 == 0 ? 0 : 4);
 
                                     return pixel;
                                 }
